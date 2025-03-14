@@ -2,7 +2,13 @@ import React, { useState } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const FAQItem = ({ question, answer, category }) => {
+interface FAQItemProps {
+  question: string;
+  answer: string;
+  category?: string;
+}
+
+const FAQItem: React.FC<FAQItemProps>= ({ question, answer, category }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -94,7 +100,7 @@ const FAQ = () => {
   };
 
   const filterFAQs = () => {
-    let filteredFAQs = [];
+    let filteredFAQs: FAQItemProps[] = [];
     Object.entries(faqData).forEach(([category, questions]) => {
       if (activeCategory === 'all' || activeCategory === category) {
         filteredFAQs = [...filteredFAQs, ...questions];

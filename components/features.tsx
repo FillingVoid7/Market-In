@@ -24,11 +24,15 @@ const Features = () => {
         </div>
       </div>
 
-      <div className="text-center text-black max-w-4xl mt-16 px-4">
-        <p className="text-2xl font-medium leading-relaxed">
-          A go-to platform that empowers clients to effortlessly create single-page websites for their products, featuring images, videos, and offers—streamlining and enhancing their marketing efforts.
+      <div className="mx-auto text-center max-w-4xl mt-20 px-4 bg-grey-900">
+        <p className="text-3xl md:text-3xl font-bold text-gray-800 leading-tight">
+          Effortlessly Create Stunning Single-Page Websites
+          <span className="block mt-4 text-xl md:text-2xl font-medium text-gray-600">
+            Showcase your products with images, videos, and exclusive offers—all in one place. Streamline your marketing and boost engagement like never before.
+          </span>
         </p>
       </div>
+
     </section>
   );
 };

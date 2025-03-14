@@ -1,14 +1,15 @@
+"use client";
 import React from "react";
 import { FaFacebook, FaTwitter, FaInstagram, FaLinkedin } from "react-icons/fa";
-import { Link } from "react-router-dom";
+import Link from "next/link";
 
  
 const Footer = () => {
   return (
-    <footer className="bg-gray-800 text-gray-300 py-10 px-6 mt-12">
+    <footer className="bg-gray-800 text-gray-300 py-10 px-8 ">
       <div className="container mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>
-          <h2 className="text-2xl font-semibold text-white">ReachTotal</h2>
+          <h2 className="text-2xl font-semibold text-white">Market-In</h2>
           <p className="mt-4 text-sm text-gray-400">Empowering you to manage your products efficiently and effectively with our top-notch tools.</p>
           
           <div className="flex space-x-4 mt-4">
@@ -22,16 +23,16 @@ const Footer = () => {
         <div>
           <h3 className="text-xl font-semibold text-white">Quick Links</h3>
           <ul className="mt-4 space-y-2 text-sm">
-            <Link to="/pricing-details" className="hover:underline">Pricing</Link><br/>
-            <Link to="/about-us" className="hover:underline">About Us</Link><br/>
-            <Link to="/contact-us" className="hover:underline">Contact Us</Link><br/> 
+            <Link href="/pricing-details" className="hover:underline">Pricing</Link><br/>
+            <Link href="/about-us" className="hover:underline">About Us</Link><br/>
+            <Link href="/contact-us" className="hover:underline">Contact Us</Link><br/> 
           </ul>
 
           <h3 className="text-xl font-semibold text-white mt-6">Support & Resources</h3>
           <ul className="mt-4 space-y-2 text-sm">
-          <Link to="/help-center" className="hover:underline">Help Center</Link><br/> 
-          <Link to="/faq" className="hover:underline">FAQs</Link><br/> 
-          <Link to="/blogs" className="hover:underline">Blogs</Link><br/> 
+          <Link href="/help-center" className="hover:underline">Help Center</Link><br/> 
+          <Link href="/faq" className="hover:underline">FAQs</Link><br/> 
+          <Link href="/blogs" className="hover:underline">Blogs</Link><br/> 
 
           </ul>
         </div>
@@ -44,9 +45,9 @@ const Footer = () => {
 
           <h3 className="text-xl font-semibold text-white mt-6">Legal</h3>
           <ul className="mt-4 space-y-2 text-sm">
-          <Link to="/terms-of-service" className="hover:underline">Terms of Service</Link><br/> 
-          <Link to="/privacy-policy" className="hover:underline">Privacy Policy</Link><br/> 
-          <Link to="/cookies-policy" className="hover:underline">Cookie Policy</Link><br/> 
+          <Link href="/terms-of-service" className="hover:underline">Terms of Service</Link><br/> 
+          <Link href="/privacy-policy" className="hover:underline">Privacy Policy</Link><br/> 
+          <Link href="/cookies-policy" className="hover:underline">Cookie Policy</Link><br/> 
 
           </ul>
         </div>

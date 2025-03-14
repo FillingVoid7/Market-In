@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+"use client";
+import React, { useState, JSX } from "react";
 import { CheckCircle2Icon } from "lucide-react";
 
 const Pricing = () => {
@@ -28,8 +29,12 @@ const Pricing = () => {
     "Social media automation."
   ];
 
-  const renderFeatures = (features) => {
-    return features.map((feature, index) => (
+  interface FeatureProps {
+    features: string[];
+  }
+
+  const renderFeatures = (features: string[]): JSX.Element[] => {
+    return features.map((feature: string, index: number) => (
       <li key={index} className="mb-2 flex items-center">
         <CheckCircle2Icon className="w-4 h-4 mr-2 text-green-500" />
         {feature}

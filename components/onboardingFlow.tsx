@@ -34,7 +34,7 @@ const OnboardingFlow = () => {
     <section className="py-16 px-4  mt-7 ">
       <div className="max-w-3xl mx-auto">
         <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold mb-4 text-black">How It Works</h2>
+          <h2 className="text-3xl font-bold mb-4 text-black">Getting Started</h2>
           <p className="text-gray-900">Follow these simple steps to get started</p>
         </div>
 

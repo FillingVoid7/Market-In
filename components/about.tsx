@@ -1,3 +1,4 @@
+'use client';
 import React from "react";
 import { motion } from "framer-motion";
 import { CheckCircle2, Target, Lightbulb, Users, Leaf } from "lucide-react";
@@ -9,7 +10,13 @@ const About = () => {
     transition: { duration: 0.6 }
   };
 
-  const CoreValue = ({ icon: Icon, title, description }) => (
+  interface CoreValueProps {
+    icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;  // icon as a react component 
+    title: string;
+    description: string;
+  }
+
+  const CoreValue: React.FC<CoreValueProps> = ({ icon: Icon, title, description }) => (
     <motion.div 
       className="flex flex-col items-center p-6 bg-white rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300"
       whileHover={{ scale: 1.02 }}

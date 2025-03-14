@@ -1,5 +1,6 @@
+"use client";
 import React from "react";
-import { Link } from 'react-router-dom';
+import Link from "next/link";
 
 const Header = () => {
   return (
@@ -8,11 +9,11 @@ const Header = () => {
         {/* Logo */}
         <div className="flex-shrink-0">
           <Link
-            to="/"
+            href="/"
             className="flex items-center no-underline group"
           >
             <span className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent group-hover:from-blue-500 group-hover:to-blue-300 transition-all duration-300">
-              ReachTotal
+              Market-In 
             </span>
           </Link>
         </div>
@@ -20,15 +21,15 @@ const Header = () => {
         {/* Navigation Links */}
         <div className="hidden md:flex items-center space-x-8">
           {[
-            { to: "/", label: "Home" },
-            { to: "/feature-details", label: "Features" },
-            { to: "/resources", label: "Resources" },
-            { to: "/pricing-details", label: "Pricing" },
-            { to: "/services", label: "Services" }
+            { href: "/", label: "Home" },
+            { href: "/feature-details", label: "Features" },
+            { href: "/resources", label: "Resources" },
+            { href: "/pricing-details", label: "Pricing" },
+            { href: "/services", label: "Services" }
           ].map((link) => (
             <Link
               key={link.label}
-              to={link.to}
+              href={link.href}
               className="relative py-1 text-black text-lg no-underline group transition-colors duration-200"
             >
               {link.label}
@@ -40,13 +41,13 @@ const Header = () => {
         {/* Auth Buttons */}
         <div className="flex items-center space-x-4">
           <Link
-            to="/login"
+            href="/login"
             className="text-gray-900 hover:text-blue-500 text-lg no-underline transition-colors duration-200"
           >
             Log in
           </Link>
           <Link
-            to="/register"
+            href="/register"
             className="text-white hover:text-white bg-blue-500 hover:bg-blue-700 text-lg px-4 py-2 rounded-full no-underline transition-colors duration-200"
           >
             Register
