@@ -1,5 +1,6 @@
 import React from "react";
 import { ArrowDownIcon, UserPlus, Layout, FileText, Share2, BarChart3 } from "lucide-react";
+import { motion } from "framer-motion";
 
 const OnboardingFlow = () => {
   const steps = [
@@ -30,8 +31,13 @@ const OnboardingFlow = () => {
     },
   ];
 
+  const stepVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0 },
+  };
+
   return (
-    <section className="py-16 px-4  mt-7 ">
+    <section className="py-16 px-4 bg-gray-50">
       <div className="max-w-3xl mx-auto">
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold mb-4 text-black">Getting Started</h2>
@@ -40,9 +46,15 @@ const OnboardingFlow = () => {
 
         <div className="space-y-8">
           {steps.map((step, index) => (
-            <div key={index} className="relative">
-
-              <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6 transform transition-all duration-200 hover:scale-105 hover:shadow-md">
+            <motion.div
+              key={index}
+              className="relative"
+              variants={stepVariants}
+              initial="hidden"
+              whileInView="visible"
+              // transition={{ duration: 0.5, delay: index * 0.2 }}
+            >
+              <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6   hover:scale-105 hover:shadow-md">
                 <div className="flex items-start gap-6">
                   <div className="flex-shrink-0">
                     <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
@@ -55,13 +67,13 @@ const OnboardingFlow = () => {
                   </div>
                 </div>
               </div>
-              
+
               {index < steps.length - 1 && (
                 <div className="absolute left-6 top-full h-8 flex items-center justify-center">
                   <ArrowDownIcon className="w-6 h-6 text-blue-400" />
                 </div>
               )}
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>

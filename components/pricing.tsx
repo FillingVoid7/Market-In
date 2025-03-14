@@ -1,15 +1,17 @@
+// Updated Pricing Component
 "use client";
 import React, { useState, JSX } from "react";
 import { CheckCircle2Icon } from "lucide-react";
+import { motion } from "framer-motion";
 
 const Pricing = () => {
-  const [isYearly, setIsYearly] = useState(true); 
+  const [isYearly, setIsYearly] = useState(true);
 
   const freePlanFeatures = [
     "Basic customization options.",
     "3 product pages available.",
     "Unique URL sharing.",
-    "Basic customer support."
+    "Basic customer support.",
   ];
 
   const basicPlanFeatures = [
@@ -17,7 +19,7 @@ const Pricing = () => {
     "15 product pages available.",
     "Basic analytics dashboard.",
     "Priority email support.",
-    "Social media link sharing."
+    "Social media link sharing.",
   ];
 
   const proPlanFeatures = [
@@ -26,12 +28,8 @@ const Pricing = () => {
     "Comprehensive analytics.",
     "Offer management.",
     "Priority live support.",
-    "Social media automation."
+    "Social media automation.",
   ];
-
-  interface FeatureProps {
-    features: string[];
-  }
 
   const renderFeatures = (features: string[]): JSX.Element[] => {
     return features.map((feature: string, index: number) => (
@@ -42,85 +40,77 @@ const Pricing = () => {
     ));
   };
 
-  const handleYearlyClick = () => {
-    setIsYearly(true);
-  };
-
-  const handleMonthlyClick = () => {
-    setIsYearly(false);
-  };
-
   const prices = isYearly
-    ? {
-        free: 0,
-        basic: 1000,
-        pro: 2000
-      }
-    : {
-        free: 0,
-        basic: 500,
-        pro: 1000
-      };
+    ? { free: 0, basic: 1000, pro: 2000 }
+    : { free: 0, basic: 500, pro: 1000 };
+
+  const cardVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0 },
+  };
 
   return (
-    <section id="pricing" className="py-10 text-center">
+    <section id="pricing" className="py-20 bg-gray-50 text-center">
       <h2 className="text-3xl font-bold mb-6 text-black">Choose Your Plan</h2>
-      
+
       <div className="mb-6 flex items-center justify-center">
         <button
-          onClick={handleYearlyClick}
-          className={`py-2 px-4 rounded-full ${isYearly ? 'bg-orange-600 text-white' : 'bg-gray-300 text-black'} focus:outline-none`}
+          onClick={() => setIsYearly(true)}
+          className={`py-2 px-4 rounded-full ${
+            isYearly ? "bg-blue-600 text-white" : "bg-gray-300 text-black"
+          } focus:outline-none transition-all duration-300`}
         >
           Billed Yearly
         </button>
         <span className="mx-2 text-black">|</span>
         <button
-          onClick={handleMonthlyClick}
-          className={`py-2 px-4 rounded-full ${!isYearly ? 'bg-orange-600 text-white' : 'bg-gray-300 text-black'} focus:outline-none`}
+          onClick={() => setIsYearly(false)}
+          className={`py-2 px-4 rounded-full ${
+            !isYearly ? "bg-blue-600 text-white" : "bg-gray-300 text-black"
+          } focus:outline-none transition-all duration-300`}
         >
           Billed Monthly
         </button>
       </div>
 
       <div className="flex justify-center space-x-8 flex-wrap mt-8">
-        <div className="bg-gray-300 border-gray-300 rounded-lg p-6 shadow-md hover:shadow-lg transition-shadow duration-300 w-80 text-black">
-          <h3 className="text-1xl font-semibold mb-2">Free</h3>
-          <p className="text-2xl font-bold mb-4">NPR {prices.free}</p>
-          <p className="mb-4 text-left text-sm">For new users or local shops with basic needs.</p>
-          <ul className="text-left">
-            {renderFeatures(freePlanFeatures)}
-          </ul>
-          <button className="mt-20 py-2 px-4 bg-blue-500 text-white rounded-full">
-            Get Started Free
-          </button>
-        </div>
-
-        <div className="bg-white border border-gray-300 rounded-lg p-6 shadow-md hover:shadow-lg transition-shadow duration-300 w-80 text-black">
-          <h3 className="text-1xl font-semibold mb-2">Basic</h3>
-          <p className="text-2xl font-bold mb-4">NPR {prices.basic}</p>
-          <p className="mb-4 text-left text-sm">For small businesses seeking better marketing.</p>
-          <ul className="text-left">
-            {renderFeatures(basicPlanFeatures)}
-          </ul>
-          <button className="mt-12 py-2 px-4 bg-gray-500 text-white rounded-full">
-            Change to Basic
-          </button>
-        </div>
-
-        <div className="bg-white border border-gray-300 rounded-lg p-6 shadow-md hover:shadow-lg transition-shadow duration-300 w-80 text-black">
-          <h3 className="text-1xl font-semibold mb-2">Pro</h3>
-          <p className="text-2xl font-bold mb-4">NPR {prices.pro}</p>
-          <p className="mb-4 text-left text-sm">For established businesses wanting advanced features.</p>
-          <ul className="text-left">
-            {renderFeatures(proPlanFeatures)}
-          </ul>
-          <button className="mt-4 py-2 px-4 bg-gray-500 text-white rounded-full">
-            Upgrade to Pro
-          </button>
-        </div>
+        {[
+          { title: "Free", price: prices.free, features: freePlanFeatures },
+          { title: "Basic", price: prices.basic, features: basicPlanFeatures },
+          { title: "Pro", price: prices.pro, features: proPlanFeatures },
+        ].map((plan, index) => (
+          <motion.div
+            key={index}
+            className="bg-white border border-gray-200 rounded-lg p-6 shadow-md hover:shadow-lg transition-shadow duration-300 w-80 text-black"
+            variants={cardVariants}
+            initial="hidden"
+            whileInView="visible"
+            transition={{ duration: 0.5, delay: index * 0.2 }}
+          >
+            <h3 className="text-xl font-semibold mb-2">{plan.title}</h3>
+            <p className="text-2xl font-bold mb-4">NPR {plan.price}</p>
+            <p className="mb-4 text-left text-sm">
+              {index === 0
+                ? "For new users or local shops with basic needs."
+                : index === 1
+                ? "For small businesses seeking better marketing."
+                : "For established businesses wanting advanced features."}
+            </p>
+            <ul className="text-left">{renderFeatures(plan.features)}</ul>
+            <button
+              className={`mt-4 py-2 px-4 ${
+                index === 0
+                  ? "bg-blue-500 hover:bg-blue-600"
+                  : "bg-gray-500 hover:bg-gray-600"
+              } text-white rounded-full transition-all duration-300`}
+            >
+              {index === 0 ? "Get Started Free" : index === 1 ? "Change to Basic" : "Upgrade to Pro"}
+            </button>
+          </motion.div>
+        ))}
       </div>
     </section>
   );
-}
+};
 
 export default Pricing;
