@@ -39,15 +39,9 @@ const Header = () => {
         <div className="flex items-center space-x-4">
           <Link
             href="/login"
-            className="text-gray-900 hover:text-blue-500 text-lg no-underline transition-colors duration-200"
-          >
-            Log in
-          </Link>
-          <Link
-            href="/register"
             className="text-white hover:text-white bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-lg px-6 py-2 rounded-full no-underline transition-all duration-300 shadow-lg hover:shadow-xl"
           >
-            Register
+            Login
           </Link>
         </div>
       </nav>
