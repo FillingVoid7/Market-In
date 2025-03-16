@@ -1,17 +1,33 @@
-import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk, PayloadAction, Middleware } from "@reduxjs/toolkit";
 import axios from "axios";
+import { RootState } from "./freePreviewStore"
 
 const API_URL = "/api/free-preview";
 axios.defaults.withCredentials = true;
 
+
+const loadState = () => {
+  try {
+    const serializedState = localStorage.getItem("freePreview");
+    return serializedState ? JSON.parse(serializedState) : undefined;
+  } catch (e) {
+    console.error("Failed to load state", e);
+    return undefined;
+  }
+};
+
+const saveState = (state: FreePreviewState): void => {
+  try {
+    const serializedState: string = JSON.stringify(state);
+    localStorage.setItem("freePreview", serializedState);
+  } catch (e: unknown) {
+    console.error("Failed to save state", e);
+  }
+};
+
 export const saveFreePreview = createAsyncThunk(
   "freePreview/createFreePreview",
-  async (data: {
-    productDetails: any;
-    shopDetails: any;
-    faqList: any;
-    uniqueURLs: string[];
-  }, { rejectWithValue }) => {
+  async (data: { productDetails: any; shopDetails: any; faqList: any; uniqueURLs: string[];}, { rejectWithValue }) => {
     try {
       const response = await axios.post(`${API_URL}/create`, data);
       return response.data;
@@ -61,7 +77,7 @@ interface FreePreviewState {
   error: any;
 }
 
-const initialState: FreePreviewState = {
+const initialState: FreePreviewState = loadState() || {
   productDetails: {
     productName: { content: "", style: {} },
     productPrice: { content: "", style: {} },
@@ -87,7 +103,7 @@ const initialState: FreePreviewState = {
 };
 
 interface UpdateProductFieldPayload {
-  field: keyof ProductDetails; 
+  field: keyof ProductDetails;
   content: string;
   style: object;
 }
@@ -160,3 +176,12 @@ export const {
 } = freePreviewSlice.actions;
 
 export default freePreviewSlice.reducer;
+
+
+export const persistStateMiddleware: Middleware = storeAPI => next => action => {
+  const result = next(action);
+  const state = storeAPI.getState() as RootState;
+  saveState(state.freePreview);
+  return result;
+};
+
