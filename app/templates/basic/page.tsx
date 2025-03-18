@@ -1,13 +1,13 @@
-import React from "react";
-import BasicTextEditor from "../text_editors/basicTextEditor";
+// import React from "react";
+// import BasicTextEditor from "../text_editors/basicTextEditor";
 
-const Basic = () => {
-    return (
-        <div>
-            <BasicTextEditor
-            />
-        </div>
-    );
-}
+// const Basic = () => {
+//     return (
+//         <div>
+//             <BasicTextEditor
+//             />
+//         </div>
+//     );
+// }
 
-export default Basic;
+// export default Basic;

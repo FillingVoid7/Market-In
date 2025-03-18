@@ -24,7 +24,11 @@ interface ToolbarButtonProps {
 }
 
 const ToolbarButton: React.FC<ToolbarButtonProps> = ({ onClick, icon: Icon, title }) => (
-    <button onClick={onClick} className="p-2 rounded bg-white transition-colors" title={title}>
+    <button
+        onClick={onClick}
+        className="p-2 rounded hover:bg-gray-100 transition-colors"
+        title={title}
+    >
         <Icon size={18} />
     </button>
 );
@@ -142,8 +146,10 @@ const FreeTextEditor: React.FC<FreeTextEditorProps> = ({ value = "", onSave, pla
 
     return (
         <div className="border rounded-lg p-3 mt-2 shadow-sm text-black">
-            <div className="flex gap-1 mb-2 flex-wrap pb-2">
-                <div className="flex gap-1 items-center border-r pr-2">
+            {/* Toolbar */}
+            <div className="flex gap-3 mb-2 flex-wrap pb-2">
+                {/* Text Formatting */}
+                <div className="flex gap-2 items-center border-r pr-3">
                     <ToolbarButton
                         onClick={() => setStyle((prev) => ({ ...prev, fontWeight: prev.fontWeight === "bold" ? "normal" : "bold" }))}
                         icon={Bold}
@@ -156,18 +162,87 @@ const FreeTextEditor: React.FC<FreeTextEditorProps> = ({ value = "", onSave, pla
                     />
                 </div>
 
-                <div className="flex gap-1 items-center border-r pr-2">
+                {/* Text Alignment */}
+                <div className="flex gap-2 items-center border-r pr-3">
                     <ToolbarButton onClick={() => setStyle((prev) => ({ ...prev, textAlign: "left" }))} icon={AlignLeft} title="Align Left" />
                     <ToolbarButton onClick={() => setStyle((prev) => ({ ...prev, textAlign: "center" }))} icon={AlignCenter} title="Center" />
                     <ToolbarButton onClick={() => setStyle((prev) => ({ ...prev, textAlign: "right" }))} icon={AlignRight} title="Align Right" />
                 </div>
 
-                <div className="flex gap-1 items-center border-r pr-2">
+                {/* Lists */}
+                <div className="flex gap-2 items-center border-r pr-3">
                     <ToolbarButton onClick={() => handleListFormat("bullet")} icon={List} title="Bullet List" />
                     <ToolbarButton onClick={() => handleListFormat("numbered")} icon={ListOrdered} title="Numbered List" />
                 </div>
+
+                {/* Font Size, Family, and Line Height */}
+                <div className="flex gap-2 items-center border-r pr-3">
+                    <select
+                        onChange={(e) => setStyle((prev) => ({ ...prev, fontSize: e.target.value }))}
+                        className="border rounded p-1 text-sm bg-white"
+                        value={style.fontSize}
+                        title="Font Size"
+                    >
+                        {[12, 14, 16, 18, 20, 24, 28, 32].map((size) => (
+                            <option key={size} value={`${size}px`}>{size}px</option>
+                        ))}
+                    </select>
+                    <select
+                        onChange={(e) => setStyle((prev) => ({ ...prev, fontFamily: e.target.value }))}
+                        className="border rounded p-1 text-sm bg-white"
+                        value={style.fontFamily}
+                        title="Font Family"
+                    >
+                        {["Arial", "Times New Roman", "Verdana", "Georgia", "Courier New", "Tahoma", "Sans-serif"].map((font) => (
+                            <option key={font} value={font}>{font}</option>
+                        ))}
+                    </select>
+                    <select
+                        onChange={(e) => setStyle((prev) => ({ ...prev, lineHeight: e.target.value }))}
+                        className="border rounded p-1 text-sm bg-white"
+                        value={style.lineHeight}
+                        title="Line Height"
+                    >
+                        {["1", "1.15", "1.5", "2", "2.5", "3"].map((height) => (
+                            <option key={height} value={height}>{height}x</option>
+                        ))}
+                    </select>
+                </div>
+
+                {/* Text and Background Color */}
+                <div className="flex gap-2 items-center">
+                    <div className="relative">
+                        <ToolbarButton
+                            onClick={() => document.getElementById("textColorPicker")?.click()}
+                            icon={Type}
+                            title="Text Color"
+                        />
+                        <input
+                            type="color"
+                            id="textColorPicker"
+                            value={style.color}
+                            onChange={(e) => setStyle((prev) => ({ ...prev, color: e.target.value }))}
+                            className="absolute w-0 h-0 opacity-0"
+                        />
+                    </div>
+                    <div className="relative">
+                        <ToolbarButton
+                            onClick={() => document.getElementById("bgColorPicker")?.click()}
+                            icon={Palette}
+                            title="Background Color"
+                        />
+                        <input
+                            type="color"
+                            id="bgColorPicker"
+                            value={style.backgroundColor === "transparent" ? "#ffffff" : style.backgroundColor}
+                            onChange={(e) => setStyle((prev) => ({ ...prev, backgroundColor: e.target.value }))}
+                            className="absolute w-0 h-0 opacity-0"
+                        />
+                    </div>
+                </div>
             </div>
 
+            {/* Textarea */}
             <textarea
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
@@ -176,6 +251,7 @@ const FreeTextEditor: React.FC<FreeTextEditorProps> = ({ value = "", onSave, pla
                 style={style}
             />
 
+            {/* Save and Cancel Buttons */}
             <div className="flex justify-between items-center">
                 <div className="flex gap-2">
                     <ToolbarButton onClick={handleUndo} icon={Undo} title="Undo" />
@@ -184,15 +260,15 @@ const FreeTextEditor: React.FC<FreeTextEditorProps> = ({ value = "", onSave, pla
                 <div className="flex gap-2">
                     <button
                         onClick={handleSave}
-                        className="flex items-center gap-2 text-white px-4 py-2 rounded-lg hover:bg-gray-900 transition-colors"
+                        className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
                     >
-                        <Save size={20} />
+                        <Save size={20} /> Save
                     </button>
                     <button
                         onClick={() => setIsEditing(false)}
-                        className="flex items-center gap-2 border px-4 py-2 text-white rounded-lg hover:bg-gray-900 transition-colors"
+                        className="flex items-center gap-2 border border-gray-300 px-4 py-2 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors"
                     >
-                        <X size={20} />
+                        <X size={20} /> Cancel
                     </button>
                 </div>
             </div>

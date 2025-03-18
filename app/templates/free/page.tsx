@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { updateProductField, updateShopField, updateProductImages, updateProductVideos, updateShopImages, updateFaqList, updateUniqueURLs, resetTemplate } from "../../../redux/templatesPreview/freePreviewSlice";
 import { RootState } from "../../../redux/templatesPreview/freePreviewStore";
 import FreeTextEditor from "../../../text-editors/freeTextEditor";
+import { toast } from "sonner";
 
 interface Faq {
     id: number;
@@ -21,6 +22,7 @@ interface ImageFile {
 const FreeTemplate: React.FC = () => {
     const router = useRouter();
     const dispatch = useDispatch();
+    const freePreviewState = useSelector((state: RootState) => state.freePreview);
     const [showPreview, setShowPreview] = useState<boolean>(false);
     const [newFaq, setNewFaq] = useState<Faq>({ id: 0, question: '', answer: '', isEditing: false });
     const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
@@ -32,7 +34,7 @@ const FreeTemplate: React.FC = () => {
 
     const handleClearAll = () => {
         dispatch(resetTemplate());
-        console.log("Redux state after reset:", useSelector((state: RootState) => state.freePreview));
+        console.log("Redux state after reset:", freePreviewState);
         localStorage.removeItem("freePreview");
         setNewFaq({ id: 0, question: '', answer: '', isEditing: false });
         setExpandedFaq(null);
@@ -76,7 +78,7 @@ const FreeTemplate: React.FC = () => {
         if (e.target.files && e.target.files[0]) {
             const selectedFile = e.target.files[0];
             if (productDetails.productVideos.length > 0) {
-                alert("Only one video is allowed for the free tier.");
+                toast.info("Only one video is allowed for the free tier.");
                 return;
             }
             dispatch(updateProductVideos([URL.createObjectURL(selectedFile)]));
@@ -135,17 +137,17 @@ const FreeTemplate: React.FC = () => {
         ];
 
         if (requiredFields.filter(Boolean).length < 7) {
-            alert('Please fill at least 7 fields before generating URL');
+            toast.info('Please fill at least 7 fields before generating URL');
             return;
         }
 
         if (uniqueURLs.length >= 3) {
-            alert('You can only generate up to 3 unique URLs in the free tier');
+            toast.info('You can only generate up to 3 unique URLs in the free tier');
             return;
         }
 
         if (productDetails.productPictures.length > 3) {
-            alert('Please select only up to 3 images to generate URL');
+            toast.info('Please select only up to 3 images to generate URL');
             return;
         }
 
@@ -163,7 +165,7 @@ const FreeTemplate: React.FC = () => {
     };
 
     return (
-        <div className="flex justify-center items-center mt-14 w-screen min-h-screen">
+        <div className="flex justify-center items-center pt-10 w-screen min-h-screen bg-gray-100">
             <div className="space-y-6">
                 <div className="flex justify-between mb-4">
                     <h2 className="text-2xl font-semibold text-black">Free Template</h2>
@@ -269,6 +271,7 @@ const FreeTemplate: React.FC = () => {
                         accept="image/*"
                         className="w-full border rounded px-3 py-2"
                     />
+                    
                     <div className="flex flex-wrap gap-4 mt-4">
                         {productDetails.productPictures.map((img, index) => (
                             <div key={index} className="relative">
@@ -336,7 +339,7 @@ const FreeTemplate: React.FC = () => {
                         />
                         <button
                             onClick={addFaq}
-                            className="flex items-center gap-2 text-white px-4 py-2 rounded-lg hover:bg-gray-900 transition-colors"
+                            className="flex items-center gap-2 text-white px-4 py-2 rounded-lg hover:bg-blue-800 transition-colors  bg-blue-600"
                         >
                             Add FAQ
                         </button>
