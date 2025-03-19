@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import { ArrowLeft, Share2 } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../redux/templatesPreview/freePreviewStore';
@@ -22,14 +22,14 @@ interface ProductDetails {
   longDescription: { content: string; style: object };
   qualityFeatures: { content: string; style: object };
   specifications: { content: string; style: object };
-  productPictures: ImageFile[];
-  productVideos: ImageFile[];
+  productPictures: string[];
+  productVideos: string[];
 }
 
 interface ShopDetails {
   shopName: { content: string; style: object };
   shopDescription: { content: string; style: object };
-  shopImages: ImageFile[];
+  shopImages: string[];
   shopAddress: { content: string; style: object };
   shopContact: { content: string; style: object };
 }
@@ -40,31 +40,20 @@ interface FreePreviewState {
   faqList: Faq[];
   uniqueURLs: string[];
 }
-
 const FreeTemplatePreview: React.FC = () => {
-  const navigate = useNavigate();
+  const router = useRouter();
   const dispatch = useDispatch();
   const [selectedImage, setSelectedImage] = useState<number>(0);
- 
-  const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
   const data = useSelector((state: RootState) => state.freePreview);
 
-  useEffect(() => {
-    console.log('Auth status:', { userId, isAuthenticated });
-    if (!isAuthenticated) {
-      console.log('User not authenticated, redirecting to login');
-      navigate('/login');
-    }
-  }, [isAuthenticated, navigate, userId]);
-
-  if (!data || !data.productDetails) {
+  if (!data) {
     return (
       <div className="w-full min-h-screen flex items-center justify-center bg-gray-50">
         <div className="bg-white rounded-lg shadow-lg text-center p-6 w-96">
           <h2 className="text-2xl font-bold text-gray-800">No Preview Data Available</h2>
           <p className="text-gray-600 mt-2">Please add some content first</p>
           <button
-            onClick={() => navigate(-1)}
+            onClick={() => router.back()}
             className="mt-4 inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
@@ -75,25 +64,19 @@ const FreeTemplatePreview: React.FC = () => {
     );
   }
 
-  const { productDetails, faqList, uniqueURLs } = data;
+  const { productDetails, shopDetails, faqList, uniqueURLs } = data;
 
   const handleSave = async (e: React.MouseEvent) => {
     e.preventDefault();
 
-    if (!userId || !isAuthenticated) {
-      console.error('User not authenticated, cannot save preview');
-      navigate('/login');
-      return;
-    }
-
     try {
       const resultAction = await dispatch(
         saveFreePreview({
-          userId,
           productDetails: data.productDetails,
+          shopDetails: data.shopDetails,
           faqList: data.faqList,
           uniqueURLs: data.uniqueURLs,
-        })
+        }) as unknown as any
       );
 
       if (saveFreePreview.fulfilled.match(resultAction)) {
@@ -114,7 +97,7 @@ const FreeTemplatePreview: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex justify-between items-center">
             <button
-              onClick={() => navigate(-1)}
+              onClick={() => router.back()}
               className="inline-flex items-center text-white hover:text-gray-200 transition-colors"
             >
               <ArrowLeft className="w-5 h-5 mr-2" />
@@ -159,7 +142,7 @@ const FreeTemplatePreview: React.FC = () => {
                 <>
                   <div className="aspect-square rounded-2xl overflow-hidden shadow-2xl">
                     <img
-                      src={productDetails.productPictures[selectedImage].url}
+                      src={productDetails.productPictures[selectedImage]} 
                       alt="Product"
                       className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
                     />
@@ -176,7 +159,7 @@ const FreeTemplatePreview: React.FC = () => {
                         }`}
                       >
                         <img
-                          src={img.url}
+                          src={img}
                           alt={`Product ${index + 1}`}
                           className="w-full h-full object-cover"
                         />
@@ -245,7 +228,7 @@ const FreeTemplatePreview: React.FC = () => {
             <h2 className="text-2xl font-bold text-gray-900 mb-6">Product Video</h2>
             <div className="aspect-video rounded-xl overflow-hidden shadow-lg">
               <video
-                src={productDetails.productVideos[0].url}
+                src={productDetails.productVideos[0]} // Directly use the URL
                 controls
                 className="w-full h-full object-cover"
               />
@@ -276,35 +259,35 @@ const FreeTemplatePreview: React.FC = () => {
           <h2 className="text-sm font-bold text-gray-900 mb-6">Shop Information</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="space-y-4">
-              {productDetails.shopName?.content && (
-                <h2 className="text-2xl font-bold text-gray-900" style={productDetails.shopName.style}>
-                  {productDetails.shopName.content}
+              {shopDetails.shopName?.content && (
+                <h2 className="text-2xl font-bold text-gray-900" style={shopDetails.shopName.style}>
+                  {shopDetails.shopName.content}
                 </h2>
               )}
-              {productDetails.shopDescription?.content && (
-                <p className="text-gray-600" style={productDetails.shopDescription.style}>
-                  {productDetails.shopDescription.content}
+              {shopDetails.shopDescription?.content && (
+                <p className="text-gray-600" style={shopDetails.shopDescription.style}>
+                  {shopDetails.shopDescription.content}
                 </p>
               )}
-              {productDetails.shopContact?.content && (
-                <div className="text-gray-600" style={productDetails.shopContact.style}>
-                  {productDetails.shopContact.content}
+              {shopDetails.shopContact?.content && (
+                <div className="text-gray-600" style={shopDetails.shopContact.style}>
+                  {shopDetails.shopContact.content}
                 </div>
               )}
             </div>
             <div className="space-y-4">
-              {productDetails.shopImages?.length > 0 && (
+              {shopDetails.shopImages?.length > 0 && (
                 <div className="rounded-xl overflow-hidden shadow-lg">
                   <img
-                    src={productDetails.shopImages[0].url}
+                    src={shopDetails.shopImages[0]}
                     alt="Shop"
                     className="w-full h-48 object-cover"
                   />
                 </div>
               )}
-              {productDetails.shopAddress?.content && (
-                <div className="text-gray-600" style={productDetails.shopAddress.style}>
-                  {productDetails.shopAddress.content}
+              {shopDetails.shopAddress?.content && (
+                <div className="text-gray-600" style={shopDetails.shopAddress.style}>
+                  {shopDetails.shopAddress.content}
                 </div>
               )}
             </div>
@@ -314,5 +297,6 @@ const FreeTemplatePreview: React.FC = () => {
     </div>
   );
 };
+
 
 export default FreeTemplatePreview;

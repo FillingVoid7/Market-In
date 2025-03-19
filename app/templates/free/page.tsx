@@ -157,7 +157,7 @@ const FreeTemplate: React.FC = () => {
 
     const handleShowPreview = () => {
         setShowPreview(true);
-        router.push('/free-template-preview');
+        router.push('/free-Template-Preview');
     };
 
     const handleEditMode = () => {
