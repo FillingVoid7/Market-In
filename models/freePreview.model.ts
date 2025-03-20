@@ -58,7 +58,8 @@ const freePreviewSchema = new Schema<IFreePreview>(
     faqList: [{ question: String, answer: String }], 
     uniqueURLs: [String], 
   },
-  { timestamps: true } 
+  { timestamps: true , collection:"saved-free-previews"},
+  
 );
 
 export const freePreviewModel = mongoose.model<IFreePreview>("FreePreview",freePreviewSchema);

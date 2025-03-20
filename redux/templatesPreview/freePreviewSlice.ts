@@ -8,6 +8,7 @@ axios.defaults.withCredentials = true;
 
 const loadState = () => {
   try {
+    if (typeof window === "undefined") return undefined;
     const serializedState = localStorage.getItem("freePreview");
     return serializedState ? JSON.parse(serializedState) : undefined;
   } catch (e) {
@@ -29,7 +30,8 @@ export const saveFreePreview = createAsyncThunk(
   "freePreview/createFreePreview",
   async (data: { productDetails: any; shopDetails: any; faqList: any; uniqueURLs: string[];}, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`${API_URL}/create`, data);
+      const response = await axios.post(`${API_URL}`, data);
+      console.log("result:", response.data);
       return response.data;
     } catch (error: any) {
       if (axios.isAxiosError(error) && error.response) {

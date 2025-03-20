@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+"use client";
+import React, {  useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Share2 } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -78,6 +79,8 @@ const FreeTemplatePreview: React.FC = () => {
           uniqueURLs: data.uniqueURLs,
         }) as unknown as any
       );
+
+      console.log('Result Action:', resultAction);
 
       if (saveFreePreview.fulfilled.match(resultAction)) {
         console.log('Free Preview created successfully', resultAction.payload);

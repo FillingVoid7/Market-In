@@ -1,3 +1,4 @@
+import { Socket } from "dgram"
 import { MongoClient, ServerApiVersion } from "mongodb"
  
 if (!process.env.MONGODB_URI) {
@@ -11,6 +12,7 @@ const options = {
     strict: true,
     deprecationErrors: true,
   },
+
 }
  
 let client: MongoClient
