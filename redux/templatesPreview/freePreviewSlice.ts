@@ -28,7 +28,7 @@ const saveState = (state: FreePreviewState): void => {
 
 export const saveFreePreview = createAsyncThunk(
   "freePreview/createFreePreview",
-  async (data: { productDetails: any; shopDetails: any; faqList: any; uniqueURLs: string[];}, { rejectWithValue }) => {
+  async (data: { productDetails: ProductDetails; shopDetails: ShopDetails; faqList: any[]; uniqueURLs: URLSnapshot[];}, { rejectWithValue }) => {
     try {
       const response = await axios.post(`${API_URL}`, data);
       console.log("result:", response.data);
@@ -44,6 +44,13 @@ export const saveFreePreview = createAsyncThunk(
     }
   }
 );
+
+interface URLSnapshot {
+  id: string;
+  url: string;
+  contentHash: string;
+  createdAt: string;
+}
 
 interface ContentStyle {
   content: string;
@@ -74,7 +81,7 @@ interface FreePreviewState {
   productDetails: ProductDetails;
   shopDetails: ShopDetails;
   faqList: any[];
-  uniqueURLs: string[];
+  uniqueURLs: URLSnapshot[];
   createdPreview: any;
   error: any;
 }
@@ -116,6 +123,19 @@ interface UpdateShopFieldPayload {
   style: object;
 }
 
+const createContentHash = (data:{
+  productDetails: ProductDetails;
+  shopDetails: ShopDetails;
+  faqList: any[];
+}):string=>{
+  const jsonString = JSON.stringify({
+    pd:data.productDetails,
+    sd:data.shopDetails,
+    faq:data.faqList
+  });
+  return btoa(jsonString).slice(0,64);
+}
+
 const freePreviewSlice = createSlice({
   name: "freePreview",
   initialState,
@@ -148,7 +168,7 @@ const freePreviewSlice = createSlice({
     updateFaqList: (state, action: PayloadAction<any[]>) => {
       state.faqList = action.payload;
     },
-    updateUniqueURLs: (state, action: PayloadAction<string[]>) => {
+    updateUniqueURLs: (state, action: PayloadAction<URLSnapshot[]>) => {
       state.uniqueURLs = action.payload;
     },
     resetTemplate: () => initialState,
