@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { ArrowLeft, Share2, Copy, Check, ChevronDown, ChevronUp, Link } from "lucide-react"
 import { useDispatch, useSelector } from "react-redux"
 import type { RootState } from "../../redux/templatesPreview/freePreviewStore"
-import { saveFreePreview, updateUniqueURLs,createContentHash } from "../../redux/templatesPreview/freePreviewSlice"
+import { saveFreePreview, updateUniqueURLs, createContentHash } from "../../redux/templatesPreview/freePreviewSlice"
 import { toast } from "sonner"
 
 interface Faq {
@@ -68,80 +68,82 @@ const FreeTemplatePreview: React.FC = () => {
     }
   }
 
+  interface URLSnapshot {
+    id: string;
+    url: string;
+    contentHash: string;
+    createdAt: string;
+  }
+
   const generateUniqueURL = async () => {
     const currentContent = {
       productDetails,
       shopDetails,
       faqList
     };
-  
-    // Create content hash
+
     const contentHash = createContentHash(currentContent);
-  
-    // Check for duplicates
+
     const exists = uniqueURLs.some(url => url.contentHash === contentHash);
-    
+
     if (exists) {
       toast.error("This configuration already has a URL");
       return;
     }
-  
+
     if (uniqueURLs.length >= 3) {
       toast.info("Free tier limited to 3 unique product pages");
       return;
     }
-  
+
     try {
-      // Generate ID on server
       const res = await fetch('/api/generate-url', {
         method: 'POST',
         body: JSON.stringify(currentContent)
       });
-      
-      const { id } = await res.json();
-      const newUrl = `${window.location.origin}/product/${id}`;
-  
+
+      const { id } = await res.json() as { id: string };
+      const newUrl: URLSnapshot = {
+        id,
+        url: `${window.location.origin}/product/${id}`,
+        contentHash,
+        createdAt: new Date().toISOString()
+      };
+
       dispatch(updateUniqueURLs([
         ...uniqueURLs,
-        {
-          id,
-          url: newUrl,
-          contentHash,
-          createdAt: new Date()
-        }
+        newUrl
       ]));
-  
-      // Show success toast
+
+      toast.success(
+        <div className="flex flex-col gap-2">
+          <p>URL generated successfully!</p>
+          <div className="flex items-center gap-2">
+            <input
+              type="text"
+              value={newUrl.url}
+              readOnly
+              className="w-full p-2 text-sm bg-white border rounded text-gray-800"
+            />
+            <button
+              onClick={() => {
+                navigator.clipboard.writeText(newUrl.url)
+                toast.success("URL copied to clipboard!")
+              }}
+              className="whitespace-nowrap bg-blue-600 text-white px-3 py-2 rounded text-sm"
+            >
+              Copy
+            </button>
+          </div>
+        </div>,
+        {
+          duration: 5000,
+        },
+      );
+
     } catch (error) {
       toast.error("URL generation failed");
     }
-  }
-    // Show toast with copy option
-    toast.success(
-      <div className="flex flex-col gap-2">
-        <p>URL generated successfully!</p>
-        <div className="flex items-center gap-2">
-          <input
-            type="text"
-            value={newUrl}
-            readOnly
-            className="w-full p-2 text-sm bg-white border rounded text-gray-800"
-          />
-          <button
-            onClick={() => {
-              navigator.clipboard.writeText(newUrl)
-              toast.success("URL copied to clipboard!")
-            }}
-            className="whitespace-nowrap bg-blue-600 text-white px-3 py-2 rounded text-sm"
-          >
-            Copy
-          </button>
-        </div>
-      </div>,
-      {
-        duration: 5000,
-      },
-    )
   }
 
   const copyToClipboard = (url: string) => {
@@ -210,11 +212,10 @@ const FreeTemplatePreview: React.FC = () => {
                       <button
                         key={index}
                         onClick={() => setSelectedImage(index)}
-                        className={`aspect-square rounded-lg overflow-hidden border-2 transition-all ${
-                          selectedImage === index
+                        className={`aspect-square rounded-lg overflow-hidden border-2 transition-all ${selectedImage === index
                             ? "border-blue-600 shadow-lg"
                             : "border-transparent hover:border-blue-400"
-                        }`}
+                          }`}
                       >
                         <img
                           src={img || "/placeholder.svg?height=150&width=150"}
@@ -266,16 +267,16 @@ const FreeTemplatePreview: React.FC = () => {
                       <div key={index} className="flex items-center gap-2 bg-white rounded-lg p-2 shadow-sm">
                         <input
                           type="text"
-                          value={url}
+                          value={url.toString()}
                           readOnly
                           className="flex-grow text-sm bg-transparent border-none focus:ring-0 text-gray-700"
                         />
                         <button
-                          onClick={() => copyToClipboard(url)}
+                          onClick={() => copyToClipboard(url.toString())}
                           className="p-2 text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
                           aria-label="Copy URL"
                         >
-                          {copied === url ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                          {copied === url.toString() ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                         </button>
                       </div>
                     ))}

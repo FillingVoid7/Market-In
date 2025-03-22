@@ -57,7 +57,7 @@ interface ContentStyle {
   style: object;
 }
 
-interface ProductDetails {
+export interface ProductDetails {
   productName: ContentStyle;
   productPrice: ContentStyle;
   shortDescription: ContentStyle;
@@ -68,7 +68,7 @@ interface ProductDetails {
   productVideos: string[];
 }
 
-interface ShopDetails {
+export interface ShopDetails {
   shopName: ContentStyle;
   shopDescription: ContentStyle;
   shopImages: string[];
@@ -123,7 +123,7 @@ interface UpdateShopFieldPayload {
   style: object;
 }
 
-const createContentHash = (data:{
+export const createContentHash = (data:{
   productDetails: ProductDetails;
   shopDetails: ShopDetails;
   faqList: any[];
