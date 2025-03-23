@@ -3,6 +3,8 @@ import axios from "axios";
 import { RootState } from "./freePreviewStore"
 
 const API_URL = "/api/free-preview";
+const GENERATE_URL = "/api/generate-url-free";
+const GET_PRODUCT_URL = "/api/get-free-product";
 axios.defaults.withCredentials = true;
 
 
@@ -41,6 +43,41 @@ export const saveFreePreview = createAsyncThunk(
       } else {
         return rejectWithValue(error.message || 'Request failed');
       }
+    }
+  }
+);
+
+export const generateUrlFree = createAsyncThunk(
+  "freePreview/generateUrl",
+  async (productId: string, { rejectWithValue, getState }) => {
+    try {
+      const state = getState() as RootState;
+      const { productDetails, shopDetails, faqList } = state.freePreview;
+
+      // Check content hash before generating
+      const contentHash = createContentHash({ productDetails, shopDetails, faqList });
+      const exists = state.freePreview.uniqueURLs.some(url => url.contentHash === contentHash);
+      
+      if (exists) {
+        throw new Error("This configuration already has a URL");
+      }
+
+      const response = await axios.post(GENERATE_URL, { productId });
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.error || error.message);
+    }
+  }
+);
+
+export const getProductFree = createAsyncThunk(
+  "freePreview/getProduct",
+  async (productId: string, { rejectWithValue }) => {
+    try {
+      const response = await axios.get(`${GET_PRODUCT_URL}?id=${productId}`);
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.error || error.message);
     }
   }
 );

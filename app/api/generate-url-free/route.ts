@@ -1,37 +1,73 @@
-import { NextApiRequest, NextApiResponse } from 'next'
-import { ProductDetails, ShopDetails } from '../../../redux/templatesPreview/freePreviewSlice'
-import { v4 as uuidv4 } from 'uuid'
+import { NextRequest, NextResponse } from "next/server";
+import { freePreviewModel } from "../../../models/freePreview.model";
+import { mongooseConnect } from "@lib/mongoose";
+import { Types } from "mongoose";
 
-import { products } from '../get-free-product/route'
+export async function POST(req: NextRequest) {
+  try {
+    await mongooseConnect();
+    
+    // Get the existing product ID from request body
+    const { productId } = await req.json();
+    
+    // Validate input
+    if (!productId) {
+      return NextResponse.json(
+        { error: "Product ID is required" },
+        { status: 400 }
+      );
+    }
 
-interface GenerateRequest {
-  productDetails: ProductDetails
-  shopDetails: ShopDetails
-  faqList: any[]
-}
+    // Validate MongoDB ID format
+    if (!Types.ObjectId.isValid(productId)) {
+      return NextResponse.json(
+        { error: "Invalid product ID format" },
+        { status: 400 }
+      );
+    }
 
-export default function handler(req: NextApiRequest, res: NextApiResponse) {
-  const { method } = req
+    // Find existing product
+    const existingProduct = await freePreviewModel.findById(productId);
+    
+    if (!existingProduct) {
+      return NextResponse.json(
+        { error: "Product not found" },
+        { status: 404 }
+      );
+    }
 
-  switch (method) {
-    case 'POST':
-      try {
-        const content = req.body as GenerateRequest
-        const id = uuidv4()
+    // Check URL limit (max 3 URLs)
+    if (existingProduct.uniqueURLs.length >= 3) {
+      return NextResponse.json(
+        { error: "Maximum 3 URLs per product" },
+        { status: 400 }
+      );
+    }
 
-        products.set(id, {
-          id,
-          content,
-          createdAt: new Date()
-        })
-        return res.status(200).json({ id })
-      } catch (error) {
-        console.error('Generate URL error:', error)
-        return res.status(500).json({ error: 'Internal server error' })
+    // Generate unique URL using existing ID
+    const productUrl = `${process.env.NEXTAUTH_URL}/product/${existingProduct._id}`;
+
+    // Add URL to product's uniqueURLs array
+    const updatedProduct = await freePreviewModel.findByIdAndUpdate(
+      productId,
+      { $push: { uniqueURLs: productUrl } },
+      { new: true }
+    );
+
+    return NextResponse.json({
+      url: productUrl,
+      existingData: {
+        productDetails: updatedProduct.productDetails,
+        shopDetails: updatedProduct.shopDetails,
+        faqList: updatedProduct.faqList
       }
+    }, { status: 200 });
 
-    default:
-      res.setHeader('Allow', ['POST'])
-      return res.status(405).json({ error: `Method ${method} not allowed` })
+  } catch (error) {
+    console.error('URL Generation Error:', error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
 }
