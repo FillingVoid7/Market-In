@@ -27,7 +27,8 @@ interface ShopDetails {
 }
 
 
-interface IFreePreview extends Document {
+export interface IFreePreview extends Document {
+  _id: Types.ObjectId;  
   productDetails: ProductDetails;
   shopDetails: ShopDetails;
   faqList: { question: string; answer: string }[];

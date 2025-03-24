@@ -30,7 +30,7 @@ const saveState = (state: FreePreviewState): void => {
 
 export const saveFreePreview = createAsyncThunk(
   "freePreview/createFreePreview",
-  async (data: { productDetails: ProductDetails; shopDetails: ShopDetails; faqList: any[]; uniqueURLs: URLSnapshot[];}, { rejectWithValue }) => {
+  async (data: { productDetails: ProductDetails; shopDetails: ShopDetails; faqList: any[]; uniqueURLs: URLSnapshot[]; }, { rejectWithValue }) => {
     try {
       const response = await axios.post(`${API_URL}`, data);
       console.log("result:", response.data);
@@ -49,17 +49,18 @@ export const saveFreePreview = createAsyncThunk(
 
 export const generateUrlFree = createAsyncThunk(
   "freePreview/generateUrl",
-  async (productId: string, { rejectWithValue, getState }) => {
+  async ({ productId }: { productId: string }, { rejectWithValue, getState }) => {
     try {
       const state = getState() as RootState;
-      const { productDetails, shopDetails, faqList } = state.freePreview;
+      const { productDetails, shopDetails, faqList, uniqueURLs } = state.freePreview;
 
-      // Check content hash before generating
+      if (uniqueURLs.length >= 3) {
+        throw new Error("Free tier limited to 3 product pages");
+      }
       const contentHash = createContentHash({ productDetails, shopDetails, faqList });
-      const exists = state.freePreview.uniqueURLs.some(url => url.contentHash === contentHash);
-      
+      const exists = uniqueURLs.some(url => url.contentHash === contentHash);
       if (exists) {
-        throw new Error("This configuration already has a URL");
+        throw new Error("This product configuration already exists");
       }
 
       const response = await axios.post(GENERATE_URL, { productId });
@@ -69,6 +70,7 @@ export const generateUrlFree = createAsyncThunk(
     }
   }
 );
+
 
 export const getProductFree = createAsyncThunk(
   "freePreview/getProduct",
@@ -115,6 +117,7 @@ export interface ShopDetails {
 }
 
 interface FreePreviewState {
+  _id?: string;
   productDetails: ProductDetails;
   shopDetails: ShopDetails;
   faqList: any[];
@@ -160,17 +163,17 @@ interface UpdateShopFieldPayload {
   style: object;
 }
 
-export const createContentHash = (data:{
+export const createContentHash = (data: {
   productDetails: ProductDetails;
   shopDetails: ShopDetails;
   faqList: any[];
-}):string=>{
+}): string => {
   const jsonString = JSON.stringify({
-    pd:data.productDetails,
-    sd:data.shopDetails,
-    faq:data.faqList
+    pd: data.productDetails,
+    sd: data.shopDetails,
+    faq: data.faqList
   });
-  return btoa(jsonString).slice(0,64);
+  return btoa(jsonString).slice(0, 64);
 }
 
 const freePreviewSlice = createSlice({
@@ -219,7 +222,32 @@ const freePreviewSlice = createSlice({
       .addCase(saveFreePreview.rejected, (state, action) => {
         console.error("Error creating free preview:", action.payload);
         state.error = action.payload;
-      });
+      })
+      .addCase(generateUrlFree.fulfilled, (state, action) => {
+        state.uniqueURLs.push({
+          id: action.payload.id,
+          url: action.payload.url,
+          contentHash: createContentHash(action.payload.existingData),
+          createdAt: new Date().toISOString()
+        });
+      })
+      .addCase(generateUrlFree.rejected, (state, action) => {
+        state.error = action.payload || "Error generating URL";
+      })
+
+      .addCase(getProductFree.pending, (state) => {
+        state.error = null;
+      })
+      .addCase(getProductFree.fulfilled, (state, action) => {
+        state.productDetails = action.payload.productDetails;
+        state.shopDetails = action.payload.shopDetails;
+        state.faqList = action.payload.faqList;
+        state.uniqueURLs = action.payload.uniqueURLs || [];
+      })
+      .addCase(getProductFree.rejected, (state, action) => {
+        state.error = action.payload || "Error fetching product data";
+      })
+
   },
 });
 

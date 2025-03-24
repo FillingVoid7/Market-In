@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { ArrowLeft, Share2, Copy, Check, ChevronDown, ChevronUp, Link } from "lucide-react"
 import { useDispatch, useSelector } from "react-redux"
 import type { RootState } from "../../redux/templatesPreview/freePreviewStore"
-import { saveFreePreview, updateUniqueURLs, createContentHash } from "../../redux/templatesPreview/freePreviewSlice"
+import { saveFreePreview, updateUniqueURLs, createContentHash, generateUrlFree } from "../../redux/templatesPreview/freePreviewSlice"
 import { toast } from "sonner"
 
 interface Faq {
@@ -14,7 +14,11 @@ interface Faq {
   answer: string
 }
 
-const FreeTemplatePreview: React.FC = () => {
+const FreeTemplatePreview: React.FC<{
+  productDetails:any,
+  shopDetails:any,
+  faqList:any,
+}> = () => {
   const router = useRouter()
   const dispatch = useDispatch()
   const [selectedImage, setSelectedImage] = useState<number>(0)
@@ -42,7 +46,7 @@ const FreeTemplatePreview: React.FC = () => {
     )
   }
 
-  const { productDetails, shopDetails, faqList } = data
+  const { _id:productId ,productDetails, shopDetails, faqList } = data
 
   const handleSave = async (e: React.MouseEvent) => {
     e.preventDefault()
@@ -76,76 +80,83 @@ const FreeTemplatePreview: React.FC = () => {
   }
 
   const generateUniqueURL = async () => {
+    if (!productId) {
+      toast.error("Please save the product before generating a URL.");
+      return;
+    }
+  
     const currentContent = {
       productDetails,
       shopDetails,
-      faqList
+      faqList,
     };
-
+  
     const contentHash = createContentHash(currentContent);
-
-    const exists = uniqueURLs.some(url => url.contentHash === contentHash);
-
+    const exists = uniqueURLs.some((url) => url.contentHash === contentHash);
+  
     if (exists) {
-      toast.error("This configuration already has a URL");
+      toast.error("This configuration already has a URL.");
       return;
     }
-
+  
     if (uniqueURLs.length >= 3) {
-      toast.info("Free tier limited to 3 unique product pages");
+      toast.info("Free tier is limited to 3 unique product pages.");
       return;
     }
-
+  
     try {
-      const res = await fetch('/api/generate-url', {
-        method: 'POST',
-        body: JSON.stringify(currentContent)
-      });
-
-      const { id } = await res.json() as { id: string };
-      const newUrl: URLSnapshot = {
-        id,
-        url: `${window.location.origin}/product/${id}`,
-        contentHash,
-        createdAt: new Date().toISOString()
-      };
-
-      dispatch(updateUniqueURLs([
-        ...uniqueURLs,
-        newUrl
-      ]));
-
-      toast.success(
-        <div className="flex flex-col gap-2">
-          <p>URL generated successfully!</p>
-          <div className="flex items-center gap-2">
-            <input
-              type="text"
-              value={newUrl.url}
-              readOnly
-              className="w-full p-2 text-sm bg-white border rounded text-gray-800"
-            />
-            <button
-              onClick={() => {
-                navigator.clipboard.writeText(newUrl.url)
-                toast.success("URL copied to clipboard!")
-              }}
-              className="whitespace-nowrap bg-blue-600 text-white px-3 py-2 rounded text-sm"
-            >
-              Copy
-            </button>
-          </div>
-        </div>,
-        {
-          duration: 5000,
-        },
-      );
-
+      toast.loading("Generating unique URL...");
+      const resultAction = await dispatch(generateUrlFree({ productId }) as any);
+      
+      if (generateUrlFree.fulfilled.match(resultAction)) {
+        const { id, url, contentHash } = resultAction.payload;
+  
+        const newUrl: URLSnapshot = {
+          id,
+          url,
+          contentHash,
+          createdAt: new Date().toISOString(),
+        };
+  
+        dispatch(updateUniqueURLs([...uniqueURLs, newUrl]));
+  
+        toast.dismiss();
+  
+        toast.success(
+          <div className="flex flex-col gap-2">
+            <p>URL generated successfully!</p>
+            <div className="flex items-center gap-2">
+              <input
+                type="text"
+                value={newUrl.url}
+                readOnly
+                className="w-full p-2 text-sm bg-white border rounded text-gray-800"
+              />
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(newUrl.url);
+                  toast.success("URL copied to clipboard!");
+                }}
+                className="whitespace-nowrap bg-blue-600 text-white px-3 py-2 rounded text-sm"
+              >
+                Copy
+              </button>
+            </div>
+          </div>,
+          { duration: 5000 }
+        );
+      } else {
+        toast.dismiss(); // Dismiss loading toast
+        const error = resultAction.error?.message || "Failed to generate URL.";
+        toast.error(`Error: ${error}`);
+      }
     } catch (error) {
-      toast.error("URL generation failed");
+      toast.dismiss(); // Ensure no loading toast remains
+      toast.error("An unexpected error occurred while generating the URL.");
     }
-  }
-
+  };
+  
+  
   const copyToClipboard = (url: string) => {
     navigator.clipboard.writeText(url)
     setCopied(url)
