@@ -30,18 +30,29 @@ const saveState = (state: FreePreviewState): void => {
 
 export const saveFreePreview = createAsyncThunk(
   "freePreview/createFreePreview",
-  async (data: { productDetails: ProductDetails; shopDetails: ShopDetails; faqList: any[]; uniqueURLs: URLSnapshot[]; }, { rejectWithValue }) => {
+  async (
+    data: {
+      productDetails: ProductDetails;
+      shopDetails: ShopDetails;
+      faqList: any[];
+      uniqueURLs: URLSnapshot[];
+    },
+    { rejectWithValue }
+  ) => {
     try {
       const response = await axios.post(`${API_URL}`, data);
-      console.log("result:", response.data);
+      console.log("Result:", response.data);
       return response.data;
     } catch (error: any) {
       if (axios.isAxiosError(error) && error.response) {
-        return rejectWithValue(error.response.data?.message || 'Server error');
+        if (error.response.status === 400) {
+          return rejectWithValue("A preview already exists for this obligation.");
+        }
+        return rejectWithValue(error.response.data?.message || "Server error");
       } else if (error.request) {
-        return rejectWithValue('No response from server');
+        return rejectWithValue("No response from server");
       } else {
-        return rejectWithValue(error.message || 'Request failed');
+        return rejectWithValue(error.message || "Request failed");
       }
     }
   }

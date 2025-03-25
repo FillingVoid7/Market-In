@@ -49,8 +49,8 @@ const FreeTemplatePreview: React.FC<{
   const { _id:productId ,productDetails, shopDetails, faqList } = data
 
   const handleSave = async (e: React.MouseEvent) => {
-    e.preventDefault()
-
+    e.preventDefault();
+  
     try {
       const resultAction = await dispatch(
         saveFreePreview({
@@ -58,19 +58,25 @@ const FreeTemplatePreview: React.FC<{
           shopDetails: data.shopDetails,
           faqList: data.faqList,
           uniqueURLs: data.uniqueURLs,
-        }) as unknown as any,
-      )
-
+        }) as unknown as any
+      );
+  
       if (saveFreePreview.fulfilled.match(resultAction)) {
-        toast.success("Preview saved successfully!")
+        toast.success("Preview saved successfully!");
       } else {
-        const error = resultAction.error?.message || "Failed to create Free Preview"
-        toast.error(`Failed to save: ${error}`)
+        const errorMessage = resultAction.payload || "Failed to create Free Preview";
+  
+        if (errorMessage === "A preview already exists for this obligation.") {
+          toast.error("The preview has already been saved!");
+        } else {
+          toast.error(`Failed to save: ${errorMessage}`);
+        }
       }
     } catch (error) {
-      toast.error("Failed to save preview")
+      toast.error("An unexpected error occurred while saving the preview.");
     }
-  }
+  };
+  
 
   interface URLSnapshot {
     id: string;

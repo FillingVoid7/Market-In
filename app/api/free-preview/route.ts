@@ -7,7 +7,16 @@ export async function POST(req: NextRequest) {
         await mongooseConnect();
         const body = await req.json();
         console.log('Received data:', body);
-        
+
+        const existingPreview = await freePreviewModel.findOne({ obligationId: body.obligationId });
+
+        if (existingPreview) {
+            return NextResponse.json(
+                { success: false, message: "A preview already exists for this obligation." },
+                { status: 400 }
+            );
+        }
+
         const freePreview = new freePreviewModel(body);
         const savedFreePreview = await freePreview.save();
 
