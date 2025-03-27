@@ -51,16 +51,33 @@ const FreeTemplatePreview: React.FC<{
   const handleSave = async (e: React.MouseEvent) => {
     e.preventDefault();
   
-    try {
-      const resultAction = await dispatch(
-        saveFreePreview({
-          productDetails: data.productDetails,
-          shopDetails: data.shopDetails,
-          faqList: data.faqList,
-          uniqueURLs: data.uniqueURLs,
-        }) as unknown as any
-      );
-  
+  // Format media fields to match schema requirements
+  const formattedProductDetails = {
+    ...data.productDetails,
+    productPictures: data.productDetails.productPictures.map(img => 
+      typeof img === 'string' ? { url: img } : img
+    ),
+    productVideos: data.productDetails.productVideos.map(vid => 
+      typeof vid === 'string' ? { url: vid } : vid
+    ),
+  };
+
+  const formattedShopDetails = {
+    ...data.shopDetails,
+    shopImages: data.shopDetails.shopImages.map(img => 
+      typeof img === 'string' ? { url: img } : img
+    ),
+  };
+
+  try {
+    const resultAction = await dispatch(
+      saveFreePreview({
+        productDetails: formattedProductDetails,
+        shopDetails: formattedShopDetails,
+        faqList: data.faqList,
+        uniqueURLs: data.uniqueURLs,
+      }) as unknown as any
+    );
       if (saveFreePreview.fulfilled.match(resultAction)) {
         toast.success("Preview saved successfully!");
       } else {
@@ -77,6 +94,39 @@ const FreeTemplatePreview: React.FC<{
     }
   };
   
+
+  /*  const { _id:productId ,productDetails, shopDetails, faqList } = data
+
+  const handleSave = async (e: React.MouseEvent) => {
+    e.preventDefault();
+
+    const formattedProductDetails = {
+      ...data.productDetails,
+      productPictures: data.productDetails.productPictures.map((img) =>
+        typeof img === 'string' ? { url: img } : img
+      ),
+      productVideos: productDetails.productVideos.map((vid) =>
+        typeof vid === 'string' ? { url: vid } : vid
+      ),
+    };
+  
+    const formattedShopDetails = {
+      ...data.shopDetails,
+      shopImages: data.shopDetails.shopImages.map((img) =>
+        typeof img === 'string' ? { url: img } : img
+      ),
+    };
+  
+  
+    try {
+      const resultAction = await dispatch(
+        saveFreePreview({
+          productDetails: formattedProductDetails,
+          shopDetails: formattedShopDetails,
+          faqList: data.faqList,
+          uniqueURLs: data.uniqueURLs,
+        }) as unknown as any
+      );*/
 
   interface URLSnapshot {
     id: string;
@@ -181,7 +231,7 @@ const FreeTemplatePreview: React.FC<{
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex justify-between items-center">
             <button
-              onClick={() => router.push("/free-template")}
+              onClick={() => router.push("/templates/free")}
               className="inline-flex items-center text-white hover:text-gray-200 transition-colors"
             >
               <ArrowLeft className="w-5 h-5 mr-2" />
@@ -219,7 +269,9 @@ const FreeTemplatePreview: React.FC<{
                 <>
                   <div className="aspect-square rounded-2xl overflow-hidden shadow-2xl bg-white">
                     <img
-                      src={productDetails.productPictures[selectedImage] || "/placeholder.svg?height=600&width=600"}
+                      src={(typeof productDetails.productPictures[selectedImage] === 'string' 
+                        ? productDetails.productPictures[selectedImage] 
+                        : productDetails.productPictures[selectedImage]?.url) || "/placeholder.svg?height=600&width=600"}
                       alt="Product"
                       className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
                     />
@@ -235,7 +287,7 @@ const FreeTemplatePreview: React.FC<{
                           }`}
                       >
                         <img
-                          src={img || "/placeholder.svg?height=150&width=150"}
+                          src={typeof img === 'string' ? img : img?.url || "/placeholder.svg?height=150&width=150"}
                           alt={`Product ${index + 1}`}
                           className="w-full h-full object-cover"
                         />
@@ -349,7 +401,9 @@ const FreeTemplatePreview: React.FC<{
             <h2 className="text-2xl font-bold text-gray-900 mb-6">Product Video</h2>
             <div className="aspect-video rounded-xl overflow-hidden shadow-lg">
               <video
-                src={productDetails.productVideos[0]}
+                src={typeof productDetails.productVideos[0] === 'string' 
+                  ? productDetails.productVideos[0] 
+                  : productDetails.productVideos[0]?.url || "/placeholder.svg?height=720&width=1280"}
                 controls
                 className="w-full h-full object-cover"
                 poster="/placeholder.svg?height=720&width=1280"
@@ -419,7 +473,9 @@ const FreeTemplatePreview: React.FC<{
               {shopDetails.shopImages?.length > 0 ? (
                 <div className="rounded-xl overflow-hidden shadow-lg h-64">
                   <img
-                    src={shopDetails.shopImages[0] || "/placeholder.svg?height=400&width=600"}
+                    src={typeof shopDetails.shopImages[0] === 'string' 
+                      ? shopDetails.shopImages[0] 
+                      : shopDetails.shopImages[0]?.url || "/placeholder.svg?height=400&width=600"}
                     alt="Shop"
                     className="w-full h-full object-cover"
                   />

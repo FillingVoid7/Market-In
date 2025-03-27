@@ -114,14 +114,14 @@ export interface ProductDetails {
   longDescription: ContentStyle;
   qualityFeatures: ContentStyle;
   specifications: ContentStyle;
-  productPictures: string[];
-  productVideos: string[];
+  productPictures: Array<{url: string}>;
+  productVideos: Array<{url: string}>;
 }
 
 export interface ShopDetails {
   shopName: ContentStyle;
   shopDescription: ContentStyle;
-  shopImages: string[];
+  shopImages: Array<{url: string}>;
   shopAddress: ContentStyle;
   shopContact: ContentStyle;
   shopEmail: ContentStyle;
@@ -208,13 +208,13 @@ const freePreviewSlice = createSlice({
       }
     },
     updateProductImages: (state, action: PayloadAction<string[]>) => {
-      state.productDetails.productPictures = action.payload;
+      state.productDetails.productPictures = action.payload.map(url => ({ url }));
     },
     updateProductVideos: (state, action: PayloadAction<string[]>) => {
-      state.productDetails.productVideos = action.payload;
+      state.productDetails.productVideos = action.payload.map(url => ({ url }));
     },
     updateShopImages: (state, action: PayloadAction<string[]>) => {
-      state.shopDetails.shopImages = action.payload;
+      state.shopDetails.shopImages = action.payload.map(url => ({ url }));
     },
     updateFaqList: (state, action: PayloadAction<any[]>) => {
       state.faqList = action.payload;

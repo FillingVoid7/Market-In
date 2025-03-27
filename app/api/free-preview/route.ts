@@ -8,7 +8,12 @@ export async function POST(req: NextRequest) {
         const body = await req.json();
         console.log('Received data:', body);
 
-        const existingPreview = await freePreviewModel.findOne({ obligationId: body.obligationId });
+        console.log("Checking for existing product with name:", body.productDetails.productName.content);
+
+        const existingPreview = await freePreviewModel.findOne({
+            "productDetails.productName.content": body.productDetails.productName.content
+        });
+        console.log('Existing preview:', existingPreview);
 
         if (existingPreview) {
             return NextResponse.json(
@@ -16,6 +21,8 @@ export async function POST(req: NextRequest) {
                 { status: 400 }
             );
         }
+
+        console.log('Existing Product found with ID:', body.productId);
 
         const freePreview = new freePreviewModel(body);
         const savedFreePreview = await freePreview.save();
@@ -28,8 +35,8 @@ export async function POST(req: NextRequest) {
     } catch (error) {
         console.error("Save error:", error);
         return NextResponse.json(
-          { success: false, message: "Database operation failed" },
-          { status: 500 }
+            { success: false, message: "Database operation failed" },
+            { status: 500 }
         );
     }
 }

@@ -1,10 +1,12 @@
 // Updated Pricing Component
 "use client";
 import React, { useState, JSX } from "react";
+import { useRouter } from "next/navigation";
 import { CheckCircle2Icon } from "lucide-react";
 import { motion } from "framer-motion";
 
 const Pricing = () => {
+  const router = useRouter();
   const [isYearly, setIsYearly] = useState(true);
 
   const freePlanFeatures = [
@@ -98,6 +100,11 @@ const Pricing = () => {
             </p>
             <ul className="text-left">{renderFeatures(plan.features)}</ul>
             <button
+            onClick={() => {
+              if (index === 0) {
+                router.push('/templates/free');
+              }
+            }}
               className={`mt-4 py-2 px-4 ${
                 index === 0
                   ? "bg-blue-500 hover:bg-blue-600"
