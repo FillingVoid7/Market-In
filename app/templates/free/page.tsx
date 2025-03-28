@@ -64,7 +64,10 @@ const FreeTemplate: React.FC = () => {
         file,
         url: URL.createObjectURL(file),
       }))
-      dispatch(updateProductImages([...productDetails.productPictures, ...files.map((file) => file.url)]))
+      dispatch(updateProductImages([
+        ...productDetails.productPictures.map((picture) => picture.url),
+        ...files.map((file) => file.url)
+      ]))
     }
   }
 
@@ -77,7 +80,7 @@ const FreeTemplate: React.FC = () => {
 
   const removeProductImage = (index: number) => {
     const updatedImages = productDetails.productPictures.filter((_, i) => i !== index)
-    dispatch(updateProductImages(updatedImages))
+    dispatch(updateProductImages(updatedImages.map(image => image.url)))
   }
 
   const removeShopImage = () => {
@@ -258,7 +261,7 @@ const FreeTemplate: React.FC = () => {
             {productDetails.productPictures.map((img, index) => (
               <div key={index} className="relative">
                 <img
-                  src={img || "/placeholder.svg"}
+                  src={img.url || "/placeholder.svg"}
                   alt={`Product ${index + 1}`}
                   className="w-32 h-32 object-cover rounded"
                 />
@@ -285,7 +288,7 @@ const FreeTemplate: React.FC = () => {
           {productDetails.productVideos.length > 0 && (
             <div className="flex gap-4 mt-4">
               <div className="relative">
-                <video src={productDetails.productVideos[0]} controls className="w-48 h-32 rounded" />
+                <video src={productDetails.productVideos[0].url} controls className="w-48 h-32 rounded" />
                 <button
                   onClick={() => removeVideo()}
                   className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1"
@@ -425,7 +428,7 @@ const FreeTemplate: React.FC = () => {
           <div className="flex flex-wrap gap-4 mt-4">
             {shopDetails.shopImages.map((img, index) => (
               <div key={index} className="relative">
-                <img src={img || "/placeholder.svg"} alt="Shop Image" className="w-32 h-32 object-cover rounded" />
+                <img src={img.url || "/placeholder.svg"} alt="Shop Image" className="w-32 h-32 object-cover rounded" />
                 <button
                   onClick={removeShopImage}
                   className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1"
