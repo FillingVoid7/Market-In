@@ -60,40 +60,42 @@ export const saveFreePreview = createAsyncThunk(
 
 export const generateUrlFree = createAsyncThunk(
   "freePreview/generateUrl",
-  async ({ productId }: { productId: string }, { rejectWithValue, getState }) => {
+  async (_, { rejectWithValue, getState }) => {
     try {
       const state = getState() as RootState;
-      const { productDetails, shopDetails, faqList, uniqueURLs } = state.freePreview;
-
-      if (uniqueURLs.length >= 3) {
-        throw new Error("Free tier limited to 3 product pages");
+      const { _id, productDetails, shopDetails, faqList, uniqueURLs } = state.freePreview;
+      if (!_id) {
+        throw new Error("No product ID found in state");
       }
       const contentHash = createContentHash({ productDetails, shopDetails, faqList });
       const exists = uniqueURLs.some(url => url.contentHash === contentHash);
       if (exists) {
         throw new Error("This product configuration already exists");
       }
-
-      const response = await axios.post(GENERATE_URL, { productId });
+      const response = await axios.post(GENERATE_URL, {productId: _id });
       return response.data;
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.error || error.message);
     }
   }
 );
+
 
 
 export const getProductFree = createAsyncThunk(
   "freePreview/getProduct",
   async (productId: string, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${GET_PRODUCT_URL}?id=${productId}`);
+      const url = `${GET_PRODUCT_URL}/${productId}`;
+      console.log("Fetching from:", url);
+      const response = await axios.get(url);
       return response.data;
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.error || error.message);
     }
   }
 );
+
 
 interface URLSnapshot {
   id: string;
@@ -128,16 +130,19 @@ export interface ShopDetails {
 }
 
 interface FreePreviewState {
-  _id?: string;
+  _id?: string | null;
   productDetails: ProductDetails;
   shopDetails: ShopDetails;
   faqList: any[];
   uniqueURLs: URLSnapshot[];
   createdPreview: any;
-  error: any;
+  error: string | null;
+  loading:boolean;
+
 }
 
 const initialState: FreePreviewState = loadState() || {
+  _id: null,
   productDetails: {
     productName: { content: "", style: {} },
     productPrice: { content: "", style: {} },
@@ -158,8 +163,9 @@ const initialState: FreePreviewState = loadState() || {
   },
   faqList: [],
   uniqueURLs: [],
+  error:null,
+  loading: false,
   createdPreview: null,
-  error: null,
 };
 
 interface UpdateProductFieldPayload {
@@ -228,11 +234,12 @@ const freePreviewSlice = createSlice({
     builder
       .addCase(saveFreePreview.fulfilled, (state, action) => {
         console.log("Free Preview created successfully", action.payload);
+        state._id = action.payload.data._id;
         state.createdPreview = action.payload;
       })
       .addCase(saveFreePreview.rejected, (state, action) => {
         console.error("Error creating free preview:", action.payload);
-        state.error = action.payload;
+        state.error = action.payload as string || "Error creating free preview";
       })
       .addCase(generateUrlFree.fulfilled, (state, action) => {
         state.uniqueURLs.push({
@@ -243,10 +250,11 @@ const freePreviewSlice = createSlice({
         });
       })
       .addCase(generateUrlFree.rejected, (state, action) => {
-        state.error = action.payload || "Error generating URL";
+        state.error = action.payload as string || "Error generating URL";
       })
 
       .addCase(getProductFree.pending, (state) => {
+        state.loading = true;
         state.error = null;
       })
       .addCase(getProductFree.fulfilled, (state, action) => {
@@ -254,9 +262,12 @@ const freePreviewSlice = createSlice({
         state.shopDetails = action.payload.shopDetails;
         state.faqList = action.payload.faqList;
         state.uniqueURLs = action.payload.uniqueURLs || [];
+        state.loading = false;
+        state.createdPreview = action.payload;
       })
       .addCase(getProductFree.rejected, (state, action) => {
-        state.error = action.payload || "Error fetching product data";
+        state.loading = false;
+        state.error = action.payload as string || "Error fetching product data";
       })
 
   },

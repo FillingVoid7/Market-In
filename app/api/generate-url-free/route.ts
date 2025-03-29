@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
     if (existingProduct) {
       return NextResponse.json({
         id: existingProduct._id,
-        url: `${process.env.NEXTAUTH_URL}/product/${existingProduct._id}`,
+        url: `${process.env.NEXTAUTH_URL}/free-products/${existingProduct._id}`,
         existingData: existingProduct
       }, { status: 200 });
     }

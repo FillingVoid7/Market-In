@@ -15,9 +15,9 @@ interface Faq {
 }
 
 const FreeTemplatePreview: React.FC<{
-  productDetails:any,
-  shopDetails:any,
-  faqList:any,
+  productDetails: any,
+  shopDetails: any,
+  faqList: any,
 }> = () => {
   const router = useRouter()
   const dispatch = useDispatch()
@@ -27,6 +27,8 @@ const FreeTemplatePreview: React.FC<{
 
   const data = useSelector((state: RootState) => state.freePreview)
   const uniqueURLs = useSelector((state: RootState) => state.freePreview.uniqueURLs)
+  const { _id: productId } = useSelector((state: RootState) => state.freePreview);
+
 
   if (!data) {
     return (
@@ -46,43 +48,42 @@ const FreeTemplatePreview: React.FC<{
     )
   }
 
-  const { _id:productId ,productDetails, shopDetails, faqList } = data
+  const { productDetails, shopDetails, faqList } = data;
 
   const handleSave = async (e: React.MouseEvent) => {
     e.preventDefault();
-  
-  // Format media fields to match schema requirements
-  const formattedProductDetails = {
-    ...data.productDetails,
-    productPictures: data.productDetails.productPictures.map(img => 
-      typeof img === 'string' ? { url: img } : img
-    ),
-    productVideos: data.productDetails.productVideos.map(vid => 
-      typeof vid === 'string' ? { url: vid } : vid
-    ),
-  };
 
-  const formattedShopDetails = {
-    ...data.shopDetails,
-    shopImages: data.shopDetails.shopImages.map(img => 
-      typeof img === 'string' ? { url: img } : img
-    ),
-  };
+    const formattedProductDetails = {
+      ...data.productDetails,
+      productPictures: data.productDetails.productPictures.map(img =>
+        typeof img === 'string' ? { url: img } : img
+      ),
+      productVideos: data.productDetails.productVideos.map(vid =>
+        typeof vid === 'string' ? { url: vid } : vid
+      ),
+    };
 
-  try {
-    const resultAction = await dispatch(
-      saveFreePreview({
-        productDetails: formattedProductDetails,
-        shopDetails: formattedShopDetails,
-        faqList: data.faqList,
-        uniqueURLs: data.uniqueURLs,
-      }) as unknown as any
-    );
+    const formattedShopDetails = {
+      ...data.shopDetails,
+      shopImages: data.shopDetails.shopImages.map(img =>
+        typeof img === 'string' ? { url: img } : img
+      ),
+    };
+
+    try {
+      const resultAction = await dispatch(
+        saveFreePreview({
+          productDetails: formattedProductDetails,
+          shopDetails: formattedShopDetails,
+          faqList: data.faqList,
+          uniqueURLs: data.uniqueURLs,
+        }) as unknown as any
+      );
       if (saveFreePreview.fulfilled.match(resultAction)) {
         toast.success("Preview saved successfully!");
       } else {
         const errorMessage = resultAction.payload || "Failed to create Free Preview";
-  
+
         if (errorMessage === "A preview already exists for this obligation.") {
           toast.error("The preview has already been saved!");
         } else {
@@ -93,40 +94,7 @@ const FreeTemplatePreview: React.FC<{
       toast.error("An unexpected error occurred while saving the preview.");
     }
   };
-  
 
-  /*  const { _id:productId ,productDetails, shopDetails, faqList } = data
-
-  const handleSave = async (e: React.MouseEvent) => {
-    e.preventDefault();
-
-    const formattedProductDetails = {
-      ...data.productDetails,
-      productPictures: data.productDetails.productPictures.map((img) =>
-        typeof img === 'string' ? { url: img } : img
-      ),
-      productVideos: productDetails.productVideos.map((vid) =>
-        typeof vid === 'string' ? { url: vid } : vid
-      ),
-    };
-  
-    const formattedShopDetails = {
-      ...data.shopDetails,
-      shopImages: data.shopDetails.shopImages.map((img) =>
-        typeof img === 'string' ? { url: img } : img
-      ),
-    };
-  
-  
-    try {
-      const resultAction = await dispatch(
-        saveFreePreview({
-          productDetails: formattedProductDetails,
-          shopDetails: formattedShopDetails,
-          faqList: data.faqList,
-          uniqueURLs: data.uniqueURLs,
-        }) as unknown as any
-      );*/
 
   interface URLSnapshot {
     id: string;
@@ -136,48 +104,46 @@ const FreeTemplatePreview: React.FC<{
   }
 
   const generateUniqueURL = async () => {
+
+    console.log("Generating unique URL...")
+    console.log("Product ID:", productId)
     if (!productId) {
       toast.error("Please save the product before generating a URL.");
       return;
     }
-  
+
     const currentContent = {
       productDetails,
       shopDetails,
       faqList,
     };
-  
+
     const contentHash = createContentHash(currentContent);
     const exists = uniqueURLs.some((url) => url.contentHash === contentHash);
-  
+
     if (exists) {
       toast.error("This configuration already has a URL.");
       return;
     }
-  
-    if (uniqueURLs.length >= 3) {
-      toast.info("Free tier is limited to 3 unique product pages.");
-      return;
-    }
-  
+
     try {
       toast.loading("Generating unique URL...");
-      const resultAction = await dispatch(generateUrlFree({ productId }) as any);
-      
+      const resultAction = await dispatch(generateUrlFree() as any);
+
       if (generateUrlFree.fulfilled.match(resultAction)) {
         const { id, url, contentHash } = resultAction.payload;
-  
+
         const newUrl: URLSnapshot = {
           id,
           url,
           contentHash,
           createdAt: new Date().toISOString(),
         };
-  
+
         dispatch(updateUniqueURLs([...uniqueURLs, newUrl]));
-  
+
         toast.dismiss();
-  
+
         toast.success(
           <div className="flex flex-col gap-2">
             <p>URL generated successfully!</p>
@@ -202,17 +168,17 @@ const FreeTemplatePreview: React.FC<{
           { duration: 5000 }
         );
       } else {
-        toast.dismiss(); // Dismiss loading toast
+        toast.dismiss();
         const error = resultAction.error?.message || "Failed to generate URL.";
         toast.error(`Error: ${error}`);
       }
     } catch (error) {
-      toast.dismiss(); // Ensure no loading toast remains
+      toast.dismiss();
       toast.error("An unexpected error occurred while generating the URL.");
     }
   };
-  
-  
+
+
   const copyToClipboard = (url: string) => {
     navigator.clipboard.writeText(url)
     setCopied(url)
@@ -242,10 +208,9 @@ const FreeTemplatePreview: React.FC<{
               <button
                 onClick={generateUniqueURL}
                 className="inline-flex items-center px-4 py-2 bg-white text-blue-600 font-medium rounded-md hover:bg-gray-100 transition-colors"
-                disabled={uniqueURLs.length >= 3}
               >
                 <Link className="w-4 h-4 mr-2" />
-                Generate URL {uniqueURLs.length}/3
+                Generate Product URL 
               </button>
 
               <button
@@ -269,8 +234,8 @@ const FreeTemplatePreview: React.FC<{
                 <>
                   <div className="aspect-square rounded-2xl overflow-hidden shadow-2xl bg-white">
                     <img
-                      src={(typeof productDetails.productPictures[selectedImage] === 'string' 
-                        ? productDetails.productPictures[selectedImage] 
+                      src={(typeof productDetails.productPictures[selectedImage] === 'string'
+                        ? productDetails.productPictures[selectedImage]
                         : productDetails.productPictures[selectedImage]?.url) || "/placeholder.svg?height=600&width=600"}
                       alt="Product"
                       className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
@@ -282,8 +247,8 @@ const FreeTemplatePreview: React.FC<{
                         key={index}
                         onClick={() => setSelectedImage(index)}
                         className={`aspect-square rounded-lg overflow-hidden border-2 transition-all ${selectedImage === index
-                            ? "border-blue-600 shadow-lg"
-                            : "border-transparent hover:border-blue-400"
+                          ? "border-blue-600 shadow-lg"
+                          : "border-transparent hover:border-blue-400"
                           }`}
                       >
                         <img
@@ -324,34 +289,31 @@ const FreeTemplatePreview: React.FC<{
               />
 
 
-              {/* Generated URLs */}
+              {/* Generated URL */}
               {uniqueURLs?.length > 0 && (
                 <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-100">
                   <h3 className="font-semibold text-gray-900 mb-3 flex items-center">
                     <Share2 className="w-4 h-4 mr-2 text-blue-600" />
                     Share Your Product
                   </h3>
-                  <div className="space-y-3">
-                    {uniqueURLs.map((url, index) => (
-                      <div key={index} className="flex items-center gap-2 bg-white rounded-lg p-2 shadow-sm">
-                        <input
-                          type="text"
-                          value={url.toString()}
-                          readOnly
-                          className="flex-grow text-sm bg-transparent border-none focus:ring-0 text-gray-700"
-                        />
-                        <button
-                          onClick={() => copyToClipboard(url.toString())}
-                          className="p-2 text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
-                          aria-label="Copy URL"
-                        >
-                          {copied === url.toString() ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                        </button>
-                      </div>
-                    ))}
+                  <div className="flex items-center gap-2 bg-white rounded-lg p-2 shadow-sm">
+                    <input
+                      type="text"
+                      value={uniqueURLs[0].url}
+                      readOnly
+                      className="flex-grow text-sm bg-transparent border-none focus:ring-0 text-gray-700"
+                    />
+                    <button
+                      onClick={() => copyToClipboard(uniqueURLs[0].toString())}
+                      className="p-2 text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+                      aria-label="Copy URL"
+                    >
+                      {copied === uniqueURLs[0].toString() ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                    </button>
                   </div>
                 </div>
               )}
+
             </div>
           </div>
         </div>
@@ -401,8 +363,8 @@ const FreeTemplatePreview: React.FC<{
             <h2 className="text-2xl font-bold text-gray-900 mb-6">Product Video</h2>
             <div className="aspect-video rounded-xl overflow-hidden shadow-lg">
               <video
-                src={typeof productDetails.productVideos[0] === 'string' 
-                  ? productDetails.productVideos[0] 
+                src={typeof productDetails.productVideos[0] === 'string'
+                  ? productDetails.productVideos[0]
                   : productDetails.productVideos[0]?.url || "/placeholder.svg?height=720&width=1280"}
                 controls
                 className="w-full h-full object-cover"
@@ -473,8 +435,8 @@ const FreeTemplatePreview: React.FC<{
               {shopDetails.shopImages?.length > 0 ? (
                 <div className="rounded-xl overflow-hidden shadow-lg h-64">
                   <img
-                    src={typeof shopDetails.shopImages[0] === 'string' 
-                      ? shopDetails.shopImages[0] 
+                    src={typeof shopDetails.shopImages[0] === 'string'
+                      ? shopDetails.shopImages[0]
                       : shopDetails.shopImages[0]?.url || "/placeholder.svg?height=400&width=600"}
                     alt="Shop"
                     className="w-full h-full object-cover"
