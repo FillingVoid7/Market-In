@@ -18,7 +18,8 @@ const FreeTemplatePreview: React.FC<{
   productDetails: any,
   shopDetails: any,
   faqList: any,
-}> = () => {
+  isGeneratedURL?: boolean,
+}> = ({ isGeneratedURL = false }) => {
   const router = useRouter()
   const dispatch = useDispatch()
   const [selectedImage, setSelectedImage] = useState<number>(0)
@@ -192,37 +193,39 @@ const FreeTemplatePreview: React.FC<{
 
   return (
     <div className="w-full min-h-screen bg-gradient-to-b from-gray-50 to-white">
-      {/* Sticky Header with Gradient */}
-      <div className="w-full sticky top-0 z-50 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white shadow-lg">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex justify-between items-center">
-            <button
-              onClick={() => router.push("/templates/free")}
-              className="inline-flex items-center text-white hover:text-gray-200 transition-colors"
-            >
-              <ArrowLeft className="w-5 h-5 mr-2" />
-              Back to Editor
-            </button>
-
-            <div className="flex items-center gap-4">
+      {!isGeneratedURL && (
+        <div className="w-full sticky top-0 z-50 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white shadow-lg">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div className="flex justify-between items-center">
               <button
-                onClick={generateUniqueURL}
-                className="inline-flex items-center px-4 py-2 bg-white text-blue-600 font-medium rounded-md hover:bg-gray-100 transition-colors"
+                onClick={() => router.push("/templates/free")}
+                className="inline-flex items-center text-white hover:text-gray-200 transition-colors"
               >
-                <Link className="w-4 h-4 mr-2" />
-                Generate Product URL 
+                <ArrowLeft className="w-5 h-5 mr-2" />
+                Back to Editor
               </button>
 
-              <button
-                onClick={handleSave}
-                className="inline-flex items-center px-4 py-2 bg-green-500 text-white font-medium rounded-md hover:bg-green-600 transition-colors"
-              >
-                Save Preview
-              </button>
+              <div className="flex items-center gap-4">
+                <button
+                  onClick={generateUniqueURL}
+                  className="inline-flex items-center px-4 py-2 bg-white text-blue-600 font-medium rounded-md hover:bg-gray-100 transition-colors"
+                >
+                  <Link className="w-4 h-4 mr-2" />
+                  Generate Product URL
+                </button>
+
+                <button
+                  onClick={handleSave}
+                  className="inline-flex items-center px-4 py-2 bg-green-500 text-white font-medium rounded-md hover:bg-green-600 transition-colors"
+                >
+                  Save Preview
+                </button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
+
 
       {/* Hero Section */}
       <div className="w-full bg-gradient-to-b from-blue-50 to-transparent pt-10">

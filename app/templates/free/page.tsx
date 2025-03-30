@@ -130,7 +130,7 @@ const FreeTemplate: React.FC = () => {
 
 
 
-  const handleShowPreview = () => {
+const handleShowPreview = () => {
     const requiredFields = [
       productDetails.productName.content,
       productDetails.productPrice.content,

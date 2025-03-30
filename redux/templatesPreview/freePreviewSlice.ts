@@ -72,7 +72,7 @@ export const generateUrlFree = createAsyncThunk(
       if (exists) {
         throw new Error("This product configuration already exists");
       }
-      const response = await axios.post(GENERATE_URL, {productId: _id });
+      const response = await axios.post(GENERATE_URL, { productId: _id });
       return response.data;
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.error || error.message);
@@ -116,14 +116,14 @@ export interface ProductDetails {
   longDescription: ContentStyle;
   qualityFeatures: ContentStyle;
   specifications: ContentStyle;
-  productPictures: Array<{url: string}>;
-  productVideos: Array<{url: string}>;
+  productPictures: Array<{ url: string }>;
+  productVideos: Array<{ url: string }>;
 }
 
 export interface ShopDetails {
   shopName: ContentStyle;
   shopDescription: ContentStyle;
-  shopImages: Array<{url: string}>;
+  shopImages: Array<{ url: string }>;
   shopAddress: ContentStyle;
   shopContact: ContentStyle;
   shopEmail: ContentStyle;
@@ -137,7 +137,7 @@ interface FreePreviewState {
   uniqueURLs: URLSnapshot[];
   createdPreview: any;
   error: string | null;
-  loading:boolean;
+  loading: boolean;
 
 }
 
@@ -163,7 +163,7 @@ const initialState: FreePreviewState = loadState() || {
   },
   faqList: [],
   uniqueURLs: [],
-  error:null,
+  error: null,
   loading: false,
   createdPreview: null,
 };
@@ -252,7 +252,6 @@ const freePreviewSlice = createSlice({
       .addCase(generateUrlFree.rejected, (state, action) => {
         state.error = action.payload as string || "Error generating URL";
       })
-
       .addCase(getProductFree.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -269,7 +268,6 @@ const freePreviewSlice = createSlice({
         state.loading = false;
         state.error = action.payload as string || "Error fetching product data";
       })
-
   },
 });
 

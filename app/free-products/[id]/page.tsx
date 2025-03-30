@@ -9,14 +9,11 @@ import FreeTemplatePreview from "../../free-template-preview/page";
 import { BarLoader } from "react-spinners";
 import { createSelector } from '@reduxjs/toolkit';
 
-
 const selectFreePreview = (state: RootState) => state.freePreview;
-const currentProductSelector = createSelector(
-  [selectFreePreview],
-  (freePreview) => ({
+const currentProductSelector = createSelector([selectFreePreview],(freePreview) => ({
     loading: freePreview.loading,
     error: freePreview.error,
-    currentProduct: freePreview.createdPreview?.data
+    currentProduct: freePreview.createdPreview 
   })
 );
 
@@ -24,18 +21,12 @@ const ProductPage = () => {
   const params = useParams();
   const dispatch = useDispatch<AppDispatch>();
   const productId = params?.id as string;
-  console.log("Params Object:", params);
-  console.log("Extracted Product ID:", productId);
-  
-  const {
-    loading: productLoading,
-    error: productError,
-    currentProduct
-  } = useSelector((state: RootState) => ({
-    loading: state.freePreview.loading,
-    error: state.freePreview.error,
-    currentProduct: state.freePreview.createdPreview?.data
-  }));
+
+  const { 
+    loading: productLoading, 
+    error: productError, 
+    currentProduct 
+  } = useSelector(currentProductSelector);
 
   useEffect(() => {
     if (productId) {
@@ -64,6 +55,7 @@ const ProductPage = () => {
     );
   }
 
+  console.log("Current Product if available:", currentProduct);
   if (!currentProduct) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -84,6 +76,7 @@ const ProductPage = () => {
       productDetails={currentProduct.productDetails}
       shopDetails={currentProduct.shopDetails}
       faqList={currentProduct.faqList}
+      isGeneratedURL = {true}
     />
   );
 };

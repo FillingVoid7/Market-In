@@ -4,11 +4,12 @@ import { mongooseConnect } from "@lib/mongoose";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { productId: string } }
+  context: { params: { productId: string } }
 ) {
   try {
     await mongooseConnect();
-    const { productId } = params; 
+    const params = await context.params; // accessing params and awaiting before accessing ;  inside function not in function args (latest changes in nextjs params usage)
+    const productId  = params.productId   
 
     if (!productId) {
       return NextResponse.json(
