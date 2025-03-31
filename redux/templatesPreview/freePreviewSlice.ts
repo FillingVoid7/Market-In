@@ -292,3 +292,50 @@ export const persistStateMiddleware: Middleware = storeAPI => next => action => 
   return result;
 };
 
+
+
+
+
+/*import { Router } from 'express';
+import mongoose from 'mongoose';
+import { GridFSBucket } from 'mongodb';
+
+const router = Router();
+const conn = mongoose.connection;
+let gfs: GridFSBucket;
+
+conn.once('open', () => {
+  gfs = new GridFSBucket(conn.db, {
+    bucketName: 'uploads'
+  });
+});
+
+// Upload endpoint
+router.post('/upload-image', (req, res) => {
+  const uploadStream = gfs.openUploadStream(
+    `image-${Date.now()}-${Math.round(Math.random() * 1E9)}`
+  );
+  
+  req.pipe(uploadStream)
+    .on('error', (error) => {
+      res.status(500).json({ error: 'Upload failed' });
+    })
+    .on('finish', () => {
+      res.json({
+        secureUrl: `/api/images/${uploadStream.id}`,
+        fileId: uploadStream.id
+      });
+    });
+});
+
+// Image retrieval endpoint
+router.get('/images/:id', (req, res) => {
+  const fileId = new mongoose.Types.ObjectId(req.params.id);
+  const downloadStream = gfs.openDownloadStream(fileId);
+
+  downloadStream.on('error', () => {
+    res.status(404).json({ error: 'Image not found' });
+  });
+
+  downloadStream.pipe(res);
+});*/ 
