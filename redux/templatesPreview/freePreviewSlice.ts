@@ -7,7 +7,6 @@ const GENERATE_URL = "/api/generate-url-free";
 const GET_PRODUCT_URL = "/api/get-free-product";
 axios.defaults.withCredentials = true;
 
-
 const loadState = () => {
   try {
     if (typeof window === "undefined") return undefined;
@@ -37,23 +36,57 @@ export const saveFreePreview = createAsyncThunk(
       faqList: any[];
       uniqueURLs: URLSnapshot[];
     },
-    { rejectWithValue }
+    { rejectWithValue, dispatch }
   ) => {
     try {
-      const response = await axios.post(`${API_URL}`, data);
-      console.log("Result:", response.data);
+      const mediaToUpload = [
+        ...data.productDetails.productPictures.filter(m => m.file),
+        ...data.productDetails.productVideos.filter(m => m.file),
+        ...data.shopDetails.shopImages.filter(m => m.file),
+      ];
+
+      const uploadResults = await Promise.all(
+        mediaToUpload.map(media =>
+          dispatch(uploadMedia({
+            file: media.file!,
+            mediaType: media.type || 'image'
+          })).unwrap()
+        )
+      );
+
+      //replacing blob urls with permanent urls
+      const urlMap = uploadResults.reduce((acc, result) => {
+        acc[result.tempUrl] = result.permanentUrl;
+        return acc;
+      }, {} as Record<string, string>);
+
+      const sanitizedPayload = {
+        productDetails: {
+          ...data.productDetails,
+          productPictures: data.productDetails.productPictures.map(m => ({
+            url: urlMap[m.url] || m.url,
+            _id: m._id
+          })),
+          productVideos: data.productDetails.productVideos.map(m => ({
+            url: urlMap[m.url] || m.url,
+            _id: m._id
+          }))
+        },
+        shopDetails: {
+          ...data.shopDetails,
+          shopImages: data.shopDetails.shopImages.map(m => ({
+            url: urlMap[m.url] || m.url,
+            _id: m._id
+          }))
+        },
+        faqList: data.faqList,
+        uniqueURLs: data.uniqueURLs
+      };
+
+      const response = await axios.post(`${API_URL}`, sanitizedPayload);
       return response.data;
     } catch (error: any) {
-      if (axios.isAxiosError(error) && error.response) {
-        if (error.response.status === 400) {
-          return rejectWithValue("A preview already exists for this obligation.");
-        }
-        return rejectWithValue(error.response.data?.message || "Server error");
-      } else if (error.request) {
-        return rejectWithValue("No response from server");
-      } else {
-        return rejectWithValue(error.message || "Request failed");
-      }
+      return rejectWithValue(error.response?.data?.message || "Server error");
     }
   }
 );
@@ -80,7 +113,27 @@ export const generateUrlFree = createAsyncThunk(
   }
 );
 
-
+export const uploadMedia = createAsyncThunk(
+  'freePreview/uploadMedia',
+  async (
+    { file, mediaType }: { file: File; mediaType: 'image' | 'video' },
+    { rejectWithValue }
+  ) => {
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('mediaType', mediaType);
+      const response = await axios.post('/api/upload-files', formData);
+      return {
+        tempUrl: URL.createObjectURL(file),
+        permanentUrl: response.data.secure_url,
+        mediaType
+      };
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.error || error.message);
+    }
+  }
+);
 
 export const getProductFree = createAsyncThunk(
   "freePreview/getProduct",
@@ -109,6 +162,13 @@ interface ContentStyle {
   style: object;
 }
 
+interface MediaItem{
+  url : string;
+  _id?: string;
+  file?:File;
+  type?:'image' | 'video';
+}
+
 export interface ProductDetails {
   productName: ContentStyle;
   productPrice: ContentStyle;
@@ -116,14 +176,14 @@ export interface ProductDetails {
   longDescription: ContentStyle;
   qualityFeatures: ContentStyle;
   specifications: ContentStyle;
-  productPictures: Array<{ url: string }>;
-  productVideos: Array<{ url: string }>;
+  productPictures: MediaItem[];
+  productVideos: MediaItem[];
 }
 
 export interface ShopDetails {
   shopName: ContentStyle;
   shopDescription: ContentStyle;
-  shopImages: Array<{ url: string }>;
+  shopImages:MediaItem[];
   shopAddress: ContentStyle;
   shopContact: ContentStyle;
   shopEmail: ContentStyle;
@@ -213,14 +273,14 @@ const freePreviewSlice = createSlice({
         state.shopDetails[field] = { content, style };
       }
     },
-    updateProductImages: (state, action: PayloadAction<string[]>) => {
-      state.productDetails.productPictures = action.payload.map(url => ({ url }));
+    updateProductImages: (state, action: PayloadAction<MediaItem[]>) => {
+      state.productDetails.productPictures = action.payload; 
     },
-    updateProductVideos: (state, action: PayloadAction<string[]>) => {
-      state.productDetails.productVideos = action.payload.map(url => ({ url }));
+    updateProductVideos: (state, action: PayloadAction<MediaItem[]>) => {
+      state.productDetails.productVideos = action.payload; 
     },
-    updateShopImages: (state, action: PayloadAction<string[]>) => {
-      state.shopDetails.shopImages = action.payload.map(url => ({ url }));
+    updateShopImages: (state, action: PayloadAction<MediaItem[]>) => {
+      state.shopDetails.shopImages = action.payload; 
     },
     updateFaqList: (state, action: PayloadAction<any[]>) => {
       state.faqList = action.payload;
@@ -229,6 +289,29 @@ const freePreviewSlice = createSlice({
       state.uniqueURLs = action.payload;
     },
     resetTemplate: () => initialState,
+    addMedia: (
+      state,
+      action: PayloadAction<{
+        field: 'productPictures' | 'productVideos' | 'shopImages';
+        media: MediaItem;
+      }>
+    ) => {
+      const { field, media } = action.payload;
+      if (field === 'productPictures' || field === 'productVideos') {
+        state.productDetails[field].push(media);
+      } else if (field === 'shopImages') {
+        state.shopDetails[field].push(media);
+      }
+    },
+
+    clearTemporaryMedia: (state) => {
+      const clearTemp = (arr: MediaItem[]) => 
+        arr.filter(item => !item.url.startsWith('blob:'));
+        
+      state.productDetails.productPictures = clearTemp(state.productDetails.productPictures);
+      state.productDetails.productVideos = clearTemp(state.productDetails.productVideos);
+      state.shopDetails.shopImages = clearTemp(state.shopDetails.shopImages);
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -268,8 +351,32 @@ const freePreviewSlice = createSlice({
         state.loading = false;
         state.error = action.payload as string || "Error fetching product data";
       })
+      .addCase(uploadMedia.fulfilled, (state, action) => {
+        const {tempUrl, permanentUrl } = action.payload ; 
+
+         // Update product pictures
+         state.productDetails.productPictures = state.productDetails.productPictures.map(m => 
+          m.url === tempUrl ? { ...m, url: permanentUrl, file: undefined } : m
+        );
+        
+        // Update product videos
+        state.productDetails.productVideos = state.productDetails.productVideos.map(m => 
+          m.url === tempUrl ? { ...m, url: permanentUrl, file: undefined } : m
+        );
+        
+        // Update shop images
+        state.shopDetails.shopImages = state.shopDetails.shopImages.map(m => 
+          m.url === tempUrl ? { ...m, url: permanentUrl, file: undefined } : m
+        );
+      })
+      .addCase(uploadMedia.rejected, (state, action) => {
+        state.error = action.payload as string || "Media upload failed"; 
+      }
+      )
   },
-});
+  
+},
+);
 
 export const {
   updateProductField,
@@ -280,6 +387,8 @@ export const {
   updateFaqList,
   updateUniqueURLs,
   resetTemplate,
+  addMedia,
+  clearTemporaryMedia
 } = freePreviewSlice.actions;
 
 export default freePreviewSlice.reducer;
@@ -292,97 +401,3 @@ export const persistStateMiddleware: Middleware = storeAPI => next => action => 
   return result;
 };
 
-
-
-
-
-/*import { Router } from 'express';
-import mongoose from 'mongoose';
-import { GridFSBucket } from 'mongodb';
-
-const router = Router();
-const conn = mongoose.connection;
-let gfs: GridFSBucket;
-
-conn.once('open', () => {
-  gfs = new GridFSBucket(conn.db, {
-    bucketName: 'uploads'
-  });
-});
-
-// Upload endpoint
-router.post('/upload-image', (req, res) => {
-  const uploadStream = gfs.openUploadStream(
-    `image-${Date.now()}-${Math.round(Math.random() * 1E9)}`
-  );
-  
-  req.pipe(uploadStream)
-    .on('error', (error) => {
-      res.status(500).json({ error: 'Upload failed' });
-    })
-    .on('finish', () => {
-      res.json({
-        secureUrl: `/api/images/${uploadStream.id}`,
-        fileId: uploadStream.id
-      });
-    });
-});
-
-// Image retrieval endpoint
-router.get('/images/:id', (req, res) => {
-  const fileId = new mongoose.Types.ObjectId(req.params.id);
-  const downloadStream = gfs.openDownloadStream(fileId);
-
-  downloadStream.on('error', () => {
-    res.status(404).json({ error: 'Image not found' });
-  });
-
-  downloadStream.pipe(res);
-});*/ 
-
-
-
-
-/*import { Router } from 'express';
-import mongoose from 'mongoose';
-import { GridFSBucket } from 'mongodb';
-
-const router = Router();
-const conn = mongoose.connection;
-let gfs: GridFSBucket;
-
-conn.once('open', () => {
-  gfs = new GridFSBucket(conn.db, {
-    bucketName: 'uploads'
-  });
-});
-
-// Upload endpoint
-router.post('/upload-image', (req, res) => {
-  const uploadStream = gfs.openUploadStream(
-    `image-${Date.now()}-${Math.round(Math.random() * 1E9)}`
-  );
-  
-  req.pipe(uploadStream)
-    .on('error', (error) => {
-      res.status(500).json({ error: 'Upload failed' });
-    })
-    .on('finish', () => {
-      res.json({
-        secureUrl: `/api/images/${uploadStream.id}`,
-        fileId: uploadStream.id
-      });
-    });
-});
-
-// Image retrieval endpoint
-router.get('/images/:id', (req, res) => {
-  const fileId = new mongoose.Types.ObjectId(req.params.id);
-  const downloadStream = gfs.openDownloadStream(fileId);
-
-  downloadStream.on('error', () => {
-    res.status(404).json({ error: 'Image not found' });
-  });
-
-  downloadStream.pipe(res);
-});*/ 
