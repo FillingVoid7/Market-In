@@ -1,5 +1,5 @@
 import { Schema, Document, Types } from "mongoose";
-import {mongoose} from '@lib/mongoose';     //importing from our shared connection 
+import {mongoose} from '@lib/mongoose';     //importing from shared connection 
 
 interface StyledText {
   content: string;
