@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction, Middleware } from "@reduxjs/toolkit";
 import axios from "axios";
-import { RootState } from "./freePreviewStore"
+import { RootState } from "./freePreviewStore";
 
 const API_URL = "/api/free-preview";
 const GENERATE_URL = "/api/generate-url-free";
@@ -36,46 +36,25 @@ export const saveFreePreview = createAsyncThunk(
       faqList: any[];
       uniqueURLs: URLSnapshot[];
     },
-    { rejectWithValue, dispatch }
+    { rejectWithValue }
   ) => {
     try {
-      const mediaToUpload = [
-        ...data.productDetails.productPictures.filter(m => m.file),
-        ...data.productDetails.productVideos.filter(m => m.file),
-        ...data.shopDetails.shopImages.filter(m => m.file),
-      ];
-
-      const uploadResults = await Promise.all(
-        mediaToUpload.map(media =>
-          dispatch(uploadMedia({
-            file: media.file!,
-            mediaType: media.type || 'image'
-          })).unwrap()
-        )
-      );
-
-      //replacing blob urls with permanent urls
-      const urlMap = uploadResults.reduce((acc, result) => {
-        acc[result.tempUrl] = result.permanentUrl;
-        return acc;
-      }, {} as Record<string, string>);
-
       const sanitizedPayload = {
         productDetails: {
           ...data.productDetails,
           productPictures: data.productDetails.productPictures.map(m => ({
-            url: urlMap[m.url] || m.url,
+            url: m.url,
             _id: m._id
           })),
           productVideos: data.productDetails.productVideos.map(m => ({
-            url: urlMap[m.url] || m.url,
+            url: m.url,
             _id: m._id
           }))
         },
         shopDetails: {
           ...data.shopDetails,
           shopImages: data.shopDetails.shopImages.map(m => ({
-            url: urlMap[m.url] || m.url,
+            url: m.url,
             _id: m._id
           }))
         },
@@ -114,20 +93,18 @@ export const generateUrlFree = createAsyncThunk(
 );
 
 export const uploadMedia = createAsyncThunk(
-  'freePreview/uploadMedia',
-  async (
-    { file, mediaType }: { file: File; mediaType: 'image' | 'video' },
-    { rejectWithValue }
-  ) => {
+  "freePreview/uploadMedia",
+  async ({ file, mediaType }: { file: File; mediaType: "image" | "video" }, { rejectWithValue }) => {
     try {
       const formData = new FormData();
-      formData.append('file', file);
-      formData.append('mediaType', mediaType);
-      const response = await axios.post('/api/upload-files', formData);
+      formData.append("file", file);
+      formData.append("mediaType", mediaType);
+
+      const response = await axios.post("/api/upload-files", formData);
+      console.log("Upload response:", response.data);
       return {
-        tempUrl: URL.createObjectURL(file),
         permanentUrl: response.data.secure_url,
-        mediaType
+        mediaType,
       };
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.error || error.message);
@@ -140,7 +117,6 @@ export const getProductFree = createAsyncThunk(
   async (productId: string, { rejectWithValue }) => {
     try {
       const url = `${GET_PRODUCT_URL}/${productId}`;
-      console.log("Fetching from:", url);
       const response = await axios.get(url);
       return response.data;
     } catch (error: any) {
@@ -148,7 +124,6 @@ export const getProductFree = createAsyncThunk(
     }
   }
 );
-
 
 interface URLSnapshot {
   id: string;
@@ -162,11 +137,11 @@ interface ContentStyle {
   style: object;
 }
 
-interface MediaItem{
-  url : string;
+export interface MediaItem {
+  url: string;
   _id?: string;
-  file?:File;
-  type?:'image' | 'video';
+  file?: File;
+  type?: "image" | "video";
 }
 
 export interface ProductDetails {
@@ -183,7 +158,7 @@ export interface ProductDetails {
 export interface ShopDetails {
   shopName: ContentStyle;
   shopDescription: ContentStyle;
-  shopImages:MediaItem[];
+  shopImages: MediaItem[];
   shopAddress: ContentStyle;
   shopContact: ContentStyle;
   shopEmail: ContentStyle;
@@ -198,7 +173,6 @@ interface FreePreviewState {
   createdPreview: any;
   error: string | null;
   loading: boolean;
-
 }
 
 const initialState: FreePreviewState = loadState() || {
@@ -248,10 +222,10 @@ export const createContentHash = (data: {
   const jsonString = JSON.stringify({
     pd: data.productDetails,
     sd: data.shopDetails,
-    faq: data.faqList
+    faq: data.faqList,
   });
   return btoa(jsonString).slice(0, 64);
-}
+};
 
 const freePreviewSlice = createSlice({
   name: "freePreview",
@@ -274,13 +248,13 @@ const freePreviewSlice = createSlice({
       }
     },
     updateProductImages: (state, action: PayloadAction<MediaItem[]>) => {
-      state.productDetails.productPictures = action.payload; 
+      state.productDetails.productPictures = action.payload;
     },
     updateProductVideos: (state, action: PayloadAction<MediaItem[]>) => {
-      state.productDetails.productVideos = action.payload; 
+      state.productDetails.productVideos = action.payload;
     },
     updateShopImages: (state, action: PayloadAction<MediaItem[]>) => {
-      state.shopDetails.shopImages = action.payload; 
+      state.shopDetails.shopImages = action.payload;
     },
     updateFaqList: (state, action: PayloadAction<any[]>) => {
       state.faqList = action.payload;
@@ -292,36 +266,25 @@ const freePreviewSlice = createSlice({
     addMedia: (
       state,
       action: PayloadAction<{
-        field: 'productPictures' | 'productVideos' | 'shopImages';
+        field: "productPictures" | "productVideos" | "shopImages";
         media: MediaItem;
       }>
     ) => {
       const { field, media } = action.payload;
-      if (field === 'productPictures' || field === 'productVideos') {
+      if (field === "productPictures" || field === "productVideos") {
         state.productDetails[field].push(media);
-      } else if (field === 'shopImages') {
+      } else if (field === "shopImages") {
         state.shopDetails[field].push(media);
       }
-    },
-
-    clearTemporaryMedia: (state) => {
-      const clearTemp = (arr: MediaItem[]) => 
-        arr.filter(item => !item.url.startsWith('blob:'));
-        
-      state.productDetails.productPictures = clearTemp(state.productDetails.productPictures);
-      state.productDetails.productVideos = clearTemp(state.productDetails.productVideos);
-      state.shopDetails.shopImages = clearTemp(state.shopDetails.shopImages);
     },
   },
   extraReducers: (builder) => {
     builder
       .addCase(saveFreePreview.fulfilled, (state, action) => {
-        console.log("Free Preview created successfully", action.payload);
         state._id = action.payload.data._id;
         state.createdPreview = action.payload;
       })
       .addCase(saveFreePreview.rejected, (state, action) => {
-        console.error("Error creating free preview:", action.payload);
         state.error = action.payload as string || "Error creating free preview";
       })
       .addCase(generateUrlFree.fulfilled, (state, action) => {
@@ -352,31 +315,20 @@ const freePreviewSlice = createSlice({
         state.error = action.payload as string || "Error fetching product data";
       })
       .addCase(uploadMedia.fulfilled, (state, action) => {
-        const {tempUrl, permanentUrl } = action.payload ; 
+        const { permanentUrl, mediaType } = action.payload;
+        const newMedia: MediaItem = { url: permanentUrl, type: mediaType };
 
-         // Update product pictures
-         state.productDetails.productPictures = state.productDetails.productPictures.map(m => 
-          m.url === tempUrl ? { ...m, url: permanentUrl, file: undefined } : m
-        );
-        
-        // Update product videos
-        state.productDetails.productVideos = state.productDetails.productVideos.map(m => 
-          m.url === tempUrl ? { ...m, url: permanentUrl, file: undefined } : m
-        );
-        
-        // Update shop images
-        state.shopDetails.shopImages = state.shopDetails.shopImages.map(m => 
-          m.url === tempUrl ? { ...m, url: permanentUrl, file: undefined } : m
-        );
+        if (mediaType === "image") {
+          state.productDetails.productPictures.push(newMedia);
+        } else if (mediaType === "video") {
+          state.productDetails.productVideos.push(newMedia);
+        }
       })
       .addCase(uploadMedia.rejected, (state, action) => {
-        state.error = action.payload as string || "Media upload failed"; 
-      }
-      )
+        state.error = action.payload as string || "Media upload failed";
+      });
   },
-  
-},
-);
+});
 
 export const {
   updateProductField,
@@ -388,11 +340,9 @@ export const {
   updateUniqueURLs,
   resetTemplate,
   addMedia,
-  clearTemporaryMedia
 } = freePreviewSlice.actions;
 
 export default freePreviewSlice.reducer;
-
 
 export const persistStateMiddleware: Middleware = storeAPI => next => action => {
   const result = next(action);
@@ -400,4 +350,3 @@ export const persistStateMiddleware: Middleware = storeAPI => next => action => 
   saveState(state.freePreview);
   return result;
 };
-

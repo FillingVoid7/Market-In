@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { ArrowLeft, Share2, Copy, Check, ChevronDown, ChevronUp, Link } from "lucide-react"
 import { useDispatch, useSelector } from "react-redux"
 import type { RootState } from "../../redux/templatesPreview/freePreviewStore"
-import { saveFreePreview, updateUniqueURLs, createContentHash, generateUrlFree } from "../../redux/templatesPreview/freePreviewSlice"
+import { saveFreePreview, updateUniqueURLs, createContentHash, generateUrlFree, MediaItem } from "../../redux/templatesPreview/freePreviewSlice"
 import { toast } from "sonner"
 
 interface Faq {
@@ -54,37 +54,20 @@ const FreeTemplatePreview: React.FC<{
   const handleSave = async (e: React.MouseEvent) => {
     e.preventDefault();
 
-    const formattedProductDetails = {
-      ...data.productDetails,
-      productPictures: data.productDetails.productPictures.map(img =>
-        typeof img === 'string' ? { url: img } : img
-      ),
-      productVideos: data.productDetails.productVideos.map(vid =>
-        typeof vid === 'string' ? { url: vid } : vid
-      ),
-    };
-
-    const formattedShopDetails = {
-      ...data.shopDetails,
-      shopImages: data.shopDetails.shopImages.map(img =>
-        typeof img === 'string' ? { url: img } : img
-      ),
-    };
-
     try {
       const resultAction = await dispatch(
         saveFreePreview({
-          productDetails: formattedProductDetails,
-          shopDetails: formattedShopDetails,
+          productDetails: data.productDetails,
+          shopDetails: data.shopDetails,
           faqList: data.faqList,
           uniqueURLs: data.uniqueURLs,
-        }) as unknown as any
+        }) as any
       );
+
       if (saveFreePreview.fulfilled.match(resultAction)) {
         toast.success("Preview saved successfully!");
       } else {
         const errorMessage = resultAction.payload || "Failed to create Free Preview";
-
         if (errorMessage === "A preview already exists for this obligation.") {
           toast.error("The preview has already been saved!");
         } else {
@@ -237,17 +220,15 @@ const FreeTemplatePreview: React.FC<{
                 <>
                   <div className="aspect-square rounded-2xl overflow-hidden shadow-2xl bg-white">
                     <img
-                      src={(typeof productDetails.productPictures[selectedImage] === 'string'
-                        ? productDetails.productPictures[selectedImage]
-                        : productDetails.productPictures[selectedImage]?.url) || "/placeholder.svg?height=600&width=600"}
+                      src= {productDetails.productPictures[selectedImage]?.url || "/placeholder.svg?height=600&width=600"}
                       alt="Product"
                       className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
                     />
                   </div>
                   <div className="grid grid-cols-4 gap-4">
-                    {productDetails.productPictures.map((img, index) => (
+                    {productDetails.productPictures.map((img:MediaItem, index:number) => (
                       <button
-                        key={index}
+                        key={img.url}
                         onClick={() => setSelectedImage(index)}
                         className={`aspect-square rounded-lg overflow-hidden border-2 transition-all ${selectedImage === index
                           ? "border-blue-600 shadow-lg"
@@ -255,7 +236,7 @@ const FreeTemplatePreview: React.FC<{
                           }`}
                       >
                         <img
-                          src={typeof img === 'string' ? img : img?.url || "/placeholder.svg?height=150&width=150"}
+                          src={img.url || "/placeholder.svg?height=600&width=600"}
                           alt={`Product ${index + 1}`}
                           className="w-full h-full object-cover"
                         />
@@ -366,9 +347,7 @@ const FreeTemplatePreview: React.FC<{
             <h2 className="text-2xl font-bold text-gray-900 mb-6">Product Video</h2>
             <div className="aspect-video rounded-xl overflow-hidden shadow-lg">
               <video
-                src={typeof productDetails.productVideos[0] === 'string'
-                  ? productDetails.productVideos[0]
-                  : productDetails.productVideos[0]?.url || "/placeholder.svg?height=720&width=1280"}
+                src={productDetails.productVideos[0].url}
                 controls
                 className="w-full h-full object-cover"
                 poster="/placeholder.svg?height=720&width=1280"
@@ -438,9 +417,7 @@ const FreeTemplatePreview: React.FC<{
               {shopDetails.shopImages?.length > 0 ? (
                 <div className="rounded-xl overflow-hidden shadow-lg h-64">
                   <img
-                    src={typeof shopDetails.shopImages[0] === 'string'
-                      ? shopDetails.shopImages[0]
-                      : shopDetails.shopImages[0]?.url || "/placeholder.svg?height=400&width=600"}
+                    src={shopDetails.shopImages[0].url || "/placeholder.svg?height=600&width=600"}
                     alt="Shop"
                     className="w-full h-full object-cover"
                   />

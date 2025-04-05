@@ -1,7 +1,6 @@
 import { v2 as cloudinary } from 'cloudinary';
-import { createReadStream } from 'fs';
-import { NextApiRequest, NextApiResponse } from 'next';
-import formidable from 'formidable';
+import { NextRequest, NextResponse } from 'next/server';
+import { Readable } from 'stream';
 
 // Configure Cloudinary
 cloudinary.config({
@@ -11,63 +10,54 @@ cloudinary.config({
   secure: true,
 });
 
-// Custom config to prevent body parsing
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
-
-export async function POST(req: NextApiRequest, res: NextApiResponse): Promise<void> {
+export async function POST(req: NextRequest) {
   try {
-    // Use formidable to parse the incoming form data
-    const form = formidable();
-    const [fields, files] = await new Promise<[formidable.Fields, formidable.Files]>((resolve, reject) => {
-      form.parse(req, (err, fields, files) => {
-        if (err) reject(err);
-        resolve([fields, files]);
-      });
-    });
+    const formData = await req.formData();
+    const file = formData.get('file') as File;
+    const mediaType = formData.get('mediaType') as string;
 
-    // Check if the file exists in the request
-    if (!files.file) {
-      return res.status(400).json({ error: 'No file uploaded' });
+    if (!file || !mediaType) {
+      return NextResponse.json(
+        { error: 'Missing file or mediaType' },
+        { status: 400 }
+      );
     }
 
-    const file = files.file[0];
+    // Convert file to buffer
+    const buffer = Buffer.from(await file.arrayBuffer());
     
-    // Upload the file to Cloudinary
-    const result = await new Promise<{ secure_url: string; public_id: string }>((resolve, reject) => {
+    // Upload to Cloudinary
+    const result = await new Promise((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
         {
           folder: 'product-images',
-          resource_type: 'auto', // Automatically detect if it's an image or video
+          resource_type: mediaType === 'video' ? 'video' : 'image',
+          allowed_formats: mediaType === 'video' ? ['mp4', 'mov'] : ['jpg', 'png', 'webp']
         },
         (error, result) => {
-          if (error) {
-            reject(error);
-          } else {
-            resolve(result as { secure_url: string; public_id: string }); // Ensure the return value matches the type
-          }
+          if (error) reject(error);
+          else resolve(result);
         }
       );
-
-      const readStream = createReadStream(file.filepath);
-      readStream.pipe(uploadStream);
+      
+      // Create a readable stream from buffer
+      const readable = new Readable();
+      readable.push(buffer);
+      readable.push(null);
+      readable.pipe(uploadStream);
+    });
+    console.log('Upload result:', result);
+    return NextResponse.json({
+      permanentUrl: (result as any).secure_url,
+      mediaType,
+      publicId: (result as any).public_id
     });
 
-    // Return both the temporary blob URL and the secure Cloudinary URL
-    res.status(200).json({
-      tempUrl: file.filepath,
-      permanentUrl: result.secure_url,
-      mediaType: file.mimetype, 
-      publicId: result.public_id, 
-    });
   } catch (error) {
     console.error('Upload error:', error);
-    res.status(500).json({
-      error: 'Upload failed',
-      message: (error as any).message || 'Server error',
-    });
+    return NextResponse.json(
+      { error: 'Failed to upload file' },
+      { status: 500 }
+    );
   }
 }
