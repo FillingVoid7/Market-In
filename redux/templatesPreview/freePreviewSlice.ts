@@ -103,7 +103,7 @@ export const uploadMedia = createAsyncThunk(
       const response = await axios.post("/api/upload-files", formData);
       console.log("Upload response:", response.data);
       return {
-        permanentUrl: response.data.secure_url,
+        permanentUrl: response.data.permanentUrl,
         mediaType,
       };
     } catch (error: any) {
@@ -316,6 +316,7 @@ const freePreviewSlice = createSlice({
       })
       .addCase(uploadMedia.fulfilled, (state, action) => {
         const { permanentUrl, mediaType } = action.payload;
+        console.log("Upload successful:", action.payload);
         const newMedia: MediaItem = { url: permanentUrl, type: mediaType };
 
         if (mediaType === "image") {

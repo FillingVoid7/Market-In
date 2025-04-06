@@ -288,11 +288,11 @@ const FreeTemplatePreview: React.FC<{
                       className="flex-grow text-sm bg-transparent border-none focus:ring-0 text-gray-700"
                     />
                     <button
-                      onClick={() => copyToClipboard(uniqueURLs[0].toString())}
+                      onClick={() => copyToClipboard(uniqueURLs[0].url)}
                       className="p-2 text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
                       aria-label="Copy URL"
                     >
-                      {copied === uniqueURLs[0].toString() ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                      {copied === uniqueURLs[0].url ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                     </button>
                   </div>
                 </div>

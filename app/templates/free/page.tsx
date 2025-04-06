@@ -14,10 +14,11 @@ import {
   resetTemplate,
 } from "../../../redux/templatesPreview/freePreviewSlice"
 import type { MediaItem } from "../../../redux/templatesPreview/freePreviewSlice";
-import {uploadMedia}  from "../../../redux/templatesPreview/freePreviewSlice"
+import { uploadMedia } from "../../../redux/templatesPreview/freePreviewSlice"
 import type { RootState, AppDispatch } from "../../../redux/templatesPreview/freePreviewStore"
 import FreeTextEditor from "../../../text-editors/freeTextEditor"
 import { toast } from "sonner"
+import { unwrapResult } from "@reduxjs/toolkit";
 import App from "next/app"
 
 interface Faq {
@@ -68,15 +69,23 @@ const FreeTemplate: React.FC = () => {
       try {
         // Upload all files and wait for results
         const uploadResults = await Promise.all(
-          files.map(file => dispatch(uploadMedia({ file, mediaType: "image" })).unwrap())
+          files.map(async file => {
+            const actionResult = await dispatch(uploadMedia({ file, mediaType: "image" }));
+            console.log("Raw action result:", actionResult);
+            const data = unwrapResult(actionResult); // <- from @reduxjs/toolkit
+            console.log("Unwrapped result:", data);
+            return data;
+          })
         );
-  
+
+        console.log("Upload results:", uploadResults);
         // Create MediaItem array from upload results
         const newImages: MediaItem[] = uploadResults.map(res => ({
           url: res.permanentUrl,
           type: "image"
         }));
-  
+        console.log("New images:", newImages);
+
         // Update Redux with combined array
         dispatch(updateProductImages([
           ...productDetails.productPictures,
@@ -93,12 +102,12 @@ const FreeTemplate: React.FC = () => {
       const file = e.target.files[0];
       try {
         const result = await dispatch(uploadMedia({ file, mediaType: "image" })).unwrap();
-        
+
         const newImage: MediaItem = {
           url: result.permanentUrl,
           type: "image"
         };
-  
+
         dispatch(updateShopImages([
           ...shopDetails.shopImages,
           newImage
@@ -126,15 +135,15 @@ const FreeTemplate: React.FC = () => {
         toast.info("Only one video is allowed");
         return;
       }
-      
+
       try {
         const result = await dispatch(uploadMedia({ file, mediaType: "video" })).unwrap();
-        
+
         const newVideo: MediaItem = {
           url: result.permanentUrl,
           type: "video"
         };
-  
+
         dispatch(updateProductVideos([newVideo]));
       } catch (error) {
         toast.error("Failed to upload video");
@@ -174,7 +183,7 @@ const FreeTemplate: React.FC = () => {
 
 
 
-const handleShowPreview = () => {
+  const handleShowPreview = () => {
     const requiredFields = [
       productDetails.productName.content,
       productDetails.productPrice.content,
@@ -291,58 +300,89 @@ const handleShowPreview = () => {
         </div>
 
         {/* Product Gallery */}
-      <div>
-        <label className="block font-semibold text-gray-700">Product Gallery</label>
-        <input
-          type="file"
-          multiple
-          onChange={handleProductImageUpload}
-          accept="image/*"
-          className="w-full border rounded px-3 py-2"
-        />
+        <div>
+          <label className="block font-semibold text-gray-700 mb-2">Product Gallery</label>
 
-        <div className="flex flex-wrap gap-4 mt-4">
-          {productDetails.productPictures.map((img, index) => (
-            <div key={index} className="relative">
-              <img
-                src={img.url || "/placeholder.svg"}
-                alt={`Product ${index + 1}`}
-                className="w-32 h-32 object-cover rounded"
-              />
-              <button
-                onClick={() => removeProductImage(index)}
-                className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1"
-              >
-                X
-              </button>
-            </div>
-          ))}
-        </div>
-      </div>
+          <input
+            id="productImageInput"
+            type="file"
+            multiple
+            onChange={handleProductImageUpload}
+            accept="image/*"
+            className="hidden"
+          />
 
-         {/* Product Video */}
-      <div>
-        <label className="block font-semibold text-gray-700">Product Video</label>
-        <input
-          type="file"
-          onChange={handleVideoUpload}
-          accept="video/*"
-          className="w-full border rounded px-3 py-2"
-        />
-        {productDetails.productVideos.length > 0 && (
-          <div className="flex gap-4 mt-4">
-            <div className="relative">
-              <video src={productDetails.productVideos[0].url} controls className="w-48 h-32 rounded" />
-              <button
-                onClick={removeVideo}
-                className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1"
-              >
-                X
-              </button>
-            </div>
+          {/* Custom upload button */}
+          <button
+            type="button"
+            onClick={() => document.getElementById("productImageInput")?.click()}
+            className="px-4 py-2 bg-blue-600 text-white rounded shadow hover:bg-blue-700"
+          >
+            Upload Images
+          </button>
+
+          {/* Preview images */}
+          <div className="flex flex-wrap gap-4 mt-4">
+            {productDetails.productPictures.map((img, index) => (
+              <div key={index} className="relative">
+                <img
+                  src={img.url || "/placeholder.svg"}
+                  alt={`Product ${index + 1}`}
+                  className="w-32 h-32 object-cover rounded"
+                />
+                <button
+                  onClick={() => removeProductImage(index)}
+                  className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1"
+                >
+                  X
+                </button>
+              </div>
+            ))}
           </div>
-        )}
-      </div>
+        </div>
+
+
+        {/* Product Video */}
+        <div>
+          <label className="block font-semibold text-gray-700 mb-2">Product Video</label>
+
+          <input
+            id="productVideoInput"
+            type="file"
+            accept="video/*"
+            onChange={handleVideoUpload}
+            className="hidden"
+          />
+
+          {/* Trigger button */}
+          <button
+            type="button"
+            onClick={() => document.getElementById("productVideoInput")?.click()}
+            className="px-4 py-2 bg-blue-600 text-white rounded shadow hover:bg-blue-700"
+          >
+            Upload Video
+          </button>
+
+          {/* Preview */}
+          {productDetails.productVideos.length > 0 && (
+            <div className="flex gap-4 mt-4">
+              <div className="relative">
+                <video
+                  src={productDetails.productVideos[0].url}
+                  controls
+                  className="w-48 h-32 rounded"
+                />
+                <button
+                  onClick={removeVideo}
+                  className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1"
+                >
+                  X
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+
 
         {/* Customer Support - FAQ */}
         <div>
@@ -462,17 +502,35 @@ const handleShowPreview = () => {
 
         {/* Shop Image */}
         <div>
-          <label className="block font-semibold text-gray-700">Shop Image</label>
+          <label className="block font-semibold text-gray-700 mb-2">Shop Image</label>
+
           <input
+            id="shopImageInput"
             type="file"
+            multiple
             onChange={handleShopImageUpload}
             accept="image/*"
-            className="w-full border rounded px-3 py-2"
+            className="hidden"
           />
+
+          {/* Trigger button */}
+          <button
+            type="button"
+            onClick={() => document.getElementById("shopImageInput")?.click()}
+            className="px-4 py-2 bg-blue-600 text-white rounded shadow hover:bg-blue-700"
+          >
+            Upload Shop Image
+          </button>
+
+          {/* Previews */}
           <div className="flex flex-wrap gap-4 mt-4">
             {shopDetails.shopImages.map((img, index) => (
               <div key={index} className="relative">
-                <img src={img.url || "/placeholder.svg"} alt="Shop Image" className="w-32 h-32 object-cover rounded" />
+                <img
+                  src={img.url || "/placeholder.svg"}
+                  alt={`Shop Image ${index + 1}`}
+                  className="w-32 h-32 object-cover rounded"
+                />
                 <button
                   onClick={() => removeShopImage(index)}
                   className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1"
@@ -483,6 +541,7 @@ const handleShowPreview = () => {
             ))}
           </div>
         </div>
+
 
         {/* Shop Address */}
         <div>

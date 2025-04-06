@@ -56,16 +56,14 @@ const ProductPage = () => {
   }
 
   console.log("Current Product if available:", currentProduct);
+
   if (!currentProduct) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="bg-white p-8 rounded-lg shadow-md max-w-md text-center">
           <h2 className="text-2xl font-bold text-gray-800 mb-4">
-            Product Not Found
+            Your product is ready to be shared!
           </h2>
-          <p className="text-gray-600">
-            The requested product page does not exist or has been removed.
-          </p>
         </div>
       </div>
     );
