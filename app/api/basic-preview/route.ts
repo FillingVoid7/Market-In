@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { BasicPreviewModel } from "../../../models/freePreview.model";
+import { BasicPreviewModel } from "../../../models/basicPreview.model";
 import { mongooseConnect } from "@lib/mongoose";
 
 export async function POST(req: NextRequest) {
@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
 
         console.log("Checking for existing product with name:", body.productDetails.productName.content);
 
-        const existingPreview = await freePreviewModel.findOne({
+        const existingPreview = await BasicPreviewModel.findOne({
             "productDetails.productName.content": body.productDetails.productName.content
         });
         console.log('Existing preview:', existingPreview);
@@ -24,8 +24,8 @@ export async function POST(req: NextRequest) {
 
         console.log('Existing Product found with ID:', body.productId);
 
-        const freePreview = new freePreviewModel(body);
-        const savedFreePreview = await freePreview.save();
+        const basicPreview = new BasicPreviewModel(body);
+        const savedFreePreview = await basicPreview.save();
 
         return NextResponse.json(
             { success: true, message: "Free Preview created successfully", data: savedFreePreview },
