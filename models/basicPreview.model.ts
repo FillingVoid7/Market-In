@@ -1,4 +1,5 @@
-import mongoose, { Schema, Document, Types } from "mongoose";
+import { Schema, Document, Types } from "mongoose";
+import {mongoose} from '@lib/mongoose';  
 
 interface StyledText {
   content: string;
@@ -32,12 +33,44 @@ interface AnalyticsData {
   emailClicks: number;
 }
 
-interface IBasicPreview extends Document {
+interface SocialMediaTemplate {
+  name: string;
+  captionStructure: string;
+  defaultHashtags: string[];
+  imageSlots: number;
+  styleSettings: {
+    fontFamily: string;
+    brandColors: string[];
+    layoutType: 'grid' | 'carousel' | 'single';
+  };
+}
+
+interface SocialMediaPost {
+  platform: string;
+  templateUsed: SocialMediaTemplate;
+  publishedContent: {
+    finalCaption: string;
+    usedHashtags: string[];
+    imageUrls: string[];
+    shortLink: string;
+    engagementStats: {
+      likes: number;
+      shares: number;
+      clickThroughs: number;
+    };
+  };
+  scheduledTime?: Date;
+}
+
+export interface IBasicPreview extends Document {
+  _id: Types.ObjectId;
   productDetails: ProductDetails;
   shopDetails: ShopDetails;
   faqList: { question: string; answer: string }[];
   uniqueURLs: string[];
   analytics: AnalyticsData[];
+  socialMediaTemplates: SocialMediaTemplate[];
+  scheduledPosts: SocialMediaPost[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -72,8 +105,48 @@ const basicPreviewSchema = new Schema<IBasicPreview>(
         emailClicks: { type: Number, default: 0 },
       },
     ],
+    socialMediaTemplates: [{
+      name: String,
+      captionStructure: String,
+      defaultHashtags: [String],
+      imageSlots: Number,
+      styleSettings: {
+        fontFamily: String,
+        brandColors: [String],
+        layoutType: String
+      }
+    }],
+    scheduledPosts: [{
+      platform: String,
+      templateUsed: {
+        name: String,
+        captionStructure: String,
+        defaultHashtags: [String],
+        imageSlots: Number,
+        styleSettings: {
+          fontFamily: String,
+          brandColors: [String],
+          layoutType: String
+        }
+      },
+      publishedContent: {
+        finalCaption: String,
+        usedHashtags: [String],
+        imageUrls: [String],
+        shortLink: String,
+        engagementStats: {
+          likes: Number,
+          shares: Number,
+          clickThroughs: Number
+        }
+      },
+      scheduledTime: Date
+    }]
   },
   { timestamps: true } 
 );
 
 export const BasicPreviewModel = mongoose.model<IBasicPreview>("BasicPreview",basicPreviewSchema);
+
+
+
