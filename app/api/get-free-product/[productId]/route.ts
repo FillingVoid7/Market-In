@@ -8,7 +8,7 @@ export async function GET(
 ) {
   try {
     await mongooseConnect();
-    const params = await context.params; // accessing params and awaiting before accessing ;  inside function not in function args (latest changes in nextjs params usage)
+    const params = await context.params; 
     const productId  = params.productId   
 
     if (!productId) {

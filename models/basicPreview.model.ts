@@ -1,5 +1,5 @@
 import { Schema, Document, Types } from "mongoose";
-import {mongoose} from '@lib/mongoose';  
+import {mongoose} from '@lib/mongoose'; 
 
 interface StyledText {
   content: string;
@@ -33,33 +33,26 @@ interface AnalyticsData {
   emailClicks: number;
 }
 
-interface SocialMediaTemplate {
-  name: string;
-  captionStructure: string;
-  defaultHashtags: string[];
-  imageSlots: number;
-  styleSettings: {
+
+interface SocialMediaPostTemplate {
+  platform: string;
+  templateName: string;
+  caption: string;
+  hashtags: string[];
+  imagePlaceholders: { position: number; description: string }[];
+  defaultImageUrl?: string;
+  style: {
     fontFamily: string;
-    brandColors: string[];
-    layoutType: 'grid' | 'carousel' | 'single';
+    fontSize: string;
+    textColor: string;
+    backgroundColor: string;
   };
 }
 
-interface SocialMediaPost {
-  platform: string;
-  templateUsed: SocialMediaTemplate;
-  publishedContent: {
-    finalCaption: string;
-    usedHashtags: string[];
-    imageUrls: string[];
-    shortLink: string;
-    engagementStats: {
-      likes: number;
-      shares: number;
-      clickThroughs: number;
-    };
-  };
-  scheduledTime?: Date;
+interface CustomizationOptions {
+  colorPalette: string[];
+  templates: string[];
+  socialMediaTemplates: SocialMediaPostTemplate[];
 }
 
 export interface IBasicPreview extends Document {
@@ -68,9 +61,8 @@ export interface IBasicPreview extends Document {
   shopDetails: ShopDetails;
   faqList: { question: string; answer: string }[];
   uniqueURLs: string[];
+  customizationOptions: CustomizationOptions;
   analytics: AnalyticsData[];
-  socialMediaTemplates: SocialMediaTemplate[];
-  scheduledPosts: SocialMediaPost[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -84,69 +76,55 @@ const basicPreviewSchema = new Schema<IBasicPreview>(
       longDescription: { content: { type: String }, style: { type: Object } },
       qualityFeatures: { content: { type: String }, style: { type: Object } },
       specifications: { content: { type: String }, style: { type: Object } },
-      productPictures: [{ url: String }], 
+      productPictures: [{ url: String }],
       productVideos: [{ url: String }],
     },
     shopDetails: {
       shopName: { content: { type: String }, style: { type: Object } },
       shopDescription: { content: { type: String }, style: { type: Object } },
-      shopImages: [{ url: String }], 
+      shopImages: [{ url: String }],
       shopAddress: { content: { type: String }, style: { type: Object } },
       shopContact: { content: { type: String }, style: { type: Object } },
       shopEmail: { content: { type: String }, style: { type: Object } },
     },
-    faqList: [{ question: String, answer: String }], 
-    uniqueURLs: [String], 
+    faqList: [{ question: String, answer: String }],
+    uniqueURLs: [String],
+    customizationOptions: {
+      colorPalette: [String],
+      templates: [String],
+      socialMediaTemplates: [{
+        platform: String,
+        templateName: String,
+        caption: String,
+        hashtags: [String],
+        imagePlaceholders: [{
+          position: Number,
+          description: String
+        }],
+        defaultImageUrl: String,
+        style: {
+          fontFamily: String,
+          fontSize: String,
+          textColor: String,
+          backgroundColor: String
+        }
+      }]
+    },
+    socialMediaLinks: [{
+      platform: String,
+      url: String,
+      template: String
+    }],
     analytics: [
       {
         productPageId: { type: Schema.Types.ObjectId, ref: "ProductPage" },
-        views: { type: Number, default: 0 }, 
+        views: { type: Number, default: 0 },
         clicks: { type: Number, default: 0 },
         emailClicks: { type: Number, default: 0 },
       },
     ],
-    socialMediaTemplates: [{
-      name: String,
-      captionStructure: String,
-      defaultHashtags: [String],
-      imageSlots: Number,
-      styleSettings: {
-        fontFamily: String,
-        brandColors: [String],
-        layoutType: String
-      }
-    }],
-    scheduledPosts: [{
-      platform: String,
-      templateUsed: {
-        name: String,
-        captionStructure: String,
-        defaultHashtags: [String],
-        imageSlots: Number,
-        styleSettings: {
-          fontFamily: String,
-          brandColors: [String],
-          layoutType: String
-        }
-      },
-      publishedContent: {
-        finalCaption: String,
-        usedHashtags: [String],
-        imageUrls: [String],
-        shortLink: String,
-        engagementStats: {
-          likes: Number,
-          shares: Number,
-          clickThroughs: Number
-        }
-      },
-      scheduledTime: Date
-    }]
   },
-  { timestamps: true } 
+  { timestamps: true }
 );
 
-export const BasicPreviewModel = mongoose.model<IBasicPreview>("BasicPreview",basicPreviewSchema);
-
-
-
+export const BasicPreviewModel = mongoose.model<IBasicPreview>("BasicPreview", basicPreviewSchema);

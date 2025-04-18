@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { freePreviewModel } from "../../../models/freePreview.model";
 import { mongooseConnect } from "@lib/mongoose";
 
-export async function POST(req: NextRequest) {
+export async function POST(req: NextRequest) { 
     try {
         await mongooseConnect();
         const body = await req.json();
