@@ -33,26 +33,33 @@ interface AnalyticsData {
   emailClicks: number;
 }
 
-
 interface SocialMediaPostTemplate {
-  platform: string;
-  templateName: string;
+  platform: string;  // e.g., 'instagram', 'facebook', 'twitter'
+  templateName: string;  // e.g., 'New Arrival', 'Limited Time Offer'
   caption: string;
   hashtags: string[];
-  imagePlaceholders: { position: number; description: string }[];
-  defaultImageUrl?: string;
+  imagePlaceholders: {
+    position: number;
+    description: string;
+    aspectRatio?: string;  // e.g., '1:1', '4:5', '16:9'
+    maxSize?: string;     // e.g., '1080x1080'
+  }[];
+  defaultImageUrl?: string;  // Fallback image if no product image is available
+  productUrl: string;        // The unique URL to the product page
+  callToAction?: string;     // e.g., 'Shop Now', 'Learn More'
   style: {
     fontFamily: string;
     fontSize: string;
     textColor: string;
     backgroundColor: string;
+    accentColor?: string;    // For buttons or highlights
+    borderRadius?: string;   // For image corners
   };
-}
-
-interface CustomizationOptions {
-  colorPalette: string[];
-  templates: string[];
-  socialMediaTemplates: SocialMediaPostTemplate[];
+  metadata?: {
+    lastUsed: Date;
+    usageCount: number;
+    isActive: boolean;
+  };
 }
 
 export interface IBasicPreview extends Document {
@@ -61,7 +68,7 @@ export interface IBasicPreview extends Document {
   shopDetails: ShopDetails;
   faqList: { question: string; answer: string }[];
   uniqueURLs: string[];
-  customizationOptions: CustomizationOptions;
+  socialMediaTemplates: SocialMediaPostTemplate[];
   analytics: AnalyticsData[];
   createdAt: Date;
   updatedAt: Date;
@@ -89,31 +96,28 @@ const basicPreviewSchema = new Schema<IBasicPreview>(
     },
     faqList: [{ question: String, answer: String }],
     uniqueURLs: [String],
-    customizationOptions: {
-      colorPalette: [String],
-      templates: [String],
-      socialMediaTemplates: [{
-        platform: String,
-        templateName: String,
-        caption: String,
-        hashtags: [String],
-        imagePlaceholders: [{
-          position: Number,
-          description: String
-        }],
-        defaultImageUrl: String,
-        style: {
-          fontFamily: String,
-          fontSize: String,
-          textColor: String,
-          backgroundColor: String
-        }
-      }]
-    },
-    socialMediaLinks: [{
-      platform: String,
-      url: String,
-      template: String
+    socialMediaTemplates: [{
+      platform: { type: String, required: true },
+      templateName: { type: String, required: true },
+      caption: { type: String, required: true },
+      hashtags: [String],
+      imagePlaceholders: [{
+        position: Number,
+        description: String,
+        aspectRatio: String,
+        maxSize: String
+      }],
+      defaultImageUrl: String,
+      productUrl: { type: String, required: true },
+      callToAction: String,
+      style: {
+        fontFamily: String,
+        fontSize: String,
+        textColor: String,
+        backgroundColor: String,
+        accentColor: String,
+        borderRadius: String
+      },
     }],
     analytics: [
       {
@@ -124,7 +128,7 @@ const basicPreviewSchema = new Schema<IBasicPreview>(
       },
     ],
   },
-  { timestamps: true }
+  { timestamps: true, collection:"saved-basic-previews" }
 );
 
-export const BasicPreviewModel = mongoose.model<IBasicPreview>("BasicPreview", basicPreviewSchema);
+export const BasicPreviewModel = mongoose.models.BasicPreview || mongoose.model<IBasicPreview>("BasicPreview", basicPreviewSchema);
