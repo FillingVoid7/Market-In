@@ -104,6 +104,12 @@ const Pricing = () => {
               if (index === 0) {
                 router.push('/templates/free');
               }
+              if (index ===1){
+                router.push('/templates/basic')
+              }
+              if (index ===2){
+                router.push('/templates/pro')
+              }
             }}
               className={`mt-4 py-2 px-4 ${
                 index === 0

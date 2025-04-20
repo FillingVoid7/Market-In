@@ -66,7 +66,7 @@ export interface ShopDetails {
   shopEmail: ContentStyle;
 }
 
-interface SocialMediaTemplate {
+export interface SocialMediaTemplate {
   platform: string;
   templateName: string;
   caption: string;
@@ -90,7 +90,7 @@ interface SocialMediaTemplate {
   };
 }
 
-interface Analytics {
+export interface Analytics {
   productPageId: string;
   views: number;
   clicks: number;
