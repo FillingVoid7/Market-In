@@ -323,6 +323,253 @@ const BasicTemplate: React.FC = () => {
           </button>
         </div>
 
+        {/* Social Media Templates Section */}
+        <div>
+          <label className="block font-semibold text-gray-700">Social Media Templates</label>
+          <div className="space-y-4">
+            {socialMediaTemplates.map((template, index) => (
+              <div key={index} className="border rounded p-4">
+                {editingTemplateIndex === index ? (
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Platform</label>
+                        <input
+                          type="text"
+                          value={template.platform}
+                          onChange={(e) => updateTemplate(index, { ...template, platform: e.target.value })}
+                          className="w-full p-2 border rounded"
+                          placeholder="e.g., Instagram, Facebook"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Template Name</label>
+                        <input
+                          type="text"
+                          value={template.templateName}
+                          onChange={(e) => updateTemplate(index, { ...template, templateName: e.target.value })}
+                          className="w-full p-2 border rounded"
+                          placeholder="Template name"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Caption</label>
+                      <textarea
+                        value={template.caption}
+                        onChange={(e) => updateTemplate(index, { ...template, caption: e.target.value })}
+                        className="w-full p-2 border rounded"
+                        placeholder="Enter caption"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Hashtags</label>
+                      <div className="flex flex-wrap gap-2 mb-2">
+                        {template.hashtags.map((hashtag, hashtagIndex) => (
+                          <span key={hashtagIndex} className="bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                            {hashtag}
+                            <button
+                              onClick={() => removeHashtag(index, hashtagIndex)}
+                              className="ml-1 text-red-500"
+                            >
+                              ×
+                            </button>
+                          </span>
+                        ))}
+                      </div>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          placeholder="Add hashtag"
+                          className="flex-1 p-2 border rounded"
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              addHashtag(index, e.currentTarget.value)
+                              e.currentTarget.value = ''
+                            }
+                          }}
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Image Placeholders</label>
+                      <div className="space-y-2">
+                        {template.imagePlaceholders.map((placeholder, placeholderIndex) => (
+                          <div key={placeholderIndex} className="flex items-center gap-2">
+                            <input
+                              type="number"
+                              value={placeholder.position}
+                              onChange={(e) => {
+                                const updatedPlaceholders = [...template.imagePlaceholders]
+                                updatedPlaceholders[placeholderIndex].position = parseInt(e.target.value)
+                                updateTemplate(index, { ...template, imagePlaceholders: updatedPlaceholders })
+                              }}
+                              className="w-20 p-2 border rounded"
+                              placeholder="Position"
+                            />
+                            <input
+                              type="text"
+                              value={placeholder.description}
+                              onChange={(e) => {
+                                const updatedPlaceholders = [...template.imagePlaceholders]
+                                updatedPlaceholders[placeholderIndex].description = e.target.value
+                                updateTemplate(index, { ...template, imagePlaceholders: updatedPlaceholders })
+                              }}
+                              className="flex-1 p-2 border rounded"
+                              placeholder="Description"
+                            />
+                            <button
+                              onClick={() => removeImagePlaceholder(index, placeholderIndex)}
+                              className="text-red-500"
+                            >
+                              ×
+                            </button>
+                          </div>
+                        ))}
+                        <button
+                          onClick={() => addImagePlaceholder(index, { position: template.imagePlaceholders.length + 1, description: '' })}
+                          className="text-blue-500"
+                        >
+                          Add Image Placeholder
+                        </button>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Style</label>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-xs text-gray-600">Font Family</label>
+                          <input
+                            type="text"
+                            value={template.style.fontFamily}
+                            onChange={(e) => updateTemplate(index, { ...template, style: { ...template.style, fontFamily: e.target.value } })}
+                            className="w-full p-2 border rounded"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs text-gray-600">Font Size</label>
+                          <input
+                            type="text"
+                            value={template.style.fontSize}
+                            onChange={(e) => updateTemplate(index, { ...template, style: { ...template.style, fontSize: e.target.value } })}
+                            className="w-full p-2 border rounded"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs text-gray-600">Text Color</label>
+                          <input
+                            type="color"
+                            value={template.style.textColor}
+                            onChange={(e) => updateTemplate(index, { ...template, style: { ...template.style, textColor: e.target.value } })}
+                            className="w-full p-1 border rounded"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs text-gray-600">Background Color</label>
+                          <input
+                            type="color"
+                            value={template.style.backgroundColor}
+                            onChange={(e) => updateTemplate(index, { ...template, style: { ...template.style, backgroundColor: e.target.value } })}
+                            className="w-full p-1 border rounded"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex justify-end gap-2">
+                      <button
+                        onClick={() => setEditingTemplateIndex(null)}
+                        className="bg-gray-500 text-white px-4 py-2 rounded"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={() => updateTemplate(index, template)}
+                        className="bg-blue-500 text-white px-4 py-2 rounded"
+                      >
+                        Save
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <h3 className="font-semibold">{template.platform} - {template.templateName}</h3>
+                        <p className="text-sm text-gray-600">{template.caption}</p>
+                      </div>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => editTemplate(index)}
+                          className="text-blue-500"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => removeTemplate(index)}
+                          className="text-red-500"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                    <div className="mt-2">
+                      <div className="flex flex-wrap gap-2">
+                        {template.hashtags.map((hashtag, hashtagIndex) => (
+                          <span key={hashtagIndex} className="bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                            {hashtag}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+            <div className="border rounded p-4">
+              <h3 className="font-semibold mb-4">Add New Template</h3>
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Platform</label>
+                    <input
+                      type="text"
+                      value={newTemplate.platform}
+                      onChange={(e) => setNewTemplate({ ...newTemplate, platform: e.target.value })}
+                      className="w-full p-2 border rounded"
+                      placeholder="e.g., Instagram, Facebook"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Template Name</label>
+                    <input
+                      type="text"
+                      value={newTemplate.templateName}
+                      onChange={(e) => setNewTemplate({ ...newTemplate, templateName: e.target.value })}
+                      className="w-full p-2 border rounded"
+                      placeholder="Template name"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Caption</label>
+                  <textarea
+                    value={newTemplate.caption}
+                    onChange={(e) => setNewTemplate({ ...newTemplate, caption: e.target.value })}
+                    className="w-full p-2 border rounded"
+                    placeholder="Enter caption"
+                  />
+                </div>
+                <button
+                  onClick={addTemplate}
+                  className="bg-green-500 text-white px-4 py-2 rounded"
+                >
+                  Add Template
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Product Name */}
         <div>
           <label className="block font-semibold text-gray-700">Product Name</label>
@@ -583,253 +830,6 @@ const BasicTemplate: React.FC = () => {
               >
                 Add FAQ
               </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Social Media Templates Section */}
-        <div>
-          <label className="block font-semibold text-gray-700">Social Media Templates</label>
-          <div className="space-y-4">
-            {socialMediaTemplates.map((template, index) => (
-              <div key={index} className="border rounded p-4">
-                {editingTemplateIndex === index ? (
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">Platform</label>
-                        <input
-                          type="text"
-                          value={template.platform}
-                          onChange={(e) => updateTemplate(index, { ...template, platform: e.target.value })}
-                          className="w-full p-2 border rounded"
-                          placeholder="e.g., Instagram, Facebook"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">Template Name</label>
-                        <input
-                          type="text"
-                          value={template.templateName}
-                          onChange={(e) => updateTemplate(index, { ...template, templateName: e.target.value })}
-                          className="w-full p-2 border rounded"
-                          placeholder="Template name"
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">Caption</label>
-                      <textarea
-                        value={template.caption}
-                        onChange={(e) => updateTemplate(index, { ...template, caption: e.target.value })}
-                        className="w-full p-2 border rounded"
-                        placeholder="Enter caption"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">Hashtags</label>
-                      <div className="flex flex-wrap gap-2 mb-2">
-                        {template.hashtags.map((hashtag, hashtagIndex) => (
-                          <span key={hashtagIndex} className="bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                            {hashtag}
-                            <button
-                              onClick={() => removeHashtag(index, hashtagIndex)}
-                              className="ml-1 text-red-500"
-                            >
-                              ×
-                            </button>
-                          </span>
-                        ))}
-                      </div>
-                      <div className="flex gap-2">
-                        <input
-                          type="text"
-                          placeholder="Add hashtag"
-                          className="flex-1 p-2 border rounded"
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter') {
-                              addHashtag(index, e.currentTarget.value)
-                              e.currentTarget.value = ''
-                            }
-                          }}
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">Image Placeholders</label>
-                      <div className="space-y-2">
-                        {template.imagePlaceholders.map((placeholder, placeholderIndex) => (
-                          <div key={placeholderIndex} className="flex items-center gap-2">
-                            <input
-                              type="number"
-                              value={placeholder.position}
-                              onChange={(e) => {
-                                const updatedPlaceholders = [...template.imagePlaceholders]
-                                updatedPlaceholders[placeholderIndex].position = parseInt(e.target.value)
-                                updateTemplate(index, { ...template, imagePlaceholders: updatedPlaceholders })
-                              }}
-                              className="w-20 p-2 border rounded"
-                              placeholder="Position"
-                            />
-                            <input
-                              type="text"
-                              value={placeholder.description}
-                              onChange={(e) => {
-                                const updatedPlaceholders = [...template.imagePlaceholders]
-                                updatedPlaceholders[placeholderIndex].description = e.target.value
-                                updateTemplate(index, { ...template, imagePlaceholders: updatedPlaceholders })
-                              }}
-                              className="flex-1 p-2 border rounded"
-                              placeholder="Description"
-                            />
-                            <button
-                              onClick={() => removeImagePlaceholder(index, placeholderIndex)}
-                              className="text-red-500"
-                            >
-                              ×
-                            </button>
-                          </div>
-                        ))}
-                        <button
-                          onClick={() => addImagePlaceholder(index, { position: template.imagePlaceholders.length + 1, description: '' })}
-                          className="text-blue-500"
-                        >
-                          Add Image Placeholder
-                        </button>
-                      </div>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">Style</label>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-xs text-gray-600">Font Family</label>
-                          <input
-                            type="text"
-                            value={template.style.fontFamily}
-                            onChange={(e) => updateTemplate(index, { ...template, style: { ...template.style, fontFamily: e.target.value } })}
-                            className="w-full p-2 border rounded"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-xs text-gray-600">Font Size</label>
-                          <input
-                            type="text"
-                            value={template.style.fontSize}
-                            onChange={(e) => updateTemplate(index, { ...template, style: { ...template.style, fontSize: e.target.value } })}
-                            className="w-full p-2 border rounded"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-xs text-gray-600">Text Color</label>
-                          <input
-                            type="color"
-                            value={template.style.textColor}
-                            onChange={(e) => updateTemplate(index, { ...template, style: { ...template.style, textColor: e.target.value } })}
-                            className="w-full p-1 border rounded"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-xs text-gray-600">Background Color</label>
-                          <input
-                            type="color"
-                            value={template.style.backgroundColor}
-                            onChange={(e) => updateTemplate(index, { ...template, style: { ...template.style, backgroundColor: e.target.value } })}
-                            className="w-full p-1 border rounded"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex justify-end gap-2">
-                      <button
-                        onClick={() => setEditingTemplateIndex(null)}
-                        className="bg-gray-500 text-white px-4 py-2 rounded"
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        onClick={() => updateTemplate(index, template)}
-                        className="bg-blue-500 text-white px-4 py-2 rounded"
-                      >
-                        Save
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <div>
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <h3 className="font-semibold">{template.platform} - {template.templateName}</h3>
-                        <p className="text-sm text-gray-600">{template.caption}</p>
-                      </div>
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => editTemplate(index)}
-                          className="text-blue-500"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => removeTemplate(index)}
-                          className="text-red-500"
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    </div>
-                    <div className="mt-2">
-                      <div className="flex flex-wrap gap-2">
-                        {template.hashtags.map((hashtag, hashtagIndex) => (
-                          <span key={hashtagIndex} className="bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                            {hashtag}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            ))}
-            <div className="border rounded p-4">
-              <h3 className="font-semibold mb-4">Add New Template</h3>
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">Platform</label>
-                    <input
-                      type="text"
-                      value={newTemplate.platform}
-                      onChange={(e) => setNewTemplate({ ...newTemplate, platform: e.target.value })}
-                      className="w-full p-2 border rounded"
-                      placeholder="e.g., Instagram, Facebook"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">Template Name</label>
-                    <input
-                      type="text"
-                      value={newTemplate.templateName}
-                      onChange={(e) => setNewTemplate({ ...newTemplate, templateName: e.target.value })}
-                      className="w-full p-2 border rounded"
-                      placeholder="Template name"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Caption</label>
-                  <textarea
-                    value={newTemplate.caption}
-                    onChange={(e) => setNewTemplate({ ...newTemplate, caption: e.target.value })}
-                    className="w-full p-2 border rounded"
-                    placeholder="Enter caption"
-                  />
-                </div>
-                <button
-                  onClick={addTemplate}
-                  className="bg-green-500 text-white px-4 py-2 rounded"
-                >
-                  Add Template
-                </button>
-              </div>
             </div>
           </div>
         </div>
