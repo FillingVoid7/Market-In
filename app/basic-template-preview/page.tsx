@@ -110,12 +110,12 @@ const BasicTemplatePreview: React.FC<{
   return (
     <div className="w-full min-h-screen bg-gradient-to-b from-gray-50 to-white">
       {!isGeneratedURL && (
-        <div className="w-full sticky top-0 z-50 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white shadow-lg">
+        <div className="w-full sticky top-0 z-50 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white shadow-lg backdrop-blur-sm">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
             <div className="flex justify-between items-center">
               <button
                 onClick={() => router.push("/templates/basic")}
-                className="inline-flex items-center text-white hover:text-gray-200 transition-colors"
+                className="inline-flex items-center text-white hover:text-gray-200 transition-all duration-300 hover:scale-105"
               >
                 <ArrowLeft className="w-5 h-5 mr-2" />
                 Back to Editor
@@ -124,7 +124,7 @@ const BasicTemplatePreview: React.FC<{
               <div className="flex items-center gap-4">
                 <button
                   onClick={generateUniqueURL}
-                  className="inline-flex items-center px-4 py-2 bg-white text-blue-600 font-medium rounded-md hover:bg-gray-100 transition-colors"
+                  className="inline-flex items-center px-4 py-2 bg-white/10 backdrop-blur-sm text-white font-medium rounded-lg hover:bg-white/20 transition-all duration-300 hover:scale-105 border border-white/20"
                 >
                   <Link className="w-4 h-4 mr-2" />
                   Generate Product URL
@@ -132,7 +132,7 @@ const BasicTemplatePreview: React.FC<{
 
                 <button
                   onClick={handleSave}
-                  className="inline-flex items-center px-4 py-2 bg-green-500 text-white font-medium rounded-md hover:bg-green-600 transition-colors"
+                  className="inline-flex items-center px-4 py-2 bg-green-500 text-white font-medium rounded-lg hover:bg-green-600 transition-all duration-300 hover:scale-105 shadow-lg shadow-green-500/20"
                 >
                   Save Preview
                 </button>
@@ -143,17 +143,17 @@ const BasicTemplatePreview: React.FC<{
       )}
 
       {/* Hero Section */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* Image Gallery */}
           <div className="space-y-6">
             {productDetails.productPictures?.length > 0 ? (
               <>
-                <div className="aspect-square rounded-2xl overflow-hidden shadow-2xl bg-white">
+                <div className="aspect-square rounded-2xl overflow-hidden shadow-2xl bg-white transform transition-transform duration-500 hover:scale-[1.02]">
                   <img
                     src={productDetails.productPictures[selectedImage]?.url || "/placeholder.svg?height=600&width=600"}
                     alt="Product"
-                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+                    className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
                   />
                 </div>
                 <div className="grid grid-cols-4 gap-4">
@@ -161,9 +161,9 @@ const BasicTemplatePreview: React.FC<{
                     <button
                       key={img.url}
                       onClick={() => setSelectedImage(index)}
-                      className={`aspect-square rounded-lg overflow-hidden border-2 transition-all ${
+                      className={`aspect-square rounded-lg overflow-hidden border-2 transition-all duration-300 transform hover:scale-105 ${
                         selectedImage === index
-                          ? "border-blue-600 shadow-lg"
+                          ? "border-blue-600 shadow-lg ring-2 ring-blue-400"
                           : "border-transparent hover:border-blue-400"
                       }`}
                     >
@@ -177,7 +177,7 @@ const BasicTemplatePreview: React.FC<{
                 </div>
               </>
             ) : (
-              <div className="aspect-square rounded-2xl overflow-hidden shadow-2xl bg-gray-100 flex items-center justify-center">
+              <div className="aspect-square rounded-2xl overflow-hidden shadow-2xl bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
                 <p className="text-gray-400">No product images available</p>
               </div>
             )}
@@ -185,20 +185,20 @@ const BasicTemplatePreview: React.FC<{
 
           {/* Product Info */}
           <div className="space-y-8">
-            <div>
+            <div className="animate-fade-in">
               <h1
-                className="text-4xl font-bold text-gray-900 mb-2"
+                className="text-4xl font-bold text-gray-900 mb-2 tracking-tight"
                 dangerouslySetInnerHTML={{ __html: productDetails.productName?.content || "Product Name" }}
               />
               <div
-                className="text-3xl font-bold text-blue-600"
+                className="text-3xl font-bold text-blue-600 bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent"
                 dangerouslySetInnerHTML={{ __html: productDetails.productPrice?.content || "Price" }}
               />
             </div>
 
             {/* Short Description */}
             <div
-              className="text-gray-600 prose prose-blue max-w-none"
+              className="text-gray-600 prose prose-blue max-w-none bg-white/50 backdrop-blur-sm p-6 rounded-xl shadow-sm"
               dangerouslySetInnerHTML={{
                 __html: productDetails.shortDescription?.content || "Short description of the product",
               }}
@@ -206,10 +206,10 @@ const BasicTemplatePreview: React.FC<{
 
             {/* Generated URL */}
             {uniqueURLs.length > 0 && (
-              <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Generated URLs</h3>
+              <div className="mt-4 p-6 bg-white/50 backdrop-blur-sm rounded-xl shadow-sm border border-gray-100">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Generated URLs</h3>
                 {uniqueURLs.map((url, index) => (
-                  <div key={index} className="flex items-center gap-2 mb-2">
+                  <div key={index} className="flex items-center gap-2 mb-3 p-3 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300">
                     <a
                       href={url.url}
                       target="_blank"
@@ -220,7 +220,7 @@ const BasicTemplatePreview: React.FC<{
                     </a>
                     <button
                       onClick={() => copyToClipboard(url.url)}
-                      className="p-2 rounded-full hover:bg-gray-200 transition-colors"
+                      className="p-2 rounded-full hover:bg-gray-100 transition-colors duration-300"
                     >
                       {copied === url.url ? (
                         <Check className="w-4 h-4 text-green-600" />
@@ -239,7 +239,7 @@ const BasicTemplatePreview: React.FC<{
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Long Description */}
         {productDetails.longDescription?.content && (
-          <div className="bg-white rounded-xl shadow-lg p-8 mb-12">
+          <div className="bg-white rounded-xl shadow-lg p-8 mb-12 transform transition-transform duration-300 hover:scale-[1.01]">
             <h2 className="text-2xl font-bold text-gray-900 mb-6">Product Description</h2>
             <div
               className="prose prose-blue max-w-none"
@@ -252,7 +252,7 @@ const BasicTemplatePreview: React.FC<{
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
           {/* Features */}
           {productDetails.qualityFeatures?.content && (
-            <div className="bg-white rounded-xl shadow-lg p-8 h-full">
+            <div className="bg-white rounded-xl shadow-lg p-8 h-full transform transition-transform duration-300 hover:scale-[1.01]">
               <h2 className="text-2xl font-bold text-gray-900 mb-6">Key Features</h2>
               <div
                 className="prose prose-blue max-w-none"
@@ -263,7 +263,7 @@ const BasicTemplatePreview: React.FC<{
 
           {/* Specifications */}
           {productDetails.specifications?.content && (
-            <div className="bg-white rounded-xl shadow-lg p-8 h-full">
+            <div className="bg-white rounded-xl shadow-lg p-8 h-full transform transition-transform duration-300 hover:scale-[1.01]">
               <h2 className="text-2xl font-bold text-gray-900 mb-6">Specifications</h2>
               <div
                 className="prose prose-blue max-w-none"
@@ -275,7 +275,7 @@ const BasicTemplatePreview: React.FC<{
 
         {/* Product Video */}
         {productDetails.productVideos?.length > 0 && (
-          <div className="bg-white rounded-xl shadow-lg p-8 mb-12">
+          <div className="bg-white rounded-xl shadow-lg p-8 mb-12 transform transition-transform duration-300 hover:scale-[1.01]">
             <h2 className="text-2xl font-bold text-gray-900 mb-6">Product Video</h2>
             <div className="aspect-video rounded-xl overflow-hidden shadow-lg">
               <video
@@ -290,27 +290,27 @@ const BasicTemplatePreview: React.FC<{
 
         {/* FAQs */}
         {faqList?.length > 0 && (
-          <div className="bg-white rounded-xl shadow-lg p-8 mb-12">
+          <div className="bg-white rounded-xl shadow-lg p-8 mb-12 transform transition-transform duration-300 hover:scale-[1.01]">
             <h2 className="text-2xl font-bold text-gray-900 mb-6">Frequently Asked Questions</h2>
             <div className="space-y-4">
               {faqList.map((faq, index) => (
                 <div
                   key={index}
-                  className="border border-gray-200 rounded-xl overflow-hidden transition-all duration-200"
+                  className="border border-gray-200 rounded-xl overflow-hidden transition-all duration-300 hover:shadow-md"
                 >
                   <button
                     onClick={() => toggleFaq(index)}
-                    className="w-full flex justify-between items-center p-6 text-left bg-gray-50 hover:bg-gray-100 transition-colors"
+                    className="w-full flex justify-between items-center p-6 text-left bg-gray-50 hover:bg-gray-100 transition-colors duration-300"
                   >
                     <h3 className="font-semibold text-lg text-gray-900">{faq.question}</h3>
                     {expandedFaq === index ? (
-                      <ChevronUp className="w-5 h-5 text-gray-500" />
+                      <ChevronUp className="w-5 h-5 text-gray-500 transform transition-transform duration-300" />
                     ) : (
-                      <ChevronDown className="w-5 h-5 text-gray-500" />
+                      <ChevronDown className="w-5 h-5 text-gray-500 transform transition-transform duration-300" />
                     )}
                   </button>
                   {expandedFaq === index && (
-                    <div className="p-6 bg-white">
+                    <div className="p-6 bg-white animate-fade-in">
                       <p className="text-gray-600">{faq.answer}</p>
                     </div>
                   )}
@@ -321,7 +321,7 @@ const BasicTemplatePreview: React.FC<{
         )}
 
         {/* Shop Details */}
-        <div className="bg-white rounded-xl shadow-lg p-8">
+        <div className="bg-white rounded-xl shadow-lg p-8 transform transition-transform duration-300 hover:scale-[1.01]">
           <h2 className="text-2xl font-bold text-gray-900 mb-6">About the Shop</h2>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div>
@@ -334,7 +334,7 @@ const BasicTemplatePreview: React.FC<{
 
             <div className="space-y-4">
               {shopDetails.shopImages?.length > 0 ? (
-                <div className="rounded-xl overflow-hidden shadow-lg h-64">
+                <div className="rounded-xl overflow-hidden shadow-lg h-64 transform transition-transform duration-300 hover:scale-[1.02]">
                   <img
                     src={shopDetails.shopImages[0].url || "/placeholder.svg?height=600&width=600"}
                     alt="Shop"
@@ -342,13 +342,13 @@ const BasicTemplatePreview: React.FC<{
                   />
                 </div>
               ) : (
-                <div className="rounded-xl bg-gray-100 h-64 flex items-center justify-center">
+                <div className="rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 h-64 flex items-center justify-center">
                   <p className="text-gray-400">No shop image available</p>
                 </div>
               )}
 
               {shopDetails.shopAddress?.content && (
-                <div className="mt-4">
+                <div className="mt-4 p-4 bg-gray-50 rounded-xl">
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">Address</h3>
                   <div
                     className="text-gray-600"
