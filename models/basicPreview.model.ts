@@ -34,10 +34,11 @@ interface AnalyticsData {
 }
 
 interface SocialMediaPostTemplate {
-  platform: string;  // e.g., 'instagram', 'facebook', 'twitter'
+  platform: 'Facebook' | 'Instagram' | 'TikTok'; 
   templateName: string;  // e.g., 'New Arrival', 'Limited Time Offer'
   caption: string;
   hashtags: string[];
+  hooks?: string[]; // e.g., 'Limited Time Offer', 'Exclusive Deal'
   imagePlaceholders: {
     position: number;
     description: string;
@@ -47,14 +48,6 @@ interface SocialMediaPostTemplate {
   defaultImageUrl?: string;  // Fallback image if no product image is available
   productUrl: string;        // The unique URL to the product page
   callToAction?: string;     // e.g., 'Shop Now', 'Learn More'
-  style: {
-    fontFamily: string;
-    fontSize: string;
-    textColor: string;
-    backgroundColor: string;
-    accentColor?: string;    // For buttons or highlights
-    borderRadius?: string;   // For image corners
-  };
   metadata?: {
     lastUsed: Date;
     usageCount: number;
@@ -77,58 +70,65 @@ export interface IBasicPreview extends Document {
 const basicPreviewSchema = new Schema<IBasicPreview>(
   {
     productDetails: {
-      productName: { content: { type: String }, style: { type: Object } },
-      productPrice: { content: { type: String }, style: { type: Object } },
-      shortDescription: { content: { type: String }, style: { type: Object } },
-      longDescription: { content: { type: String }, style: { type: Object } },
-      qualityFeatures: { content: { type: String }, style: { type: Object } },
-      specifications: { content: { type: String }, style: { type: Object } },
-      productPictures: [{ url: String }],
-      productVideos: [{ url: String }],
+      productName: { content: { type: String, required: true }, style: { type: Object, default: {} } },
+      productPrice: { content: { type: String, required: true }, style: { type: Object, default: {} } },
+      shortDescription: { content: { type: String, required: true }, style: { type: Object, default: {} } },
+      longDescription: { content: { type: String, required: true }, style: { type: Object, default: {} } },
+      qualityFeatures: { content: { type: String, required: true }, style: { type: Object, default: {} } },
+      specifications: { content: { type: String, required: true }, style: { type: Object, default: {} } },
+      productPictures: [{ url: { type: String, required: true } }],
+      productVideos: [{ url: { type: String, required: true } }],
     },
     shopDetails: {
-      shopName: { content: { type: String }, style: { type: Object } },
-      shopDescription: { content: { type: String }, style: { type: Object } },
-      shopImages: [{ url: String }],
-      shopAddress: { content: { type: String }, style: { type: Object } },
-      shopContact: { content: { type: String }, style: { type: Object } },
-      shopEmail: { content: { type: String }, style: { type: Object } },
+      shopName: { content: { type: String, required: true }, style: { type: Object, default: {} } },
+      shopDescription: { content: { type: String, required: true }, style: { type: Object, default: {} } },
+      shopImages: [{ url: { type: String, required: true } }],
+      shopAddress: { content: { type: String, required: true }, style: { type: Object, default: {} } },
+      shopContact: { content: { type: String, required: true }, style: { type: Object, default: {} } },
+      shopEmail: { content: { type: String, required: true }, style: { type: Object, default: {} } },
     },
-    faqList: [{ question: String, answer: String }],
-    uniqueURLs: [String],
+    faqList: [{ 
+      question: { type: String, required: true },
+      answer: { type: String, required: true }
+    }],
+    uniqueURLs: [{ type: String, required: true }],
     socialMediaTemplates: [{
-      platform: { type: String, required: true },
+      platform: { 
+        type: String, 
+        required: true,
+        enum: ['Facebook', 'Instagram', 'TikTok']
+      },
       templateName: { type: String, required: true },
       caption: { type: String, required: true },
-      hashtags: [String],
+      hashtags: [{ type: String }],
+      hooks: [{ type: String }],
       imagePlaceholders: [{
-        position: Number,
-        description: String,
+        position: { type: Number, required: true },
+        description: { type: String, required: true },
         aspectRatio: String,
         maxSize: String
       }],
       defaultImageUrl: String,
       productUrl: { type: String, required: true },
       callToAction: String,
-      style: {
-        fontFamily: String,
-        fontSize: String,
-        textColor: String,
-        backgroundColor: String,
-        accentColor: String,
-        borderRadius: String
-      },
+      metadata: {
+        lastUsed: { type: Date, default: Date.now },
+        usageCount: { type: Number, default: 0 },
+        isActive: { type: Boolean, default: true }
+      }
     }],
-    analytics: [
-      {
-        productPageId: { type: Schema.Types.ObjectId, ref: "ProductPage" },
-        views: { type: Number, default: 0 },
-        clicks: { type: Number, default: 0 },
-        emailClicks: { type: Number, default: 0 },
-      },
-    ],
+    analytics: [{
+      productPageId: { type: Schema.Types.ObjectId, ref: "ProductPage", required: true },
+      views: { type: Number, default: 0 },
+      clicks: { type: Number, default: 0 },
+      emailClicks: { type: Number, default: 0 },
+    }],
   },
-  { timestamps: true, collection:"saved-basic-previews" }
+  { 
+    timestamps: true, 
+    collection: "saved-basic-previews",
+    strict: true
+  }
 );
 
 export const BasicPreviewModel = mongoose.models.BasicPreview || mongoose.model<IBasicPreview>("BasicPreview", basicPreviewSchema);

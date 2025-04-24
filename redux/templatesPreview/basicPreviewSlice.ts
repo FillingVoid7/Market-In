@@ -67,10 +67,11 @@ export interface ShopDetails {
 }
 
 export interface SocialMediaTemplate {
-  platform: string;
+  platform: 'Facebook' | 'Instagram' | 'TikTok';
   templateName: string;
   caption: string;
   hashtags: string[];
+  hooks?: string[];
   imagePlaceholders: {
     position: number;
     description: string;
@@ -80,13 +81,10 @@ export interface SocialMediaTemplate {
   defaultImageUrl?: string;
   productUrl: string;
   callToAction?: string;
-  style: {
-    fontFamily: string;
-    fontSize: string;
-    textColor: string;
-    backgroundColor: string;
-    accentColor?: string;
-    borderRadius?: string;
+  metadata?: {
+    lastUsed: Date;
+    usageCount: number;
+    isActive: boolean;
   };
 }
 
@@ -174,7 +172,14 @@ export const saveBasicPreview = createAsyncThunk(
         },
         faqList: data.faqList,
         uniqueURLs: data.uniqueURLs,
-        socialMediaTemplates: data.socialMediaTemplates,
+        socialMediaTemplates: data.socialMediaTemplates.map(template => ({
+          ...template,
+          metadata: {
+            lastUsed: new Date(),
+            usageCount: 0,
+            isActive: true
+          }
+        })),
         analytics: data.analytics
       };
 
@@ -293,7 +298,14 @@ const basicPreviewSlice = createSlice({
       state.faqList = action.payload;
     },
     updateSocialMediaTemplates: (state, action: PayloadAction<SocialMediaTemplate[]>) => {
-      state.socialMediaTemplates = action.payload;
+      state.socialMediaTemplates = action.payload.map(template => ({
+        ...template,
+        metadata: template.metadata || {
+          lastUsed: new Date(),
+          usageCount: 0,
+          isActive: true
+        }
+      }));
     },
     updateAnalytics: (state, action: PayloadAction<Analytics[]>) => {
       state.analytics = action.payload;
@@ -346,7 +358,14 @@ const basicPreviewSlice = createSlice({
         state.shopDetails = action.payload.shopDetails;
         state.faqList = action.payload.faqList;
         state.uniqueURLs = action.payload.uniqueURLs || [];
-        state.socialMediaTemplates = action.payload.socialMediaTemplates || [];
+        state.socialMediaTemplates = (action.payload.socialMediaTemplates || []).map((template: SocialMediaTemplate) => ({
+          ...template,
+          metadata: template.metadata || {
+            lastUsed: new Date(),
+            usageCount: 0,
+            isActive: true
+          }
+        }));
         state.analytics = action.payload.analytics || [];
         state.loading = false;
         state.createdPreview = action.payload;
