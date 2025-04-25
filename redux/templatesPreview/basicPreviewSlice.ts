@@ -242,13 +242,13 @@ export const uploadMedia = createAsyncThunk(
 
 interface UpdateProductFieldPayload {
   field: keyof ProductDetails;
-  content: string;
+  content: string | MediaItem[];
   style: object;
 }
 
 interface UpdateShopFieldPayload {
   field: keyof ShopDetails;
-  content: string;
+  content: string | MediaItem[];
   style: object;
 }
 
@@ -272,17 +272,17 @@ const basicPreviewSlice = createSlice({
     updateProductField: (state, action: PayloadAction<UpdateProductFieldPayload>) => {
       const { field, content, style } = action.payload;
       if (field === "productPictures" || field === "productVideos") {
-        state.productDetails[field] = content as any;
+        state.productDetails[field] = content as MediaItem[];
       } else {
-        state.productDetails[field] = { content, style };
+        state.productDetails[field] = { content: content as string, style };
       }
     },
     updateShopField: (state, action: PayloadAction<UpdateShopFieldPayload>) => {
       const { field, content, style } = action.payload;
       if (field === "shopImages") {
-        state.shopDetails[field] = content as any;
+        state.shopDetails[field] = content as MediaItem[];
       } else {
-        state.shopDetails[field] = { content, style };
+        state.shopDetails[field] = { content: content as string, style };
       }
     },
     updateProductImages: (state, action: PayloadAction<MediaItem[]>) => {

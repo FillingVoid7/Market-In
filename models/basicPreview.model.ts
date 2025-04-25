@@ -33,7 +33,7 @@ interface AnalyticsData {
   emailClicks: number;
 }
 
-interface SocialMediaPostTemplate {
+export interface SocialMediaPostTemplate {
   platform: 'Facebook' | 'Instagram' | 'TikTok'; 
   templateName: string;  // e.g., 'New Arrival', 'Limited Time Offer'
   caption: string;
