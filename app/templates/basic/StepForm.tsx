@@ -1,16 +1,17 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState, AppDispatch } from '../../../redux/templatesPreview/basicPreviewStore';
-import { 
-  updateProductField, 
-  updateShopField, 
-  updateFaqList, 
+import {
+  updateProductField,
+  updateShopField,
+  updateFaqList,
   updateSocialMediaTemplates,
   updateProductImages,
   updateProductVideos,
   updateShopImages,
   uploadMedia,
-  MediaItem
+  MediaItem,
+  ContentStyle
 } from '../../../redux/templatesPreview/basicPreviewSlice';
 import { SocialMediaPostTemplate } from '../../../models/basicPreview.model';
 import FreeTextEditor from '../../../text-editors/freeTextEditor';
@@ -27,7 +28,6 @@ const StepForm: React.FC<StepFormProps> = ({ onComplete }) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [newFaq, setNewFaq] = useState({ question: '', answer: '' });
   const [newTemplate, setNewTemplate] = useState<SocialMediaPostTemplate>({
-    platform: 'Facebook',
     templateName: '',
     caption: '',
     hashtags: [],
@@ -46,11 +46,25 @@ const StepForm: React.FC<StepFormProps> = ({ onComplete }) => {
   const socialMediaTemplates = useSelector((state: RootState) => state.basicPreview.socialMediaTemplates);
 
   const handleProductContentSave = (field: keyof typeof productDetails, content: string, style: object) => {
-    dispatch(updateProductField({ field, content, style }));
+    if (field === 'productPictures' || field === 'productVideos') {
+      return;
+    }
+    dispatch(updateProductField({
+      field,
+      content,
+      style: { ...(productDetails[field] as ContentStyle)?.style, ...style }
+    }));
   };
 
   const handleShopContentSave = (field: keyof typeof shopDetails, content: string, style: object) => {
-    dispatch(updateShopField({ field, content, style }));
+    if (field === 'shopImages') {
+      return;
+    }
+    dispatch(updateShopField({
+      field,
+      content,
+      style: { ...(shopDetails[field] as ContentStyle)?.style, ...style }
+    }));
   };
 
   const addFaq = () => {
@@ -61,15 +75,13 @@ const StepForm: React.FC<StepFormProps> = ({ onComplete }) => {
   };
 
   const addTemplate = () => {
-    if (!newTemplate.templateName || !newTemplate.caption) {
-      alert('Please fill in all required fields');
+    if (socialMediaTemplates.length > 0) {
+      toast.error("Only one template is allowed per product");
       return;
     }
-
     const updatedTemplates = [...socialMediaTemplates, newTemplate];
     dispatch(updateSocialMediaTemplates(updatedTemplates));
     setNewTemplate({
-      platform: 'Facebook',
       templateName: '',
       caption: '',
       hashtags: [],
@@ -81,6 +93,11 @@ const StepForm: React.FC<StepFormProps> = ({ onComplete }) => {
         isActive: true
       }
     });
+  };
+
+  const deleteTemplate = (index: number) => {
+    const updatedTemplates = socialMediaTemplates.filter((_, i) => i !== index);
+    dispatch(updateSocialMediaTemplates(updatedTemplates));
   };
 
   const nextStep = () => {
@@ -184,7 +201,7 @@ const StepForm: React.FC<StepFormProps> = ({ onComplete }) => {
       case 1:
         return (
           <div className="space-y-6">
-            <h2 className="text-2xl font-bold">Product Details</h2>
+            <h2 className="text-gray-800 text-2xl font-bold">Product Details</h2>
             <div>
               <label className="block font-semibold text-gray-700">Product Name</label>
               <FreeTextEditor
@@ -299,7 +316,7 @@ const StepForm: React.FC<StepFormProps> = ({ onComplete }) => {
       case 2:
         return (
           <div className="space-y-6">
-            <h2 className="text-2xl font-bold">Shop Details</h2>
+            <h2 className="text-gray-800 text-2xl font-bold">Shop Details</h2>
             <div>
               <label className="block font-semibold text-gray-700">Shop Name</label>
               <FreeTextEditor
@@ -375,7 +392,7 @@ const StepForm: React.FC<StepFormProps> = ({ onComplete }) => {
       case 3:
         return (
           <div className="space-y-6">
-            <h2 className="text-2xl font-bold">FAQs</h2>
+            <h2 className="text-gray-800 text-2xl font-bold">FAQs</h2>
             <div className="space-y-4">
               {faqList.map((faq, index) => (
                 <div key={index} className="border rounded p-4">
@@ -399,7 +416,7 @@ const StepForm: React.FC<StepFormProps> = ({ onComplete }) => {
                 />
                 <button
                   onClick={addFaq}
-                  className="bg-green-500 text-white px-4 py-2 rounded"
+                  className="bg-green-500 text-white hover:bg-green-700 px-4 py-2 rounded"
                 >
                   Add FAQ
                 </button>
@@ -409,117 +426,123 @@ const StepForm: React.FC<StepFormProps> = ({ onComplete }) => {
         );
       case 4:
         return (
-          <div className="space-y-6">
-            <h2 className="text-2xl font-bold">Social Media Templates</h2>
+          <div className="max-w-2xl mx-auto space-y-6">
+            <h2 className="text-2xl font-bold text-gray-800">Social Media Template</h2>
             <div className="space-y-4">
               {socialMediaTemplates.map((template, index) => (
-                <div key={index} className="border rounded p-4">
-                  <h3 className="font-semibold">{template.platform} - {template.templateName}</h3>
-                  <p className="text-gray-600">{template.caption}</p>
+                <div key={index} className="bg-white rounded-lg shadow-sm p-4 relative border border-gray-100">
+                  <button
+                    onClick={() => deleteTemplate(index)}
+                    className="absolute top-2 right-2 text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-50"
+                  >
+                    ×
+                  </button>
+                  <h3 className="font-semibold text-lg text-gray-800 mb-2">{template.templateName || 'Untitled Template'}</h3>
+                  {template.caption && (
+                    <p className="text-gray-600 mb-3">{template.caption}</p>
+                  )}
                   {template.hashtags.length > 0 && (
-                    <div className="mt-2">
-                      <span className="text-sm text-gray-500">Hashtags: </span>
+                    <div className="flex flex-wrap gap-2 mb-2">
                       {template.hashtags.map((tag, i) => (
-                        <span key={i} className="text-blue-500 mr-2">#{tag}</span>
+                        <span key={i} className="text-sm text-blue-500 bg-blue-50 px-2 py-1 rounded-full">
+                          #{tag}
+                        </span>
                       ))}
                     </div>
                   )}
                   {template.callToAction && (
                     <div className="mt-2">
-                      <span className="text-sm text-gray-500">Call to Action: </span>
-                      <span className="text-purple-500">{template.callToAction}</span>
+                      <span className="text-sm font-medium text-purple-600">{template.callToAction}</span>
                     </div>
                   )}
                 </div>
               ))}
-              <div className="space-y-4 p-4 border rounded">
-                <div>
-                  <label className="block font-semibold text-gray-700">Platform</label>
-                  <select
-                    value={newTemplate.platform}
-                    onChange={(e) => setNewTemplate({ ...newTemplate, platform: e.target.value as "Facebook" | "Instagram" | "TikTok" })}
-                    className="w-full p-2 border rounded"
-                  >
-                    <option value="Facebook">Facebook</option>
-                    <option value="Instagram">Instagram</option>
-                    <option value="TikTok">TikTok</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block font-semibold text-gray-700">Template Type</label>
-                  <select
-                    value={newTemplate.templateName}
-                    onChange={(e) => setNewTemplate({ ...newTemplate, templateName: e.target.value })}
-                    className="w-full p-2 border rounded"
-                  >
-                    <option value="">Select a template type</option>
-                    <option value="New Arrival">New Arrival</option>
-                    <option value="Limited Time Offer">Limited Time Offer</option>
-                    <option value="Flash Sale">Flash Sale</option>
-                    <option value="Product Launch">Product Launch</option>
-                    <option value="Special Promotion">Special Promotion</option>
-                    <option value="Holiday Special">Holiday Special</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block font-semibold text-gray-700">Caption</label>
-                  <textarea
-                    value={newTemplate.caption}
-                    onChange={(e) => setNewTemplate({ ...newTemplate, caption: e.target.value })}
-                    className="w-full p-2 border rounded"
-                    placeholder="Write an engaging caption for your post..."
-                  />
-                </div>
-                <div>
-                  <label className="block font-semibold text-gray-700">Hashtags</label>
-                  <div className="flex flex-wrap gap-2 mb-2">
-                    {newTemplate.hashtags.map((tag, index) => (
-                      <span key={index} className="bg-blue-100 text-blue-600 px-2 py-1 rounded-full flex items-center">
-                        #{tag}
-                        <button
-                          onClick={() => {
-                            const updatedTags = [...newTemplate.hashtags];
-                            updatedTags.splice(index, 1);
-                            setNewTemplate({ ...newTemplate, hashtags: updatedTags });
-                          }}
-                          className="ml-1 text-blue-600 hover:text-blue-800"
-                        >
-                          ×
-                        </button>
-                      </span>
-                    ))}
+
+              {socialMediaTemplates.length === 0 && (
+                <div className="bg-white rounded-lg shadow-sm p-6 space-y-6  border-gray-100">
+                  <div className="grid grid-cols-1 gap-4">
+                    <div>
+                      <label className="block text-md font-medium text-gray-700 mb-1">Template Type</label>
+                      <select
+                        value={newTemplate.templateName}
+                        onChange={(e) => setNewTemplate({ ...newTemplate, templateName: e.target.value })}
+                        className="w-full p-2 text-sm text-gray-700 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      >
+                        <option value="" className="text-gray-500">Select a template type</option>
+                        <option value="New Arrival">New Arrival</option>
+                        <option value="Limited Time Offer">Limited Time Offer</option>
+                        <option value="Flash Sale">Flash Sale</option>
+                        <option value="Product Launch">Product Launch</option>
+                        <option value="Special Promotion">Special Promotion</option>
+                        <option value="Holiday Special">Holiday Special</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-md font-medium text-gray-700 mb-1">Caption</label>
+                      <textarea
+                        value={newTemplate.caption}
+                        onChange={(e) => setNewTemplate({ ...newTemplate, caption: e.target.value })}
+                        className="w-full p-2 text-gray-700 
+                         border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 border focus:border-blue-500 min-h-[100px] placeholder-gray-400"
+                        placeholder="Write an engaging caption for your post..."
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-md font-medium text-gray-700 mb-1">Hashtags</label>
+                      <div className="flex flex-wrap gap-2 mb-1">
+                        {newTemplate.hashtags.map((tag, index) => (
+                          <span key={index} className="bg-blue-100 text-blue-600 px-2 py-1 rounded-full text-sm flex items-center">
+                            #{tag}
+                            <button
+                              onClick={() => {
+                                const updatedTags = [...newTemplate.hashtags];
+                                updatedTags.splice(index, 1);
+                                setNewTemplate({ ...newTemplate, hashtags: updatedTags });
+                              }}
+                              className="ml-1 text-blue-600 hover:text-blue-800"
+                            >
+                              ×
+                            </button>
+                          </span>
+                        ))}
+                      </div>
+                      <input
+                        type="text"
+                        value={newTemplate.hashtags.join(' ')}
+                        onChange={(e) => setNewTemplate({ ...newTemplate, hashtags: e.target.value.split(' ').filter(tag => tag) })}
+                        className="w-full p-2 text-gray-700 border  border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400"
+                        placeholder="#madeInNepal #vintageProduct #exclusive"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-md font-medium text-gray-700 mb-1">Call to Action</label>
+                      <select
+                        value={newTemplate.callToAction || ''}
+                        onChange={(e) => setNewTemplate({ ...newTemplate, callToAction: e.target.value })}
+                        className="w-full text-sm p-2 text-gray-700 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      >
+                        <option value="" className="text-gray-500">Select a call to action</option>
+                        <option value="Shop Now">Shop Now</option>
+                        <option value="Learn More">Learn More</option>
+                        <option value="Get Yours Today">Get Yours Today</option>
+                        <option value="Limited Stock">Limited Stock</option>
+                        <option value="Don't Miss Out">Don't Miss Out</option>
+                        <option value="Grab Yours">Grab Yours</option>
+                      </select>
+                    </div>
                   </div>
-                  <input
-                    type="text"
-                    value={newTemplate.hashtags.join(' ')}
-                    onChange={(e) => setNewTemplate({ ...newTemplate, hashtags: e.target.value.split(' ').filter(tag => tag) })}
-                    className="w-full p-2 border rounded"
-                    placeholder="Add hashtags (separate with spaces) e.g., #newarrival #limitedtime #exclusive"
-                  />
-                </div>
-                <div>
-                  <label className="block font-semibold text-gray-700">Call to Action</label>
-                  <select
-                    value={newTemplate.callToAction || ''}
-                    onChange={(e) => setNewTemplate({ ...newTemplate, callToAction: e.target.value })}
-                    className="w-full p-2 border rounded"
+
+                  <button
+                    onClick={addTemplate}
+                    className="w-full bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors"
                   >
-                    <option value="">Select a call to action</option>
-                    <option value="Shop Now">Shop Now</option>
-                    <option value="Learn More">Learn More</option>
-                    <option value="Get Yours Today">Get Yours Today</option>
-                    <option value="Limited Stock">Limited Stock</option>
-                    <option value="Don't Miss Out">Don't Miss Out</option>
-                    <option value="Grab Yours">Grab Yours</option>
-                  </select>
+                    Add Template
+                  </button>
                 </div>
-                <button
-                  onClick={addTemplate}
-                  className="w-full bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
-                >
-                  Add Template
-                </button>
-              </div>
+              )}
             </div>
           </div>
         );
@@ -533,18 +556,18 @@ const StepForm: React.FC<StepFormProps> = ({ onComplete }) => {
       <div className="mb-8">
         <div className="flex justify-between">
           {[1, 2, 3, 4].map((step) => (
-            <div
+            <button
               key={step}
-              className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                currentStep === step
+              onClick={() => setCurrentStep(step)}
+              className={`w-8 h-8 rounded-full flex items-center justify-center cursor-pointer transition-all duration-300 ${currentStep === step
                   ? 'bg-blue-600 text-white'
                   : currentStep > step
-                  ? 'bg-green-500 text-white'
-                  : 'bg-gray-200 text-gray-600'
-              }`}
+                    ? 'bg-green-500 text-white'
+                    : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+                }`}
             >
               {step}
-            </div>
+            </button>
           ))}
         </div>
       </div>

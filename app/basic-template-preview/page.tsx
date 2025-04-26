@@ -52,6 +52,12 @@ const BasicTemplatePreview: React.FC<{
   const handleSave = async (e: React.MouseEvent) => {
     e.preventDefault();
 
+    // Validate required fields
+    if (!productDetails.productName?.content || !shopDetails.shopName?.content) {
+      toast.error("Please fill in both Product Name and Shop Name before saving");
+      return;
+    }
+
     try {
       const resultAction = await dispatch(
         saveBasicPreview({
@@ -71,7 +77,7 @@ const BasicTemplatePreview: React.FC<{
         if (errorMessage === "A preview already exists for this obligation.") {
           toast.error("The preview has already been saved!");
         } else {
-          toast.error(`Failed to save: ${errorMessage}`);
+          toast.error("Failed to save");
         }
       }
     } catch (error) {
@@ -82,7 +88,7 @@ const BasicTemplatePreview: React.FC<{
   const generateUniqueURL = async () => {
     try {
       const resultAction = await dispatch(generateUrlBasic() as any);
-      
+
       if (generateUrlBasic.fulfilled.match(resultAction)) {
         toast.success("URL generated successfully!");
       } else {
@@ -142,67 +148,99 @@ const BasicTemplatePreview: React.FC<{
         </div>
       )}
 
-      {/* Hero Section */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          {/* Image Gallery */}
-          <div className="space-y-6">
-            {productDetails.productPictures?.length > 0 ? (
-              <>
-                <div className="aspect-square rounded-2xl overflow-hidden shadow-2xl bg-white transform transition-transform duration-500 hover:scale-[1.02]">
-                  <img
-                    src={productDetails.productPictures[selectedImage]?.url || "/placeholder.svg?height=600&width=600"}
-                    alt="Product"
-                    className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
-                  />
-                </div>
-                <div className="grid grid-cols-4 gap-4">
-                  {productDetails.productPictures.map((img: MediaItem, index: number) => (
-                    <button
-                      key={img.url}
-                      onClick={() => setSelectedImage(index)}
-                      className={`aspect-square rounded-lg overflow-hidden border-2 transition-all duration-300 transform hover:scale-105 ${
-                        selectedImage === index
-                          ? "border-blue-600 shadow-lg ring-2 ring-blue-400"
-                          : "border-transparent hover:border-blue-400"
-                      }`}
-                    >
-                      <img
-                        src={img.url || "/placeholder.svg?height=600&width=600"}
-                        alt={`Product ${index + 1}`}
-                        className="w-full h-full object-cover"
-                      />
-                    </button>
-                  ))}
-                </div>
-              </>
-            ) : (
-              <div className="aspect-square rounded-2xl overflow-hidden shadow-2xl bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
-                <p className="text-gray-400">No product images available</p>
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        {/* Social Media Templates */}
+        {data.socialMediaTemplates?.length > 0 && (
+          <div className="bg-white rounded-xl shadow-lg p-8 mb-12 transform transition-transform duration-300 hover:scale-[1.01] max-w-2xl mx-auto">
+            {data.socialMediaTemplates.map((template, index) => (
+              <div
+                key={index}
+                className="bg-gradient-to-br from-gray-50 to-white rounded-xl p-6 shadow-md hover:shadow-lg transition-shadow duration-300"
+              >
+                {template.templateName && (
+                  <span className="px-3 py-1 bg-purple-100 text-purple-600 rounded-full text-sm font-medium mb-4 inline-block">
+                    {template.templateName}
+                  </span>
+                )}
+                {template.caption && (
+                  <p className="text-gray-700 mb-4">{template.caption}</p>
+                )}
+                {template.hashtags?.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {template.hashtags.map((tag, i) => (
+                      <span key={i} className="text-blue-500 text-sm">#{tag}</span>
+                    ))}
+                  </div>
+                )}
+                {template.callToAction && (
+                  <div className="mt-4">
+                    <span className="text-purple-600 font-medium">{template.callToAction}</span>
+                  </div>
+                )}
               </div>
-            )}
+            ))}
           </div>
+        )}
+
+        {/* Hero Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
+          {/* Image Gallery */}
+          {productDetails.productPictures?.length > 0 && (
+            <div className="space-y-6">
+              <div className="aspect-square rounded-2xl overflow-hidden shadow-2xl bg-white transform transition-transform duration-500 hover:scale-[1.02]">
+                <img
+                  src={productDetails.productPictures[selectedImage]?.url}
+                  alt="Product"
+                  className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                />
+              </div>
+              <div className="grid grid-cols-4 gap-4">
+                {productDetails.productPictures.map((img: MediaItem, index: number) => (
+                  <button
+                    key={img.url}
+                    onClick={() => setSelectedImage(index)}
+                    className={`aspect-square rounded-lg overflow-hidden border-2 transition-all duration-300 transform hover:scale-105 ${selectedImage === index
+                        ? "border-blue-600 shadow-lg ring-2 ring-blue-400"
+                        : "border-transparent hover:border-blue-400"
+                      }`}
+                  >
+                    <img
+                      src={img.url}
+                      alt={`Product ${index + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Product Info */}
           <div className="space-y-8">
-            <div className="animate-fade-in">
-              <h1
-                className="text-4xl font-bold text-gray-900 mb-2 tracking-tight"
-                dangerouslySetInnerHTML={{ __html: productDetails.productName?.content || "Product Name" }}
-              />
+            {productDetails.productName?.content && (
+              <div className="animate-fade-in">
+                <h1
+                  className="text-4xl font-bold text-gray-900 mb-2 tracking-tight"
+                  dangerouslySetInnerHTML={{ __html: productDetails.productName.content }}
+                />
+              </div>
+            )}
+
+            {productDetails.productPrice?.content && (
               <div
                 className="text-3xl font-bold text-blue-600 bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent"
-                dangerouslySetInnerHTML={{ __html: productDetails.productPrice?.content || "Price" }}
+                dangerouslySetInnerHTML={{ __html: productDetails.productPrice.content }}
               />
-            </div>
+            )}
 
-            {/* Short Description */}
-            <div
-              className="text-gray-600 prose prose-blue max-w-none bg-white/50 backdrop-blur-sm p-6 rounded-xl shadow-sm"
-              dangerouslySetInnerHTML={{
-                __html: productDetails.shortDescription?.content || "Short description of the product",
-              }}
-            />
+            {productDetails.shortDescription?.content && (
+              <div
+                className="text-gray-600 prose prose-blue max-w-none bg-white/50 backdrop-blur-sm p-6 rounded-xl shadow-sm"
+                dangerouslySetInnerHTML={{
+                  __html: productDetails.shortDescription.content,
+                }}
+              />
+            )}
 
             {/* Generated URL */}
             {uniqueURLs.length > 0 && (
@@ -234,19 +272,6 @@ const BasicTemplatePreview: React.FC<{
             )}
           </div>
         </div>
-      </div>
-
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Long Description */}
-        {productDetails.longDescription?.content && (
-          <div className="bg-white rounded-xl shadow-lg p-8 mb-12 transform transition-transform duration-300 hover:scale-[1.01]">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Product Description</h2>
-            <div
-              className="prose prose-blue max-w-none"
-              dangerouslySetInnerHTML={{ __html: productDetails.longDescription.content }}
-            />
-          </div>
-        )}
 
         {/* Product Details Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
@@ -272,6 +297,17 @@ const BasicTemplatePreview: React.FC<{
             </div>
           )}
         </div>
+
+        {/* Long Description */}
+        {productDetails.longDescription?.content && (
+          <div className="bg-white rounded-xl shadow-lg p-8 mb-12 transform transition-transform duration-300 hover:scale-[1.01]">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">Product Description</h2>
+            <div
+              className="prose prose-blue max-w-none"
+              dangerouslySetInnerHTML={{ __html: productDetails.longDescription.content }}
+            />
+          </div>
+        )}
 
         {/* Product Video */}
         {productDetails.productVideos?.length > 0 && (
@@ -320,45 +356,46 @@ const BasicTemplatePreview: React.FC<{
           </div>
         )}
 
+
         {/* Shop Details */}
-        <div className="bg-white rounded-xl shadow-lg p-8 transform transition-transform duration-300 hover:scale-[1.01]">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">About the Shop</h2>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">{shopDetails.shopName?.content}</h3>
-              <div
-                className="prose prose-blue max-w-none"
-                dangerouslySetInnerHTML={{ __html: shopDetails.shopDescription?.content }}
-              />
-            </div>
-
-            <div className="space-y-4">
-              {shopDetails.shopImages?.length > 0 ? (
-                <div className="rounded-xl overflow-hidden shadow-lg h-64 transform transition-transform duration-300 hover:scale-[1.02]">
-                  <img
-                    src={shopDetails.shopImages[0].url || "/placeholder.svg?height=600&width=600"}
-                    alt="Shop"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              ) : (
-                <div className="rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 h-64 flex items-center justify-center">
-                  <p className="text-gray-400">No shop image available</p>
-                </div>
-              )}
-
-              {shopDetails.shopAddress?.content && (
-                <div className="mt-4 p-4 bg-gray-50 rounded-xl">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Address</h3>
+        {shopDetails.shopName?.content && (
+          <div className="bg-white rounded-xl shadow-lg p-8 transform transition-transform duration-300 hover:scale-[1.01]">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">About the Shop</h2>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-4">{shopDetails.shopName.content}</h3>
+                {shopDetails.shopDescription?.content && (
                   <div
-                    className="text-gray-600"
-                    dangerouslySetInnerHTML={{ __html: shopDetails.shopAddress.content }}
+                    className="prose prose-blue max-w-none"
+                    dangerouslySetInnerHTML={{ __html: shopDetails.shopDescription.content }}
                   />
-                </div>
-              )}
+                )}
+              </div>
+
+              <div className="space-y-4">
+                {shopDetails.shopImages?.length > 0 && (
+                  <div className="rounded-xl overflow-hidden shadow-lg h-64 transform transition-transform duration-300 hover:scale-[1.02]">
+                    <img
+                      src={shopDetails.shopImages[0].url}
+                      alt="Shop"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                )}
+
+                {shopDetails.shopAddress?.content && (
+                  <div className="mt-4 p-4 bg-gray-50 rounded-xl">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Address</h3>
+                    <div
+                      className="text-gray-600"
+                      dangerouslySetInnerHTML={{ __html: shopDetails.shopAddress.content }}
+                    />
+                  </div>
+                )}
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </main>
     </div>
   )

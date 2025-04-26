@@ -34,7 +34,7 @@ interface URLSnapshot {
   createdAt: string;
 }
 
-interface ContentStyle {
+export interface ContentStyle {
   content: string;
   style: object;
 }
@@ -67,7 +67,6 @@ export interface ShopDetails {
 }
 
 export interface SocialMediaTemplate {
-  platform: 'Facebook' | 'Instagram' | 'TikTok';
   templateName: string;
   caption: string;
   hashtags: string[];
@@ -176,6 +175,7 @@ export const saveBasicPreview = createAsyncThunk(
       };
 
       const response = await axios.post(`${API_URL}`, sanitizedPayload);
+      console.log('Returned saved state after save:',response);
       return response.data;
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || "Server error");
@@ -266,7 +266,10 @@ const basicPreviewSlice = createSlice({
       if (field === "productPictures" || field === "productVideos") {
         state.productDetails[field] = content as MediaItem[];
       } else {
-        state.productDetails[field] = { content: content as string, style };
+        state.productDetails[field] = { 
+          content: content as string, 
+          style: { ...state.productDetails[field]?.style, ...style } 
+        };
       }
     },
     updateShopField: (state, action: PayloadAction<UpdateShopFieldPayload>) => {
@@ -274,7 +277,10 @@ const basicPreviewSlice = createSlice({
       if (field === "shopImages") {
         state.shopDetails[field] = content as MediaItem[];
       } else {
-        state.shopDetails[field] = { content: content as string, style };
+        state.shopDetails[field] = { 
+          content: content as string, 
+          style: { ...state.shopDetails[field]?.style, ...style } 
+        };
       }
     },
     updateProductImages: (state, action: PayloadAction<MediaItem[]>) => {

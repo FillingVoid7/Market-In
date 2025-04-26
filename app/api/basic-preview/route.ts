@@ -15,6 +15,13 @@ export async function POST(req: NextRequest) {
             );
         }
 
+        if (!body.shopDetails || !body.shopDetails.shopName || !body.shopDetails.shopName.content) {
+            return NextResponse.json(
+                { success: false, message: "Product name is required" },
+                { status: 400 }
+            );
+        }
+
         console.log("Checking for existing product with name:", body.productDetails.productName.content);
 
         const existingPreview = await BasicPreviewModel.findOne({
@@ -39,7 +46,7 @@ export async function POST(req: NextRequest) {
                 data: savedBasicPreview 
             },
             { status: 201 }
-        );
+        ); 
 
     } catch (error) {
         console.error("Save error:", error);

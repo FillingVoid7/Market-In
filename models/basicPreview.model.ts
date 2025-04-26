@@ -34,7 +34,6 @@ interface AnalyticsData {
 }
 
 export interface SocialMediaPostTemplate {
-  platform: 'Facebook' | 'Instagram' | 'TikTok'; 
   templateName: string;  // e.g., 'New Arrival', 'Limited Time Offer'
   caption: string;
   hashtags: string[];
@@ -62,38 +61,30 @@ export interface IBasicPreview extends Document {
 const basicPreviewSchema = new Schema<IBasicPreview>(
   {
     productDetails: {
-      productName: { content: { type: String, required: true }, style: { type: Object, default: {} } },
-      productPrice: { content: { type: String, required: true }, style: { type: Object, default: {} } },
-      shortDescription: { content: { type: String, required: true }, style: { type: Object, default: {} } },
-      longDescription: { content: { type: String, required: true }, style: { type: Object, default: {} } },
-      qualityFeatures: { content: { type: String, required: true }, style: { type: Object, default: {} } },
-      specifications: { content: { type: String, required: true }, style: { type: Object, default: {} } },
-      productPictures: [{ url: { type: String, required: true } }],
-      productVideos: [{ url: { type: String, required: true } }],
+      productName: { content: { type: String }, style: { type: Schema.Types.Mixed } },
+      productPrice: { content: { type: String }, style: { type: Schema.Types.Mixed } },
+      shortDescription: { content: { type: String }, style: { type: Schema.Types.Mixed } },
+      longDescription: { content: { type: String }, style: { type: Schema.Types.Mixed } },
+      qualityFeatures: { content: { type: String }, style: { type: Schema.Types.Mixed } },
+      specifications: { content: { type: String }, style: { type: Schema.Types.Mixed } },
+      productPictures: [{ url: String }],
+      productVideos: [{ url: String }],
     },
     shopDetails: {
-      shopName: { content: { type: String, required: true }, style: { type: Object, default: {} } },
-      shopDescription: { content: { type: String, required: true }, style: { type: Object, default: {} } },
-      shopImages: [{ url: { type: String, required: true } }],
-      shopAddress: { content: { type: String, required: true }, style: { type: Object, default: {} } },
-      shopContact: { content: { type: String, required: true }, style: { type: Object, default: {} } },
-      shopEmail: { content: { type: String, required: true }, style: { type: Object, default: {} } },
+      shopName: { content: { type: String }, style: { type: Schema.Types.Mixed } },
+      shopDescription: { content: { type: String }, style: { type: Schema.Types.Mixed } },
+      shopImages: [{ url: String }],
+      shopAddress: { content: { type: String }, style: { type: Schema.Types.Mixed } },
+      shopContact: { content: { type: String }, style: { type: Schema.Types.Mixed } },
+      shopEmail: { content: { type: String }, style: { type: Schema.Types.Mixed } },
     },
-    faqList: [{ 
-      question: { type: String, required: true },
-      answer: { type: String, required: true }
-    }],
-    uniqueURLs: [{ type: String, required: true }],
+    faqList: [{ question: String, answer: String }],
+    uniqueURLs: [String],
     socialMediaTemplates: [{
-      platform: { 
-        type: String, 
-        required: true,
-        enum: ['Facebook', 'Instagram', 'TikTok']
-      },
-      templateName: { type: String, required: true },
-      caption: { type: String, required: true },
+      templateName: { type: String },
+      caption: { type: String },
       hashtags: [{ type: String }],
-      productUrl: { type: String, required: true },
+      productUrl: { type: String },
       callToAction: String,
       metadata: {
         lastUsed: { type: String, default: Date.now.toString() },
@@ -102,7 +93,7 @@ const basicPreviewSchema = new Schema<IBasicPreview>(
       }
     }],
     analytics: [{
-      productPageId: { type: Schema.Types.ObjectId, ref: "ProductPage", required: true },
+      productPageId: { type: Schema.Types.ObjectId, ref: "ProductPage" },
       views: { type: Number, default: 0 },
       clicks: { type: Number, default: 0 },
       emailClicks: { type: Number, default: 0 },

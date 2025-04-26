@@ -57,30 +57,27 @@ const FreeTextEditor: React.FC<FreeTextEditorProps> = ({ value = "", onSave, pla
 
     useEffect(() => {
         setContent(value);
-        setHistory([
-            {
-                content: value,
-                style: history[0]?.style || {
-                    fontWeight: "normal",
-                    fontStyle: "normal",
-                    textAlign: "left",
-                    color: "#000000",
-                    backgroundColor: "transparent",
-                    fontSize: "16px",
-                    fontFamily: "Arial",
-                    lineHeight: "1.5",
-                    letterSpacing: "normal",
-                },
-            },
-        ]);
-        setHistoryIndex(0);
+        // Only reset style if it's the initial mount
+        if (history.length === 1 && history[0].content === "") {
+            setStyle({
+                fontWeight: "normal",
+                fontStyle: "normal",
+                textAlign: "left",
+                color: "#000000",
+                backgroundColor: "transparent",
+                fontSize: "16px",
+                fontFamily: "Arial",
+                lineHeight: "1.5",
+                letterSpacing: "normal",
+            });
+        }
     }, [value]);
 
     useEffect(() => {
         const currentState: EditorState = { content, style };
         if (
-            content !== history[historyIndex].content ||
-            JSON.stringify(style) !== JSON.stringify(history[historyIndex].style)
+            content !== history[historyIndex]?.content ||
+            JSON.stringify(style) !== JSON.stringify(history[historyIndex]?.style)
         ) {
             const newHistory = history.slice(0, historyIndex + 1);
             setHistory([...newHistory, currentState]);
