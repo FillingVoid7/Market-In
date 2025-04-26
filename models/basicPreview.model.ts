@@ -38,18 +38,10 @@ export interface SocialMediaPostTemplate {
   templateName: string;  // e.g., 'New Arrival', 'Limited Time Offer'
   caption: string;
   hashtags: string[];
-  hooks?: string[]; // e.g., 'Limited Time Offer', 'Exclusive Deal'
-  imagePlaceholders: {
-    position: number;
-    description: string;
-    aspectRatio?: string;  // e.g., '1:1', '4:5', '16:9'
-    maxSize?: string;     // e.g., '1080x1080'
-  }[];
-  defaultImageUrl?: string;  // Fallback image if no product image is available
   productUrl: string;        // The unique URL to the product page
   callToAction?: string;     // e.g., 'Shop Now', 'Learn More'
   metadata?: {
-    lastUsed: Date;
+    lastUsed: string;
     usageCount: number;
     isActive: boolean;
   };
@@ -101,18 +93,10 @@ const basicPreviewSchema = new Schema<IBasicPreview>(
       templateName: { type: String, required: true },
       caption: { type: String, required: true },
       hashtags: [{ type: String }],
-      hooks: [{ type: String }],
-      imagePlaceholders: [{
-        position: { type: Number, required: true },
-        description: { type: String, required: true },
-        aspectRatio: String,
-        maxSize: String
-      }],
-      defaultImageUrl: String,
       productUrl: { type: String, required: true },
       callToAction: String,
       metadata: {
-        lastUsed: { type: Date, default: Date.now },
+        lastUsed: { type: String, default: Date.now.toString() },
         usageCount: { type: Number, default: 0 },
         isActive: { type: Boolean, default: true }
       }

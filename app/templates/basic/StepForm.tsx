@@ -1,11 +1,22 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState, AppDispatch } from '../../../redux/templatesPreview/basicPreviewStore';
-import { updateProductField, updateShopField, updateFaqList, updateSocialMediaTemplates } from '../../../redux/templatesPreview/basicPreviewSlice';
+import { 
+  updateProductField, 
+  updateShopField, 
+  updateFaqList, 
+  updateSocialMediaTemplates,
+  updateProductImages,
+  updateProductVideos,
+  updateShopImages,
+  uploadMedia,
+  MediaItem
+} from '../../../redux/templatesPreview/basicPreviewSlice';
 import { SocialMediaPostTemplate } from '../../../models/basicPreview.model';
 import FreeTextEditor from '../../../text-editors/freeTextEditor';
 import { getPlatformLayout } from './platformLayouts';
 import { toast } from 'sonner';
+import { unwrapResult } from '@reduxjs/toolkit';
 
 interface StepFormProps {
   onComplete: () => void;
@@ -16,13 +27,17 @@ const StepForm: React.FC<StepFormProps> = ({ onComplete }) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [newFaq, setNewFaq] = useState({ question: '', answer: '' });
   const [newTemplate, setNewTemplate] = useState<SocialMediaPostTemplate>({
-    platform: "Facebook",
-    templateName: "",
-    caption: "",
+    platform: 'Facebook',
+    templateName: '',
+    caption: '',
     hashtags: [],
-    imagePlaceholders: [],
-    productUrl: "",
-
+    productUrl: '',
+    callToAction: '',
+    metadata: {
+      lastUsed: new Date().toISOString(),
+      usageCount: 0,
+      isActive: true
+    }
   });
 
   const productDetails = useSelector((state: RootState) => state.basicPreview.productDetails);
@@ -46,24 +61,26 @@ const StepForm: React.FC<StepFormProps> = ({ onComplete }) => {
   };
 
   const addTemplate = () => {
-    if (newTemplate.platform && newTemplate.templateName && newTemplate.caption) {
-      const platformLayout = getPlatformLayout(newTemplate.platform);
-      const templateWithLayout = {
-        ...newTemplate,
-        style: platformLayout.defaultStyle,
-        callToAction: platformLayout.preferredCTA
-      };
-      
-      dispatch(updateSocialMediaTemplates([...socialMediaTemplates, templateWithLayout]));
-      setNewTemplate({
-        platform: "Facebook",
-        templateName: "",
-        caption: "",
-        hashtags: [],
-        imagePlaceholders: [],
-        productUrl: "",
-      });
+    if (!newTemplate.templateName || !newTemplate.caption) {
+      alert('Please fill in all required fields');
+      return;
     }
+
+    const updatedTemplates = [...socialMediaTemplates, newTemplate];
+    dispatch(updateSocialMediaTemplates(updatedTemplates));
+    setNewTemplate({
+      platform: 'Facebook',
+      templateName: '',
+      caption: '',
+      hashtags: [],
+      productUrl: '',
+      callToAction: '',
+      metadata: {
+        lastUsed: new Date().toISOString(),
+        usageCount: 0,
+        isActive: true
+      }
+    });
   };
 
   const nextStep = () => {
@@ -72,6 +89,94 @@ const StepForm: React.FC<StepFormProps> = ({ onComplete }) => {
     } else {
       onComplete();
     }
+  };
+
+  const handleProductImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const files = Array.from(e.target.files);
+      try {
+        // Upload all files and wait for results
+        const uploadResults = await Promise.all(
+          files.map(async file => {
+            const actionResult = await dispatch(uploadMedia({ file, mediaType: "image" }));
+            const data = unwrapResult(actionResult);
+            return data;
+          })
+        );
+
+        // Create MediaItem array from upload results
+        const newImages = uploadResults.map(res => ({
+          url: res.permanentUrl,
+          type: "image" as "image"
+        }));
+
+        // Update Redux with combined array
+        dispatch(updateProductImages([
+          ...productDetails.productPictures,
+          ...newImages
+        ]));
+      } catch (error) {
+        toast.error("Failed to upload product images");
+      }
+    }
+  };
+
+  const handleShopImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      try {
+        const result = await dispatch(uploadMedia({ file, mediaType: "image" })).unwrap();
+
+        const newImage = {
+          url: result.permanentUrl,
+          type: "image" as "image"
+        };
+
+        dispatch(updateShopImages([
+          ...shopDetails.shopImages,
+          newImage
+        ]));
+      } catch (error) {
+        toast.error("Failed to upload shop image");
+      }
+    }
+  };
+
+  const handleVideoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      if (productDetails.productVideos.length > 0) {
+        toast.info("Only one video is allowed");
+        return;
+      }
+
+      try {
+        const result = await dispatch(uploadMedia({ file, mediaType: "video" })).unwrap();
+
+        const newVideo = {
+          url: result.permanentUrl,
+          type: "video" as "video"
+        };
+
+        dispatch(updateProductVideos([newVideo]));
+      } catch (error) {
+        toast.error("Failed to upload video");
+      }
+    }
+  };
+
+  const removeProductImage = (index: number) => {
+    const updated = productDetails.productPictures.filter((_, i) => i !== index);
+    dispatch(updateProductImages(updated));
+  };
+
+  const removeShopImage = (index: number) => {
+    const updated = shopDetails.shopImages.filter((_, i) => i !== index);
+    dispatch(updateShopImages(updated));
+  };
+
+  const removeVideo = () => {
+    dispatch(updateProductVideos([]));
   };
 
   const renderStep = () => {
@@ -130,16 +235,27 @@ const StepForm: React.FC<StepFormProps> = ({ onComplete }) => {
             </div>
             <div>
               <label className="block font-semibold text-gray-700">Product Pictures</label>
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={handleProductImageUpload}
+                className="hidden"
+                id="productImageInput"
+              />
+              <button
+                type="button"
+                onClick={() => document.getElementById("productImageInput")?.click()}
+                className="px-4 py-2 bg-blue-600 text-white rounded shadow hover:bg-blue-700"
+              >
+                Upload Images
+              </button>
               <div className="mt-2 grid grid-cols-2 gap-4">
                 {productDetails.productPictures.map((picture, index) => (
                   <div key={index} className="relative">
                     <img src={picture.url} alt={`Product ${index + 1}`} className="w-full h-48 object-cover rounded" />
                     <button
-                      onClick={() => {
-                        const updatedPictures = [...productDetails.productPictures];
-                        updatedPictures.splice(index, 1);
-                        dispatch(updateProductField({ field: "productPictures", content: updatedPictures, style: {} }));
-                      }}
+                      onClick={() => removeProductImage(index)}
                       className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full"
                     >
                       ×
@@ -147,36 +263,29 @@ const StepForm: React.FC<StepFormProps> = ({ onComplete }) => {
                   </div>
                 ))}
               </div>
-              <input
-                type="file"
-                accept="image/*"
-                multiple
-                onChange={(e) => {
-                  const files = Array.from(e.target.files || []);
-                  const newPictures = files.map(file => ({
-                    url: URL.createObjectURL(file)
-                  }));
-                  dispatch(updateProductField({
-                    field: "productPictures",
-                    content: [...productDetails.productPictures, ...newPictures],
-                    style: {}
-                  }));
-                }}
-                className="mt-2"
-              />
             </div>
             <div>
               <label className="block font-semibold text-gray-700">Product Videos</label>
+              <input
+                type="file"
+                accept="video/*"
+                onChange={handleVideoUpload}
+                className="hidden"
+                id="productVideoInput"
+              />
+              <button
+                type="button"
+                onClick={() => document.getElementById("productVideoInput")?.click()}
+                className="px-4 py-2 bg-blue-600 text-white rounded shadow hover:bg-blue-700"
+              >
+                Upload Video
+              </button>
               <div className="mt-2 space-y-4">
                 {productDetails.productVideos.map((video, index) => (
                   <div key={index} className="relative">
                     <video src={video.url} controls className="w-full rounded" />
                     <button
-                      onClick={() => {
-                        const updatedVideos = [...productDetails.productVideos];
-                        updatedVideos.splice(index, 1);
-                        dispatch(updateProductField({ field: "productVideos", content: updatedVideos, style: {} }));
-                      }}
+                      onClick={removeVideo}
                       className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full"
                     >
                       ×
@@ -184,23 +293,6 @@ const StepForm: React.FC<StepFormProps> = ({ onComplete }) => {
                   </div>
                 ))}
               </div>
-              <input
-                type="file"
-                accept="video/*"
-                multiple
-                onChange={(e) => {
-                  const files = Array.from(e.target.files || []);
-                  const newVideos = files.map(file => ({
-                    url: URL.createObjectURL(file)
-                  }));
-                  dispatch(updateProductField({
-                    field: "productVideos",
-                    content: [...productDetails.productVideos, ...newVideos],
-                    style: {}
-                  }));
-                }}
-                className="mt-2"
-              />
             </div>
           </div>
         );
@@ -250,16 +342,26 @@ const StepForm: React.FC<StepFormProps> = ({ onComplete }) => {
             </div>
             <div>
               <label className="block font-semibold text-gray-700">Shop Images</label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleShopImageUpload}
+                className="hidden"
+                id="shopImageInput"
+              />
+              <button
+                type="button"
+                onClick={() => document.getElementById("shopImageInput")?.click()}
+                className="px-4 py-2 bg-blue-600 text-white rounded shadow hover:bg-blue-700"
+              >
+                Upload Shop Image
+              </button>
               <div className="mt-2 grid grid-cols-2 gap-4">
                 {shopDetails.shopImages.map((image, index) => (
                   <div key={index} className="relative">
                     <img src={image.url} alt={`Shop ${index + 1}`} className="w-full h-48 object-cover rounded" />
                     <button
-                      onClick={() => {
-                        const updatedImages = [...shopDetails.shopImages];
-                        updatedImages.splice(index, 1);
-                        dispatch(updateShopField({ field: "shopImages", content: updatedImages, style: {} }));
-                      }}
+                      onClick={() => removeShopImage(index)}
                       className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full"
                     >
                       ×
@@ -267,23 +369,6 @@ const StepForm: React.FC<StepFormProps> = ({ onComplete }) => {
                   </div>
                 ))}
               </div>
-              <input
-                type="file"
-                accept="image/*"
-                multiple
-                onChange={(e) => {
-                  const files = Array.from(e.target.files || []);
-                  const newImages = files.map(file => ({
-                    url: URL.createObjectURL(file)
-                  }));
-                  dispatch(updateShopField({
-                    field: "shopImages",
-                    content: [...shopDetails.shopImages, ...newImages],
-                    style: {}
-                  }));
-                }}
-                className="mt-2"
-              />
             </div>
           </div>
         );
@@ -336,14 +421,6 @@ const StepForm: React.FC<StepFormProps> = ({ onComplete }) => {
                       <span className="text-sm text-gray-500">Hashtags: </span>
                       {template.hashtags.map((tag, i) => (
                         <span key={i} className="text-blue-500 mr-2">#{tag}</span>
-                      ))}
-                    </div>
-                  )}
-                  {template.hooks && template.hooks.length > 0 && (
-                    <div className="mt-2">
-                      <span className="text-sm text-gray-500">Hooks: </span>
-                      {template.hooks.map((hook, i) => (
-                        <span key={i} className="text-green-500 mr-2">{hook}</span>
                       ))}
                     </div>
                   )}
@@ -421,33 +498,6 @@ const StepForm: React.FC<StepFormProps> = ({ onComplete }) => {
                   />
                 </div>
                 <div>
-                  <label className="block font-semibold text-gray-700">Hooks</label>
-                  <div className="flex flex-wrap gap-2 mb-2">
-                    {newTemplate.hooks?.map((hook, index) => (
-                      <span key={index} className="bg-green-100 text-green-600 px-2 py-1 rounded-full flex items-center">
-                        {hook}
-                        <button
-                          onClick={() => {
-                            const updatedHooks = [...(newTemplate.hooks || [])];
-                            updatedHooks.splice(index, 1);
-                            setNewTemplate({ ...newTemplate, hooks: updatedHooks });
-                          }}
-                          className="ml-1 text-green-600 hover:text-green-800"
-                        >
-                          ×
-                        </button>
-                      </span>
-                    ))}
-                  </div>
-                  <input
-                    type="text"
-                    value={newTemplate.hooks?.join(' ') || ''}
-                    onChange={(e) => setNewTemplate({ ...newTemplate, hooks: e.target.value.split(' ').filter(hook => hook) })}
-                    className="w-full p-2 border rounded"
-                    placeholder="Add hooks (separate with spaces) e.g., Limited Time Offer, Exclusive Deal, Flash Sale"
-                  />
-                </div>
-                <div>
                   <label className="block font-semibold text-gray-700">Call to Action</label>
                   <select
                     value={newTemplate.callToAction || ''}
@@ -462,21 +512,6 @@ const StepForm: React.FC<StepFormProps> = ({ onComplete }) => {
                     <option value="Don't Miss Out">Don't Miss Out</option>
                     <option value="Grab Yours">Grab Yours</option>
                   </select>
-                </div>
-                <div>
-                  <label className="block font-semibold text-gray-700">Default Image URL</label>
-                  <input
-                    type="text"
-                    value={newTemplate.defaultImageUrl || ''}
-                    onChange={(e) => setNewTemplate({ ...newTemplate, defaultImageUrl: e.target.value })}
-                    className="w-full p-2 border rounded"
-                    placeholder="Enter URL for default image (used when no product image is available)"
-                  />
-                  {newTemplate.defaultImageUrl && (
-                    <div className="mt-2">
-                      <img src={newTemplate.defaultImageUrl} alt="Preview" className="max-h-40 rounded" />
-                    </div>
-                  )}
                 </div>
                 <button
                   onClick={addTemplate}

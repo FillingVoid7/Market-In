@@ -71,18 +71,10 @@ export interface SocialMediaTemplate {
   templateName: string;
   caption: string;
   hashtags: string[];
-  hooks?: string[];
-  imagePlaceholders: {
-    position: number;
-    description: string;
-    aspectRatio?: string;
-    maxSize?: string;
-  }[];
-  defaultImageUrl?: string;
   productUrl: string;
   callToAction?: string;
   metadata?: {
-    lastUsed: Date;
+    lastUsed: string;
     usageCount: number;
     isActive: boolean;
   };
@@ -175,7 +167,7 @@ export const saveBasicPreview = createAsyncThunk(
         socialMediaTemplates: data.socialMediaTemplates.map(template => ({
           ...template,
           metadata: {
-            lastUsed: new Date(),
+            lastUsed: new Date().toISOString(),
             usageCount: 0,
             isActive: true
           }
@@ -301,7 +293,7 @@ const basicPreviewSlice = createSlice({
       state.socialMediaTemplates = action.payload.map(template => ({
         ...template,
         metadata: template.metadata || {
-          lastUsed: new Date(),
+          lastUsed: new Date().toISOString(),
           usageCount: 0,
           isActive: true
         }
@@ -361,7 +353,7 @@ const basicPreviewSlice = createSlice({
         state.socialMediaTemplates = (action.payload.socialMediaTemplates || []).map((template: SocialMediaTemplate) => ({
           ...template,
           metadata: template.metadata || {
-            lastUsed: new Date(),
+            lastUsed: new Date().toISOString(),
             usageCount: 0,
             isActive: true
           }
