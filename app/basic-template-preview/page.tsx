@@ -13,6 +13,104 @@ interface Faq {
   answer: string
 }
 
+const SocialMediaTemplatePreview: React.FC = () => {
+  const socialMediaTemplates = useSelector((state: RootState) => state.basicPreview.socialMediaTemplates)
+  const [copiedIdx, setCopiedIdx] = useState<number | null>(null)
+
+  if (!socialMediaTemplates.length) return null
+
+  const handleCopy = (template: any, idx: number) => {
+    const hashtags = template.hashtags && template.hashtags.length > 0 ? template.hashtags.map((tag: string) => `#${tag}`).join(' ') : ''
+    const text = [
+      template.caption,
+      hashtags,
+      template.callToAction
+    ].filter(Boolean).join('\n')
+
+    // HTML version for rich copy
+    const html = `
+      <div style="background:#181A20;padding:24px;border-radius:16px;max-width:600px;color:#fff;font-family:sans-serif;">
+        ${template.caption ? `<div style='font-size:1.2rem;margin-bottom:16px;color:#f3f4f6;'>${template.caption}</div>` : ''}
+        ${template.hashtags && template.hashtags.length > 0 ? `<div style='margin-bottom:16px;'>${template.hashtags.map((tag: string) => `<span style='display:inline-block;background:#23262F;color:#60a5fa;font-size:0.9rem;padding:4px 12px;border-radius:999px;margin-right:6px;margin-bottom:6px;'>#${tag}</span>`).join('')}</div>` : ''}
+        ${template.callToAction ? `<div style='margin-top:20px;'><span style='display:inline-block;background:#23262F;color:#60a5fa;font-weight:600;font-size:1rem;padding:10px 24px;border-radius:8px;'>${template.callToAction}</span></div>` : ''}
+      </div>
+    `
+
+    if (navigator.clipboard && (window.ClipboardItem || window.Clipboard)) {
+      // Try to copy both HTML and plain text
+      const blobHtml = new Blob([html], { type: 'text/html' })
+      const blobText = new Blob([text], { type: 'text/plain' })
+      // @ts-ignore
+      navigator.clipboard.write([
+        new window.ClipboardItem({ 'text/html': blobHtml, 'text/plain': blobText })
+      ]).then(() => {
+        setCopiedIdx(idx)
+        toast.success("Template copied to clipboard!")
+        setTimeout(() => setCopiedIdx(null), 2000)
+      }, () => {
+        // fallback to plain text
+        navigator.clipboard.writeText(text)
+        setCopiedIdx(idx)
+        toast.success("Template copied to clipboard!")
+        setTimeout(() => setCopiedIdx(null), 2000)
+      })
+    } else {
+      // fallback to plain text
+      navigator.clipboard.writeText(text)
+      setCopiedIdx(idx)
+      toast.success("Template copied to clipboard!")
+      setTimeout(() => setCopiedIdx(null), 2000)
+    }
+  }
+
+  return (
+    <div className="flex flex-col items-center justify-center py-8">
+      {socialMediaTemplates.map((template, idx) => (
+        <div
+          key={idx}
+          className="w-full max-w-xl bg-white/10 backdrop-blur-md rounded-2xl shadow-2xl p-6 mb-6 border border-white/20 relative transform transition-all duration-300 hover:scale-[1.02] hover:shadow-3xl"
+        >
+          <button
+            onClick={() => handleCopy(template, idx)}
+            className="absolute top-4 right-4 p-2 rounded-full bg-white/20 hover:bg-white/30 transition-colors"
+            title="Copy template"
+          >
+            {copiedIdx === idx ? (
+              <Check className="w-5 h-5 text-green-400" />
+            ) : (
+              <Copy className="w-5 h-5 text-white" />
+            )}
+          </button>
+          {template.caption && (
+            <p className="text-white text-lg mb-4 font-medium">{template.caption}</p>
+          )}
+          {template.hashtags.length > 0 && (
+            <div className="flex flex-wrap gap-2 mb-4">
+              {template.hashtags.map((tag, i) => (
+                <span
+                  key={i}
+                  className="text-sm text-purple-200 bg-white/10 px-3 py-1 rounded-full tracking-wide font-medium"
+                >
+                  #{tag}
+                </span>
+              ))}
+            </div>
+          )}
+          {template.callToAction && (
+            <div className="mt-4">
+              <div className="w-full bg-white/20 rounded-lg px-4 py-3 flex justify-center hover:bg-white/30 transition-colors">
+                <span className="text-white font-semibold text-base">
+                  {template.callToAction}
+                </span>
+              </div>
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  )
+}
+
 const BasicTemplatePreview: React.FC<{
   productDetails: any,
   shopDetails: any,
@@ -86,6 +184,11 @@ const BasicTemplatePreview: React.FC<{
   };
 
   const generateUniqueURL = async () => {
+    if (!productId) {
+      toast.error("Please save the product before generating a URL.");
+      return;
+    }
+
     try {
       const resultAction = await dispatch(generateUrlBasic() as any);
 
@@ -147,41 +250,14 @@ const BasicTemplatePreview: React.FC<{
           </div>
         </div>
       )}
-
+      {/* Social Media Template Preview Card */}
+      <div className="w-full bg-gradient-to-br from-purple-900 via-indigo-900 to-blue-900 py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl font-bold text-white mb-8 text-center">Social Media Templates</h2>
+          <SocialMediaTemplatePreview />
+        </div>
+      </div>
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Social Media Templates */}
-        {data.socialMediaTemplates?.length > 0 && (
-          <div className="bg-white rounded-xl shadow-lg p-8 mb-12 transform transition-transform duration-300 hover:scale-[1.01] max-w-2xl mx-auto">
-            {data.socialMediaTemplates.map((template, index) => (
-              <div
-                key={index}
-                className="bg-gradient-to-br from-gray-50 to-white rounded-xl p-6 shadow-md hover:shadow-lg transition-shadow duration-300"
-              >
-                {template.templateName && (
-                  <span className="px-3 py-1 bg-purple-100 text-purple-600 rounded-full text-sm font-medium mb-4 inline-block">
-                    {template.templateName}
-                  </span>
-                )}
-                {template.caption && (
-                  <p className="text-gray-700 mb-4">{template.caption}</p>
-                )}
-                {template.hashtags?.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {template.hashtags.map((tag, i) => (
-                      <span key={i} className="text-blue-500 text-sm">#{tag}</span>
-                    ))}
-                  </div>
-                )}
-                {template.callToAction && (
-                  <div className="mt-4">
-                    <span className="text-purple-600 font-medium">{template.callToAction}</span>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
-
         {/* Hero Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
           {/* Image Gallery */}

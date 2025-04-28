@@ -36,40 +36,25 @@ const ToolbarButton: React.FC<ToolbarButtonProps> = ({ onClick, icon: Icon, titl
 const FreeTextEditor: React.FC<FreeTextEditorProps> = ({ value = "", onSave, placeholder }) => {
     const [isEditing, setIsEditing] = useState<boolean>(true);
     const [content, setContent] = useState<string>(value);
-    const [history, setHistory] = useState<EditorState[]>([
-        {
-            content: value,
-            style: {
-                fontWeight: "normal",
-                fontStyle: "normal",
-                textAlign: "left",
-                color: "#000000",
-                backgroundColor: "transparent",
-                fontSize: "16px",
-                fontFamily: "Arial",
-                lineHeight: "1.5",
-                letterSpacing: "normal",
-            },
-        },
-    ]);
+    const [history, setHistory] = useState<EditorState[]>([]);
     const [historyIndex, setHistoryIndex] = useState<number>(0);
-    const [style, setStyle] = useState<Record<string, string>>(history[0].style);
+    const [style, setStyle] = useState<Record<string, string>>({
+        fontWeight: "normal",
+        fontStyle: "normal",
+        textAlign: "left",
+        color: "#000000",
+        backgroundColor: "transparent",
+        fontSize: "16px",
+        fontFamily: "Arial",
+        lineHeight: "1.5",
+        letterSpacing: "normal",
+    });
 
     useEffect(() => {
         setContent(value);
-        // Only reset style if it's the initial mount
-        if (history.length === 1 && history[0].content === "") {
-            setStyle({
-                fontWeight: "normal",
-                fontStyle: "normal",
-                textAlign: "left",
-                color: "#000000",
-                backgroundColor: "transparent",
-                fontSize: "16px",
-                fontFamily: "Arial",
-                lineHeight: "1.5",
-                letterSpacing: "normal",
-            });
+        // Initialize history with the current value and style
+        if (history.length === 0) {
+            setHistory([{ content: value, style }]);
         }
     }, [value]);
 

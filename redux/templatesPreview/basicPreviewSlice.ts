@@ -266,9 +266,10 @@ const basicPreviewSlice = createSlice({
       if (field === "productPictures" || field === "productVideos") {
         state.productDetails[field] = content as MediaItem[];
       } else {
+        const newStyle = { ...style };
         state.productDetails[field] = { 
           content: content as string, 
-          style: { ...state.productDetails[field]?.style, ...style } 
+          style: newStyle
         };
       }
     },
@@ -277,9 +278,10 @@ const basicPreviewSlice = createSlice({
       if (field === "shopImages") {
         state.shopDetails[field] = content as MediaItem[];
       } else {
+        const newStyle = { ...style };
         state.shopDetails[field] = { 
           content: content as string, 
-          style: { ...state.shopDetails[field]?.style, ...style } 
+          style: newStyle
         };
       }
     },
