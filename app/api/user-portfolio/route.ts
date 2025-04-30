@@ -47,25 +47,42 @@ export async function GET(req: NextRequest) {
           "shopDetails.shopName": 1,
           createdAt: 1,
           updatedAt: 1,
-          "analytics.views": 1,
+          analytics: 1, // Select all analytics data
           uniqueURLs: { $slice: -1 } // Get most recent URL
         }),
       BasicPreviewModel.countDocuments(query)
     ]);
 
     // Transform the data for the response
-    const transformedProducts = products.map(product => ({
-      id: product._id,
-      productName: product.productDetails?.productName?.content || "",
-      productPrice: product.productDetails?.productPrice?.content || "",
-      shortDescription: product.productDetails?.shortDescription?.content || "",
-      thumbnailImage: product.productDetails?.productPictures?.[0]?.url || "",
-      shopName: product.shopDetails?.shopName?.content || "",
-      createdAt: product.createdAt,
-      updatedAt: product.updatedAt,
-      views: product.analytics?.[0]?.views || 0,
-      latestUrl: product.uniqueURLs?.[0]?.url || ""
-    }));
+    const transformedProducts = products.map(product => {
+      // Calculate total analytics metrics
+      const analytics = product.analytics || [];
+      const totalStats = analytics.reduce((acc: { views: any; clicks: any; emailClicks: any; }, curr: { views: any; clicks: any; emailClicks: any; }) => ({
+        views: acc.views + (curr.views || 0),
+        clicks: acc.clicks + (curr.clicks || 0),
+        emailClicks: acc.emailClicks + (curr.emailClicks || 0)
+      }), { views: 0, clicks: 0, emailClicks: 0 });
+
+      return {
+        id: product._id,
+        productName: product.productDetails?.productName?.content || "",
+        productPrice: product.productDetails?.productPrice?.content || "",
+        shortDescription: product.productDetails?.shortDescription?.content || "",
+        thumbnailImage: product.productDetails?.productPictures?.[0]?.url || "",
+        shopName: product.shopDetails?.shopName?.content || "",
+        createdAt: product.createdAt,
+        updatedAt: product.updatedAt,
+        analytics: {
+          totalViews: totalStats.views,
+          totalClicks: totalStats.clicks,
+          totalEmailClicks: totalStats.emailClicks,
+          engagementRate: totalStats.views > 0 ? 
+            ((totalStats.clicks + totalStats.emailClicks) / totalStats.views * 100).toFixed(2) + '%' : 
+            '0%'
+        },
+        latestUrl: product.uniqueURLs?.[0]?.url || ""
+      };
+    });
 
     // Calculate pagination metadata
     const totalPages = Math.ceil(totalCount / limit);
