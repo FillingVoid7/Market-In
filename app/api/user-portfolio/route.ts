@@ -125,7 +125,7 @@ export async function GET(req: NextRequest) {
     // Transform products with enhanced analytics
     const transformedProducts = products.map(product => {
       const analytics = product.analytics || [];
-      const totalStats = analytics.reduce((acc, curr) => ({
+      const totalStats = analytics.reduce((acc: { views: number; clicks: number; emailClicks: number }, curr: { views?: number; clicks?: number; emailClicks?: number }) => ({
         views: acc.views + (curr.views || 0),
         clicks: acc.clicks + (curr.clicks || 0),
         emailClicks: acc.emailClicks + (curr.emailClicks || 0)
@@ -268,7 +268,7 @@ async function getPortfolioStats(query: any): Promise<PortfolioStats> {
   
   const stats = products.reduce((acc, product) => {
     const analytics = product.analytics || [];
-    const productStats = analytics.reduce((a, curr) => ({
+    const productStats = analytics.reduce((a: { views: number; clicks: number; emailClicks: number }, curr: { views?: number; clicks?: number; emailClicks?: number }) => ({
       views: a.views + (curr.views || 0),
       clicks: a.clicks + (curr.clicks || 0),
       emailClicks: a.emailClicks + (curr.emailClicks || 0)
