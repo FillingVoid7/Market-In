@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { ChevronDown, ChevronUp } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState } from "react";
+import { ChevronDown, ChevronUp } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface FAQItemProps {
   question: string;
@@ -8,7 +8,7 @@ interface FAQItemProps {
   category?: string;
 }
 
-const FAQItem: React.FC<FAQItemProps>= ({ question, answer, category }) => {
+const FAQItem: React.FC<FAQItemProps> = ({ question, answer, category }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -23,7 +23,9 @@ const FAQItem: React.FC<FAQItemProps>= ({ question, answer, category }) => {
         onClick={() => setIsOpen(!isOpen)}
       >
         <div className="flex items-start">
-          <span className="text-left font-medium text-gray-900">{question}</span>
+          <span className="text-left font-medium text-gray-900">
+            {question}
+          </span>
         </div>
         <span className="ml-4 flex-shrink-0">
           {isOpen ? (
@@ -53,41 +55,48 @@ const FAQItem: React.FC<FAQItemProps>= ({ question, answer, category }) => {
 };
 
 const FAQ = () => {
-  const [activeCategory, setActiveCategory] = useState('all');
+  const [activeCategory, setActiveCategory] = useState("all");
 
   const faqData = {
     general: [
       {
         question: "How do I create an account?",
-        answer: "Creating an account is simple! Visit our signup page, fill in your details including your email address and preferred password, and click 'Submit'. You'll receive a confirmation email to verify your account. Once verified, you can start using our services immediately.",
+        answer:
+          "Creating an account is simple! Visit our signup page, fill in your details including your email address and preferred password, and click 'Submit'. You'll receive a confirmation email to verify your account. Once verified, you can start using our services immediately.",
       },
       {
         question: "Is there a free trial available?",
-        answer: "Yes! We offer a comprehensive 14-day free trial for new users. During this period, you'll have access to all premium features with no commitment required. You can cancel anytime during the trial period.",
+        answer:
+          "Yes! We offer a comprehensive 14-day free trial for new users. During this period, you'll have access to all premium features with no commitment required. You can cancel anytime during the trial period.",
       },
       {
         question: "What payment methods do you accept?",
-        answer: "We accept all major credit cards (Visa, MasterCard, American Express), PayPal, and bank transfers. All payments are processed securely through our encrypted payment system.",
+        answer:
+          "We accept all major credit cards (Visa, MasterCard, American Express), PayPal, and bank transfers. All payments are processed securely through our encrypted payment system.",
       },
     ],
     billing: [
       {
         question: "How does billing work?",
-        answer: "Billing occurs monthly or annually, depending on your chosen plan. We offer flexible payment options and you can upgrade or downgrade your plan at any time.",
+        answer:
+          "Billing occurs monthly or annually, depending on your chosen plan. We offer flexible payment options and you can upgrade or downgrade your plan at any time.",
       },
       {
         question: "Can I get a refund?",
-        answer: "Yes, we offer a 30-day money-back guarantee for all our paid plans. If you're not satisfied with our service, contact our support team for a full refund.",
+        answer:
+          "Yes, we offer a 30-day money-back guarantee for all our paid plans. If you're not satisfied with our service, contact our support team for a full refund.",
       },
     ],
     technical: [
       {
         question: "What technical requirements are needed?",
-        answer: "Our platform works on all modern web browsers (Chrome, Firefox, Safari, Edge). No additional software installation is required. We recommend a stable internet connection for optimal performance.",
+        answer:
+          "Our platform works on all modern web browsers (Chrome, Firefox, Safari, Edge). No additional software installation is required. We recommend a stable internet connection for optimal performance.",
       },
       {
         question: "Is my data secure?",
-        answer: "Yes, we take security seriously. All data is encrypted using industry-standard protocols, and we regularly perform security audits to ensure your information remains protected.",
+        answer:
+          "Yes, we take security seriously. All data is encrypted using industry-standard protocols, and we regularly perform security audits to ensure your information remains protected.",
       },
     ],
   };
@@ -102,7 +111,7 @@ const FAQ = () => {
   const filterFAQs = () => {
     let filteredFAQs: FAQItemProps[] = [];
     Object.entries(faqData).forEach(([category, questions]) => {
-      if (activeCategory === 'all' || activeCategory === category) {
+      if (activeCategory === "all" || activeCategory === category) {
         filteredFAQs = [...filteredFAQs, ...questions];
       }
     });
@@ -119,7 +128,7 @@ const FAQ = () => {
           <p className="text-lg text-gray-600 mb-8">
             Find answers to common questions about our services and platform.
           </p>
-          
+
           {/* Category Tabs */}
           <div className="flex flex-wrap justify-center gap-2 mb-8">
             {Object.entries(categories).map(([key, label]) => (
@@ -128,8 +137,8 @@ const FAQ = () => {
                 onClick={() => setActiveCategory(key)}
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-colors duration-200 ${
                   activeCategory === key
-                    ? 'bg-orange-500 text-white'
-                    : 'bg-white text-gray-600 hover:bg-gray-100'
+                    ? "bg-orange-500 text-white"
+                    : "bg-white text-gray-600 hover:bg-gray-100"
                 }`}
               >
                 {label}
@@ -141,11 +150,7 @@ const FAQ = () => {
         {/* FAQ Items */}
         <div className="bg-white rounded-xl shadow-lg divide-y divide-gray-200">
           {filterFAQs().map((faq, index) => (
-            <FAQItem
-              key={index}
-              question={faq.question}
-              answer={faq.answer}
-            />
+            <FAQItem key={index} question={faq.question} answer={faq.answer} />
           ))}
           {filterFAQs().length === 0 && (
             <div className="py-8 text-center text-gray-500">

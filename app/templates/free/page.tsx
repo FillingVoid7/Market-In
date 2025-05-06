@@ -1,8 +1,8 @@
-"use client"
-import type React from "react"
-import { useState } from "react"
-import { useDispatch, useSelector } from "react-redux"
-import { useRouter } from "next/navigation"
+"use client";
+import type React from "react";
+import { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useRouter } from "next/navigation";
 import {
   updateProductField,
   updateShopField,
@@ -10,108 +10,129 @@ import {
   updateProductVideos,
   updateShopImages,
   updateFaqList,
-  updateUniqueURLs,
   resetTemplate,
-} from "../../../redux/templatesPreview/freePreviewSlice"
+} from "../../../redux/templatesPreview/freePreviewSlice";
 import type { MediaItem } from "../../../redux/templatesPreview/freePreviewSlice";
-import { uploadMedia } from "../../../redux/templatesPreview/freePreviewSlice"
-import type { RootState, AppDispatch } from "../../../redux/templatesPreview/freePreviewStore"
-import FreeTextEditor from "../../../text-editors/freeTextEditor"
-import { toast } from "sonner"
+import { uploadMedia } from "../../../redux/templatesPreview/freePreviewSlice";
+import type {
+  RootState,
+  AppDispatch,
+} from "../../../redux/templatesPreview/freePreviewStore";
+import FreeTextEditor from "../../../text-editors/freeTextEditor";
+import { toast } from "sonner";
 import { unwrapResult } from "@reduxjs/toolkit";
-import App from "next/app"
+import App from "next/app";
 
 interface Faq {
-  id: number
-  question: string
-  answer: string
-  isEditing: boolean
+  id: number;
+  question: string;
+  answer: string;
+  isEditing: boolean;
 }
 
 interface ImageFile {
-  file: File
-  url: string
+  file: File;
+  url: string;
 }
 
-
 const FreeTemplate: React.FC = () => {
-  const router = useRouter()
-  const dispatch = useDispatch<AppDispatch>()
-  const freePreviewState = useSelector((state: RootState) => state.freePreview)
-  const [showPreview, setShowPreview] = useState<boolean>(false)
-  const [newFaq, setNewFaq] = useState<Faq>({ id: 0, question: "", answer: "", isEditing: false })
-  const [expandedFaq, setExpandedFaq] = useState<number | null>(null)
+  const router = useRouter();
+  const dispatch = useDispatch<AppDispatch>();
+  const freePreviewState = useSelector((state: RootState) => state.freePreview);
+  const [showPreview, setShowPreview] = useState<boolean>(false);
+  const [newFaq, setNewFaq] = useState<Faq>({
+    id: 0,
+    question: "",
+    answer: "",
+    isEditing: false,
+  });
+  const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
 
-  const productDetails = useSelector((state: RootState) => state.freePreview.productDetails)
-  const shopDetails = useSelector((state: RootState) => state.freePreview.shopDetails)
-  const faqList = useSelector((state: RootState) => state.freePreview.faqList)
-  const uniqueURLs = useSelector((state: RootState) => state.freePreview.uniqueURLs)
+  const productDetails = useSelector(
+    (state: RootState) => state.freePreview.productDetails
+  );
+  const shopDetails = useSelector(
+    (state: RootState) => state.freePreview.shopDetails
+  );
+  const faqList = useSelector((state: RootState) => state.freePreview.faqList);
+  const uniqueURLs = useSelector(
+    (state: RootState) => state.freePreview.uniqueURLs
+  );
 
   const handleClearAll = () => {
-    dispatch(resetTemplate())
-    console.log("Redux state after reset:", freePreviewState)
-    localStorage.removeItem("freePreview")
-    setNewFaq({ id: 0, question: "", answer: "", isEditing: false })
-    setExpandedFaq(null)
-  }
+    dispatch(resetTemplate());
+    console.log("Redux state after reset:", freePreviewState);
+    localStorage.removeItem("freePreview");
+    setNewFaq({ id: 0, question: "", answer: "", isEditing: false });
+    setExpandedFaq(null);
+  };
 
-  const handleProductContentSave = (field: keyof typeof productDetails, content: string, style: object) => {
-    dispatch(updateProductField({ field, content, style }))
-  }
+  const handleProductContentSave = (
+    field: keyof typeof productDetails,
+    content: string,
+    style: object
+  ) => {
+    dispatch(updateProductField({ field, content, style }));
+  };
 
-  const handleShopContentSave = (field: keyof typeof shopDetails, content: string, style: object) => {
-    dispatch(updateShopField({ field, content, style }))
-  }
+  const handleShopContentSave = (
+    field: keyof typeof shopDetails,
+    content: string,
+    style: object
+  ) => {
+    dispatch(updateShopField({ field, content, style }));
+  };
 
-  const handleProductImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleProductImageUpload = async (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
     if (e.target.files) {
       const files = Array.from(e.target.files);
       try {
-        // Upload all files and wait for results
         const uploadResults = await Promise.all(
-          files.map(async file => {
-            const actionResult = await dispatch(uploadMedia({ file, mediaType: "image" }));
+          files.map(async (file) => {
+            const actionResult = await dispatch(
+              uploadMedia({ file, mediaType: "image" })
+            );
             console.log("Raw action result:", actionResult);
-            const data = unwrapResult(actionResult); // <- from @reduxjs/toolkit
+            const data = unwrapResult(actionResult);
             console.log("Unwrapped result:", data);
             return data;
           })
         );
 
         console.log("Upload results:", uploadResults);
-        // Create MediaItem array from upload results
-        const newImages: MediaItem[] = uploadResults.map(res => ({
+        const newImages: MediaItem[] = uploadResults.map((res) => ({
           url: res.permanentUrl,
-          type: "image"
+          type: "image",
         }));
         console.log("New images:", newImages);
 
-        // Update Redux with combined array
-        dispatch(updateProductImages([
-          ...productDetails.productPictures,
-          ...newImages
-        ]));
+        dispatch(
+          updateProductImages([...productDetails.productPictures, ...newImages])
+        );
       } catch (error) {
         toast.error("Failed to upload product images");
       }
     }
   };
 
-  const handleShopImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleShopImageUpload = async (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       try {
-        const result = await dispatch(uploadMedia({ file, mediaType: "image" })).unwrap();
+        const result = await dispatch(
+          uploadMedia({ file, mediaType: "image" })
+        ).unwrap();
 
         const newImage: MediaItem = {
           url: result.permanentUrl,
-          type: "image"
+          type: "image",
         };
 
-        dispatch(updateShopImages([
-          ...shopDetails.shopImages,
-          newImage
-        ]));
+        dispatch(updateShopImages([...shopDetails.shopImages, newImage]));
       } catch (error) {
         toast.error("Failed to upload shop image");
       }
@@ -119,7 +140,9 @@ const FreeTemplate: React.FC = () => {
   };
 
   const removeProductImage = (index: number) => {
-    const updated = productDetails.productPictures.filter((_, i) => i !== index);
+    const updated = productDetails.productPictures.filter(
+      (_, i) => i !== index
+    );
     dispatch(updateProductImages(updated));
   };
 
@@ -137,11 +160,13 @@ const FreeTemplate: React.FC = () => {
       }
 
       try {
-        const result = await dispatch(uploadMedia({ file, mediaType: "video" })).unwrap();
+        const result = await dispatch(
+          uploadMedia({ file, mediaType: "video" })
+        ).unwrap();
 
         const newVideo: MediaItem = {
           url: result.permanentUrl,
-          type: "video"
+          type: "video",
         };
 
         dispatch(updateProductVideos([newVideo]));
@@ -157,151 +182,189 @@ const FreeTemplate: React.FC = () => {
 
   const addFaq = () => {
     if (newFaq.question && newFaq.answer) {
-      dispatch(updateFaqList([...faqList, { ...newFaq, id: Date.now() }]))
-      setNewFaq({ id: 0, question: "", answer: "", isEditing: false })
+      dispatch(updateFaqList([...faqList, { ...newFaq, id: Date.now() }]));
+      setNewFaq({ id: 0, question: "", answer: "", isEditing: false });
     }
-  }
+  };
 
   const editFaq = (id: number) => {
-    const updatedFaqList = faqList.map((faq) => (faq.id === id ? { ...faq, isEditing: true } : faq))
-    dispatch(updateFaqList(updatedFaqList))
-  }
+    const updatedFaqList = faqList.map((faq) =>
+      faq.id === id ? { ...faq, isEditing: true } : faq
+    );
+    dispatch(updateFaqList(updatedFaqList));
+  };
 
   const updateFaq = (id: number, updatedFaq: Faq) => {
-    const updatedFaqList = faqList.map((faq) => (faq.id === id ? { ...updatedFaq, isEditing: false } : faq))
-    dispatch(updateFaqList(updatedFaqList))
-  }
+    const updatedFaqList = faqList.map((faq) =>
+      faq.id === id ? { ...updatedFaq, isEditing: false } : faq
+    );
+    dispatch(updateFaqList(updatedFaqList));
+  };
 
   const removeFaq = (id: number) => {
-    const updatedFaqList = faqList.filter((faq) => faq.id !== id)
-    dispatch(updateFaqList(updatedFaqList))
-  }
+    const updatedFaqList = faqList.filter((faq) => faq.id !== id);
+    dispatch(updateFaqList(updatedFaqList));
+  };
 
   const toggleFaq = (id: number) => {
-    setExpandedFaq((prev) => (prev === id ? null : id))
-  }
-
-
+    setExpandedFaq((prev) => (prev === id ? null : id));
+  };
 
   const handleShowPreview = () => {
-    const requiredFields = [
-      productDetails.productName.content,
-      productDetails.productPrice.content,
-      productDetails.shortDescription.content,
-      productDetails.longDescription.content,
-      productDetails.qualityFeatures.content,
-      productDetails.specifications.content,
-      productDetails.productPictures.length > 0,
-      productDetails.productVideos.length > 0,
-      shopDetails.shopName.content,
-      shopDetails.shopDescription.content,
-      shopDetails.shopImages.length > 0,
-      shopDetails.shopAddress.content,
-      shopDetails.shopContact.content,
-    ]
+    const requiredFields = {
+      "Product Name": productDetails.productName.content,
+      "Product Price": productDetails.productPrice.content,
+      "Shop Name": shopDetails.shopName.content,
+      "Shop Contact": shopDetails.shopContact.content,
+    };
 
-    if (requiredFields.filter(Boolean).length < 7) {
-      toast.info("Please fill at least seven field before previewing")
-      return
+    const emptyFields = Object.entries(requiredFields)
+      .filter(([_, value]) => !value)
+      .map(([fieldName]) => fieldName);
+
+    if (emptyFields.length > 0) {
+      toast.info(
+        `Please fill them to show the preview: ${emptyFields.join(", ")}`,
+        {
+          duration: 4000,
+        }
+      );
+      return;
     }
 
-    setShowPreview(true)
-    router.push("/free-template-preview")
-  }
+    setShowPreview(true);
+    router.push("/free-template-preview");
+  };
 
   const handleEditMode = () => {
-    setShowPreview(false)
-  }
+    setShowPreview(false);
+  };
 
   const handleReturnFromPreview = () => {
-    setShowPreview(false)
-  }
+    setShowPreview(false);
+  };
 
   return (
     <div className="flex justify-center items-center pt-10 w-screen min-h-screen bg-gray-100">
+      <button
+        onClick={() => router.push("/")}
+        className="fixed top-4 left-4 flex items-center gap-2 px-4 py-2 bg-white text-gray-700 rounded-lg shadow hover:bg-gray-50 transition-colors"
+      >
+        <span>←</span> Back to Home
+      </button>
+
       <div className="space-y-6">
         <div className="flex justify-between mb-4">
           <h2 className="text-2xl font-semibold text-black">Free Template</h2>
           <button
             onClick={() => {
               if (!showPreview) {
-                handleShowPreview()
+                handleShowPreview();
               } else {
-                handleEditMode()
+                handleEditMode();
               }
             }}
             className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded"
           >
             {showPreview ? "Edit" : "Preview"}
           </button>
-          <button onClick={handleClearAll} className="flex items-center gap-2 bg-red-500 text-white px-4 py-2 rounded">
+          <button
+            onClick={handleClearAll}
+            className="flex items-center gap-2 bg-red-500 text-white px-4 py-2 rounded"
+          >
             Clear All
           </button>
         </div>
 
         {/* Product Name */}
         <div>
-          <label className="block font-semibold text-gray-700">Product Name</label>
+          <label className="block font-semibold text-gray-700">
+            Product Name
+          </label>
           <FreeTextEditor
             value={productDetails.productName.content}
-            onSave={(content: string, style: object) => handleProductContentSave("productName", content, style)}
+            onSave={(content: string, style: object) =>
+              handleProductContentSave("productName", content, style)
+            }
             placeholder="Enter product name"
           />
         </div>
 
         {/* Product Price */}
         <div>
-          <label className="block font-semibold text-gray-700">Product Price</label>
+          <label className="block font-semibold text-gray-700">
+            Product Price
+          </label>
           <FreeTextEditor
             value={productDetails.productPrice.content}
-            onSave={(content: string, style: object) => handleProductContentSave("productPrice", content, style)}
+            onSave={(content: string, style: object) =>
+              handleProductContentSave("productPrice", content, style)
+            }
             placeholder="Enter product price"
           />
         </div>
 
         {/* Short Description */}
         <div>
-          <label className="block font-semibold text-gray-700">Short Description</label>
+          <label className="block font-semibold text-gray-700">
+            Short Description
+          </label>
           <FreeTextEditor
             value={productDetails.shortDescription.content}
-            onSave={(content: string, style: object) => handleProductContentSave("shortDescription", content, style)}
+            onSave={(content: string, style: object) =>
+              handleProductContentSave("shortDescription", content, style)
+            }
             placeholder="Enter short description"
           />
         </div>
 
         {/* Long Description */}
         <div>
-          <label className="block font-semibold text-gray-700">Long Description</label>
+          <label className="block font-semibold text-gray-700">
+            Long Description
+          </label>
           <FreeTextEditor
             value={productDetails.longDescription.content}
-            onSave={(content: string, style: object) => handleProductContentSave("longDescription", content, style)}
+            onSave={(content: string, style: object) =>
+              handleProductContentSave("longDescription", content, style)
+            }
             placeholder="Enter long description"
           />
         </div>
 
         {/* Quality Features */}
         <div>
-          <label className="block font-semibold text-gray-700">Quality Features</label>
+          <label className="block font-semibold text-gray-700">
+            Quality Features
+          </label>
           <FreeTextEditor
             value={productDetails.qualityFeatures.content}
-            onSave={(content: string, style: object) => handleProductContentSave("qualityFeatures", content, style)}
+            onSave={(content: string, style: object) =>
+              handleProductContentSave("qualityFeatures", content, style)
+            }
             placeholder="List the quality features of the product"
           />
         </div>
 
         {/* Specifications */}
         <div>
-          <label className="block font-semibold text-gray-700">Specifications</label>
+          <label className="block font-semibold text-gray-700">
+            Specifications
+          </label>
           <FreeTextEditor
             value={productDetails.specifications.content}
-            onSave={(content: string, style: object) => handleProductContentSave("specifications", content, style)}
+            onSave={(content: string, style: object) =>
+              handleProductContentSave("specifications", content, style)
+            }
             placeholder="List the specs of the product"
           />
         </div>
 
         {/* Product Gallery */}
         <div>
-          <label className="block font-semibold text-gray-700 mb-2">Product Gallery</label>
+          <label className="block font-semibold text-gray-700 mb-2">
+            Product Gallery
+          </label>
 
           <input
             id="productImageInput"
@@ -315,7 +378,9 @@ const FreeTemplate: React.FC = () => {
           {/* Custom upload button */}
           <button
             type="button"
-            onClick={() => document.getElementById("productImageInput")?.click()}
+            onClick={() =>
+              document.getElementById("productImageInput")?.click()
+            }
             className="px-4 py-2 bg-blue-600 text-white rounded shadow hover:bg-blue-700"
           >
             Upload Images
@@ -341,10 +406,11 @@ const FreeTemplate: React.FC = () => {
           </div>
         </div>
 
-
         {/* Product Video */}
         <div>
-          <label className="block font-semibold text-gray-700 mb-2">Product Video</label>
+          <label className="block font-semibold text-gray-700 mb-2">
+            Product Video
+          </label>
 
           <input
             id="productVideoInput"
@@ -357,7 +423,9 @@ const FreeTemplate: React.FC = () => {
           {/* Trigger button */}
           <button
             type="button"
-            onClick={() => document.getElementById("productVideoInput")?.click()}
+            onClick={() =>
+              document.getElementById("productVideoInput")?.click()
+            }
             className="px-4 py-2 bg-blue-600 text-white rounded shadow hover:bg-blue-700"
           >
             Upload Video
@@ -383,21 +451,26 @@ const FreeTemplate: React.FC = () => {
           )}
         </div>
 
-
         {/* Customer Support - FAQ */}
         <div>
-          <h3 className="text-lg font-semibold text-gray-700">Customer Support - FAQ</h3>
+          <h3 className="text-lg font-semibold text-gray-700">
+            Customer Support - FAQ
+          </h3>
           <div className="space-y-4 mt-4 text-black">
             <input
               type="text"
               value={newFaq.question}
-              onChange={(e) => setNewFaq((prev) => ({ ...prev, question: e.target.value }))}
+              onChange={(e) =>
+                setNewFaq((prev) => ({ ...prev, question: e.target.value }))
+              }
               className="w-full border rounded px-3 py-2 bg-white"
               placeholder="Enter FAQ question"
             />
             <textarea
               value={newFaq.answer}
-              onChange={(e) => setNewFaq((prev) => ({ ...prev, answer: e.target.value }))}
+              onChange={(e) =>
+                setNewFaq((prev) => ({ ...prev, answer: e.target.value }))
+              }
               className="w-full border rounded px-3 py-2 bg-white"
               rows={2}
               placeholder="Enter FAQ answer"
@@ -418,13 +491,17 @@ const FreeTemplate: React.FC = () => {
                     <input
                       type="text"
                       value={faq.question}
-                      onChange={(e) => updateFaq(faq.id, { ...faq, question: e.target.value })}
+                      onChange={(e) =>
+                        updateFaq(faq.id, { ...faq, question: e.target.value })
+                      }
                       className="w-full border rounded px-3 py-2 mb-2"
                       placeholder="Enter FAQ question"
                     />
                     <textarea
                       value={faq.answer}
-                      onChange={(e) => updateFaq(faq.id, { ...faq, answer: e.target.value })}
+                      onChange={(e) =>
+                        updateFaq(faq.id, { ...faq, answer: e.target.value })
+                      }
                       className="w-full border rounded px-3 py-2 mb-2"
                       rows={2}
                       placeholder="Enter FAQ answer"
@@ -437,7 +514,9 @@ const FreeTemplate: React.FC = () => {
                         Save
                       </button>
                       <button
-                        onClick={() => updateFaq(faq.id, { ...faq, isEditing: false })}
+                        onClick={() =>
+                          updateFaq(faq.id, { ...faq, isEditing: false })
+                        }
                         className="flex items-center gap-2 border px-4 py-2 rounded"
                       >
                         Cancel
@@ -454,7 +533,9 @@ const FreeTemplate: React.FC = () => {
                         {index + 1}. {faq.question}
                       </p>
                       <span
-                        className={`transform transition-transform duration-300 ${expandedFaq === faq.id ? "rotate-180" : ""}`}
+                        className={`transform transition-transform duration-300 ${
+                          expandedFaq === faq.id ? "rotate-180" : ""
+                        }`}
                       >
                         ▼
                       </span>
@@ -466,10 +547,16 @@ const FreeTemplate: React.FC = () => {
                       </>
                     )}
                     <div className="flex gap-2">
-                      <button onClick={() => editFaq(faq.id)} className="flex items-center gap-2 text-blue-600">
+                      <button
+                        onClick={() => editFaq(faq.id)}
+                        className="flex items-center gap-2 text-blue-600"
+                      >
                         Edit
                       </button>
-                      <button onClick={() => removeFaq(faq.id)} className="flex items-center gap-2 text-red-500">
+                      <button
+                        onClick={() => removeFaq(faq.id)}
+                        className="flex items-center gap-2 text-red-500"
+                      >
                         Remove
                       </button>
                     </div>
@@ -485,24 +572,32 @@ const FreeTemplate: React.FC = () => {
           <label className="block font-semibold text-gray-700">Shop Name</label>
           <FreeTextEditor
             value={shopDetails.shopName.content}
-            onSave={(content: string, style: object) => handleShopContentSave("shopName", content, style)}
+            onSave={(content: string, style: object) =>
+              handleShopContentSave("shopName", content, style)
+            }
             placeholder="Enter name of your shop"
           />
         </div>
 
         {/* Shop Description */}
         <div>
-          <label className="block font-semibold text-gray-700">Shop Description</label>
+          <label className="block font-semibold text-gray-700">
+            Shop Description
+          </label>
           <FreeTextEditor
             value={shopDetails.shopDescription.content}
-            onSave={(content: string, style: object) => handleShopContentSave("shopDescription", content, style)}
+            onSave={(content: string, style: object) =>
+              handleShopContentSave("shopDescription", content, style)
+            }
             placeholder="Enter description about your shop"
           />
         </div>
 
         {/* Shop Image */}
         <div>
-          <label className="block font-semibold text-gray-700 mb-2">Shop Image</label>
+          <label className="block font-semibold text-gray-700 mb-2">
+            Shop Image
+          </label>
 
           <input
             id="shopImageInput"
@@ -542,63 +637,46 @@ const FreeTemplate: React.FC = () => {
           </div>
         </div>
 
-
         {/* Shop Address */}
         <div>
-          <label className="block font-semibold text-gray-700">Shop Address</label>
+          <label className="block font-semibold text-gray-700">
+            Shop Address
+          </label>
           <FreeTextEditor
             value={shopDetails.shopAddress.content}
-            onSave={(content: string, style: object) => handleShopContentSave("shopAddress", content, style)}
+            onSave={(content: string, style: object) =>
+              handleShopContentSave("shopAddress", content, style)
+            }
             placeholder="Enter address of your shop"
           />
         </div>
 
         {/* Shop Contact */}
         <div>
-          <label className="block font-semibold text-gray-700">Shop Contact</label>
+          <label className="block font-semibold text-gray-700">
+            Shop Contact
+          </label>
           <FreeTextEditor
             value={shopDetails.shopContact.content}
-            onSave={(content: string, style: object) => handleShopContentSave("shopContact", content, style)}
+            onSave={(content: string, style: object) =>
+              handleShopContentSave("shopContact", content, style)
+            }
             placeholder="Enter contact of your shop"
           />
         </div>
 
         {/* Show Product Preview */}
         <div className="mt-6">
-          <button onClick={handleShowPreview} className="w-full py-2 bg-blue-600 text-white rounded font-semibold mb-2">
+          <button
+            onClick={handleShowPreview}
+            className="w-full py-2 bg-blue-600 text-white rounded font-semibold mb-2"
+          >
             Show Product Preview
           </button>
-          {uniqueURLs.length > 0 && (
-            <div className="mt-2 p-4 bg-gray-100 rounded">
-              <p className="font-semibold mb-2">Generated URLs:</p>
-              {uniqueURLs.map((url, index) => (
-                <div key={index} className="mb-2 flex items-center gap-2">
-                  <a
-                    href={url.toString()}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-600 underline break-all flex-grow"
-                  >
-                    {url.toString()}
-                  </a>
-                  <button
-                    onClick={() => {
-                      navigator.clipboard.writeText(url.toString())
-                      toast.success("URL copied to clipboard!")
-                    }}
-                    className="bg-blue-600 text-white px-3 py-1 rounded text-sm"
-                  >
-                    Copy
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default FreeTemplate
-
+export default FreeTemplate;

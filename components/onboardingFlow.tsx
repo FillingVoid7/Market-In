@@ -1,5 +1,12 @@
 import React from "react";
-import { ArrowDownIcon, UserPlus, Layout, FileText, Share2, BarChart3 } from "lucide-react";
+import {
+  ArrowDownIcon,
+  UserPlus,
+  Layout,
+  FileText,
+  Share2,
+  BarChart3,
+} from "lucide-react";
 import { motion } from "framer-motion";
 
 const OnboardingFlow = () => {
@@ -12,22 +19,26 @@ const OnboardingFlow = () => {
     {
       icon: Layout,
       title: "Choose Your Template",
-      description: "Select from a variety of customizable templates that suit your brand and product.",
+      description:
+        "Select from a variety of customizable templates that suit your brand and product.",
     },
     {
       icon: FileText,
       title: "Add Your Product Details",
-      description: "Effortlessly upload images, videos, and pricing information to showcase your products.",
+      description:
+        "Effortlessly upload images, videos, and pricing information to showcase your products.",
     },
     {
       icon: Share2,
       title: "Generate and Share Your Page",
-      description: "Instantly generate a shareable link to your new single-page website and post it on your social media platforms.",
+      description:
+        "Instantly generate a shareable link to your new single-page website and post it on your social media platforms.",
     },
     {
       icon: BarChart3,
       title: "Upgrade for Insights",
-      description: "Consider upgrading to access advanced performance tracking and analytics to enhance your marketing strategy.",
+      description:
+        "Consider upgrading to access advanced performance tracking and analytics to enhance your marketing strategy.",
     },
   ];
 
@@ -40,8 +51,12 @@ const OnboardingFlow = () => {
     <section className="py-16 px-4 bg-transparent">
       <div className="max-w-3xl mx-auto">
         <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold mb-4 text-white">Getting Started</h2>
-          <p className="text-gray-300">Follow these simple steps to get started</p>
+          <h2 className="text-3xl font-bold mb-4 text-white">
+            Getting Started
+          </h2>
+          <p className="text-gray-300">
+            Follow these simple steps to get started
+          </p>
         </div>
 
         <div className="space-y-8">
@@ -62,7 +77,9 @@ const OnboardingFlow = () => {
                     </div>
                   </div>
                   <div>
-                    <h3 className="text-xl font-semibold mb-2 text-white">{step.title}</h3>
+                    <h3 className="text-xl font-semibold mb-2 text-white">
+                      {step.title}
+                    </h3>
                     <p className="text-gray-300">{step.description}</p>
                   </div>
                 </div>

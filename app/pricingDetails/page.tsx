@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Check, ArrowLeft, Sparkles } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { toast } from 'react-hot-toast'; // You'll need to install react-hot-toast
+import { toast } from 'sonner'; 
 
 const PricingDetails = () => {
   const [isYearly, setIsYearly] = useState(false);
@@ -46,9 +46,7 @@ const PricingDetails = () => {
         return;
     }
     
-    // Handle plan selection for authenticated users
     if (planName === "Free Plan" || planName === "Basic Plan") {
-        // Add your plan selection logic here
         toast.success(`Selected ${planName}`);
     }
   };
@@ -75,7 +73,6 @@ const PricingDetails = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
-      {/* Back Button */}
       <button
         onClick={() => router.push('/')}
         className="fixed top-8 left-8 flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-900 transition-colors"

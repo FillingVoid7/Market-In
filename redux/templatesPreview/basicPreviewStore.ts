@@ -3,7 +3,7 @@ import basicPreviewReducer from "./basicPreviewSlice";
 
 const store = configureStore({
   reducer: {
-    basicPreview: basicPreviewReducer, 
+    basicPreview: basicPreviewReducer,
   },
 });
 

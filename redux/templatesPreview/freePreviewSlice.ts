@@ -1,4 +1,9 @@
-import { createSlice, createAsyncThunk, PayloadAction, Middleware } from "@reduxjs/toolkit";
+import {
+  createSlice,
+  createAsyncThunk,
+  PayloadAction,
+  Middleware,
+} from "@reduxjs/toolkit";
 import axios from "axios";
 import { RootState } from "./freePreviewStore";
 
@@ -42,24 +47,24 @@ export const saveFreePreview = createAsyncThunk(
       const sanitizedPayload = {
         productDetails: {
           ...data.productDetails,
-          productPictures: data.productDetails.productPictures.map(m => ({
+          productPictures: data.productDetails.productPictures.map((m) => ({
             url: m.url,
-            _id: m._id
+            _id: m._id,
           })),
-          productVideos: data.productDetails.productVideos.map(m => ({
+          productVideos: data.productDetails.productVideos.map((m) => ({
             url: m.url,
-            _id: m._id
-          }))
+            _id: m._id,
+          })),
         },
         shopDetails: {
           ...data.shopDetails,
-          shopImages: data.shopDetails.shopImages.map(m => ({
+          shopImages: data.shopDetails.shopImages.map((m) => ({
             url: m.url,
-            _id: m._id
-          }))
+            _id: m._id,
+          })),
         },
         faqList: data.faqList,
-        uniqueURLs: data.uniqueURLs
+        uniqueURLs: data.uniqueURLs,
       };
 
       const response = await axios.post(`${API_URL}`, sanitizedPayload);
@@ -75,12 +80,17 @@ export const generateUrlFree = createAsyncThunk(
   async (_, { rejectWithValue, getState }) => {
     try {
       const state = getState() as RootState;
-      const { _id, productDetails, shopDetails, faqList, uniqueURLs } = state.freePreview;
+      const { _id, productDetails, shopDetails, faqList, uniqueURLs } =
+        state.freePreview;
       if (!_id) {
         throw new Error("No product ID found in state");
       }
-      const contentHash = createContentHash({ productDetails, shopDetails, faqList });
-      const exists = uniqueURLs.some(url => url.contentHash === contentHash);
+      const contentHash = createContentHash({
+        productDetails,
+        shopDetails,
+        faqList,
+      });
+      const exists = uniqueURLs.some((url) => url.contentHash === contentHash);
       if (exists) {
         throw new Error("This product configuration already exists");
       }
@@ -94,7 +104,10 @@ export const generateUrlFree = createAsyncThunk(
 
 export const uploadMedia = createAsyncThunk(
   "freePreview/uploadMedia",
-  async ({ file, mediaType }: { file: File; mediaType: "image" | "video" }, { rejectWithValue }) => {
+  async (
+    { file, mediaType }: { file: File; mediaType: "image" | "video" },
+    { rejectWithValue }
+  ) => {
     try {
       const formData = new FormData();
       formData.append("file", file);
@@ -231,7 +244,10 @@ const freePreviewSlice = createSlice({
   name: "freePreview",
   initialState,
   reducers: {
-    updateProductField: (state, action: PayloadAction<UpdateProductFieldPayload>) => {
+    updateProductField: (
+      state,
+      action: PayloadAction<UpdateProductFieldPayload>
+    ) => {
       const { field, content, style } = action.payload;
       if (field === "productPictures" || field === "productVideos") {
         state.productDetails[field] = content as any;
@@ -285,18 +301,19 @@ const freePreviewSlice = createSlice({
         state.createdPreview = action.payload;
       })
       .addCase(saveFreePreview.rejected, (state, action) => {
-        state.error = action.payload as string || "Error creating free preview";
+        state.error =
+          (action.payload as string) || "Error creating free preview";
       })
       .addCase(generateUrlFree.fulfilled, (state, action) => {
         state.uniqueURLs.push({
           id: action.payload.id,
           url: action.payload.url,
           contentHash: createContentHash(action.payload.existingData),
-          createdAt: new Date().toISOString()
+          createdAt: new Date().toISOString(),
         });
       })
       .addCase(generateUrlFree.rejected, (state, action) => {
-        state.error = action.payload as string || "Error generating URL";
+        state.error = (action.payload as string) || "Error generating URL";
       })
       .addCase(getProductFree.pending, (state) => {
         state.loading = true;
@@ -312,7 +329,8 @@ const freePreviewSlice = createSlice({
       })
       .addCase(getProductFree.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload as string || "Error fetching product data";
+        state.error =
+          (action.payload as string) || "Error fetching product data";
       })
       .addCase(uploadMedia.fulfilled, (state, action) => {
         const { permanentUrl, mediaType } = action.payload;
@@ -326,7 +344,7 @@ const freePreviewSlice = createSlice({
         }
       })
       .addCase(uploadMedia.rejected, (state, action) => {
-        state.error = action.payload as string || "Media upload failed";
+        state.error = (action.payload as string) || "Media upload failed";
       });
   },
 });
@@ -345,9 +363,10 @@ export const {
 
 export default freePreviewSlice.reducer;
 
-export const persistStateMiddleware: Middleware = storeAPI => next => action => {
-  const result = next(action);
-  const state = storeAPI.getState() as RootState;
-  saveState(state.freePreview);
-  return result;
-};
+export const persistStateMiddleware: Middleware =
+  (storeAPI) => (next) => (action) => {
+    const result = next(action);
+    const state = storeAPI.getState() as RootState;
+    saveState(state.freePreview);
+    return result;
+  };

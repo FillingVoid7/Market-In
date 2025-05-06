@@ -1,14 +1,14 @@
 import { MongoClient, ServerApiVersion } from "mongodb";
 
 const uri = process.env.MONGODB_URI!;
-if (!uri) throw new Error('Missing MONGODB_URI!');
+if (!uri) throw new Error("Missing MONGODB_URI!");
 
 const options = {
   serverApi: {
     version: ServerApiVersion.v1,
     strict: true,
     deprecationErrors: true,
-  }
+  },
 };
 
 declare global {

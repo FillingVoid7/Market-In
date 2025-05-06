@@ -10,14 +10,12 @@ export default function LoginPage() {
 
     useEffect(() => {
         if (session) {
-            // Redirect to pricing section of the landing page
             router.push('/#pricing');
         }
     }, [session, router]);
 
     return (
         <div className="min-h-screen relative flex items-center justify-center bg-gradient-to-br from-purple-600 to-blue-500">
-            {/* Back button */}
             <button
                 onClick={() => router.push('/')}
                 className="absolute top-8 left-8 flex items-center gap-2 px-4 py-2 text-white hover:bg-white/10 rounded-lg transition-colors"
@@ -36,7 +34,6 @@ export default function LoginPage() {
                     className="w-full flex items-center justify-center gap-3 py-3 px-4 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-semibold rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105"
                 >
                     <svg className="w-5 h-5" viewBox="0 0 24 24">
-                        {/* Google icon paths */}
                     </svg>
                     Continue with Google
                 </button>

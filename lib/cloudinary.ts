@@ -1,4 +1,4 @@
-import { v2 as cloudinary } from 'cloudinary';
+import { v2 as cloudinary } from "cloudinary";
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -8,18 +8,18 @@ cloudinary.config({
 });
 
 interface UploadFileResponse {
-    url: string;
-    [key: string]: any; 
+  url: string;
+  [key: string]: any;
 }
 
 export const uploadFile = async (file: File): Promise<UploadFileResponse> => {
-    try {
-        const response = await fetch('/api/upload', {
-            method: 'POST',
-            body: file,
-        });
-        return await response.json() as UploadFileResponse;
-    } catch (error: any) {
-        throw new Error(`Upload failed: ${error.message}`);
-    }
+  try {
+    const response = await fetch("/api/upload", {
+      method: "POST",
+      body: file,
+    });
+    return (await response.json()) as UploadFileResponse;
+  } catch (error: any) {
+    throw new Error(`Upload failed: ${error.message}`);
+  }
 };

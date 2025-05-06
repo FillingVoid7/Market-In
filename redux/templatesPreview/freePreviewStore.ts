@@ -3,7 +3,7 @@ import freePreviewReducer from "./freePreviewSlice";
 
 const store = configureStore({
   reducer: {
-    freePreview: freePreviewReducer, 
+    freePreview: freePreviewReducer,
   },
 });
 

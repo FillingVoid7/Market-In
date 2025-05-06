@@ -3,8 +3,8 @@ import React, { useState, JSX } from "react";
 import { useRouter } from "next/navigation";
 import { CheckCircle2Icon } from "lucide-react";
 import { motion } from "framer-motion";
-import { useSession } from 'next-auth/react';
-import { toast } from 'react-hot-toast';
+import { useSession } from "next-auth/react";
+import { toast } from "sonner";
 
 const Pricing = () => {
   const router = useRouter();
@@ -37,23 +37,25 @@ const Pricing = () => {
 
   const handlePlanClick = (planTitle: string) => {
     if (!session) {
-        toast.error('Please sign in to select a plan');
-        router.push('/login');
-        return;
+      toast.error("Please sign in to select a plan");
+      router.push("/login");
+      return;
     }
 
-    if (planTitle.toLowerCase() === 'free' || planTitle.toLowerCase() === 'basic') {
-        router.push(`/templates/${planTitle.toLowerCase()}`);
+    if (
+      planTitle.toLowerCase() === "free" ||
+      planTitle.toLowerCase() === "basic"
+    ) {
+      router.push(`/templates/${planTitle.toLowerCase()}`);
     }
   };
 
   return (
     <section className="py-20 bg-transparent text-center relative">
-      {/* Background gradient */}
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-purple-900/20 to-transparent"></div>
-      
+
       <div className="relative z-10">
-        <motion.h2 
+        <motion.h2
           initial={{ opacity: 0, y: -20 }}
           whileInView={{ opacity: 1, y: 0 }}
           className="text-4xl font-bold mb-6 text-white"
@@ -61,7 +63,7 @@ const Pricing = () => {
           Choose Your Plan
         </motion.h2>
 
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           className="mb-6 flex items-center justify-center bg-white/5 backdrop-blur-sm p-2 rounded-full w-fit mx-auto"
@@ -69,8 +71,8 @@ const Pricing = () => {
           <button
             onClick={() => setIsYearly(true)}
             className={`py-2 px-6 rounded-full transition-all duration-300 ${
-              isYearly 
-                ? "bg-gradient-to-r from-blue-500 to-purple-500 text-white" 
+              isYearly
+                ? "bg-gradient-to-r from-blue-500 to-purple-500 text-white"
                 : "text-gray-300"
             }`}
           >
@@ -80,8 +82,8 @@ const Pricing = () => {
           <button
             onClick={() => setIsYearly(false)}
             className={`py-2 px-6 rounded-full transition-all duration-300 ${
-              !isYearly 
-                ? "bg-gradient-to-r from-blue-500 to-purple-500 text-white" 
+              !isYearly
+                ? "bg-gradient-to-r from-blue-500 to-purple-500 text-white"
                 : "text-gray-300"
             }`}
           >
@@ -92,7 +94,11 @@ const Pricing = () => {
         <div className="flex justify-center space-x-8 flex-wrap mt-8">
           {[
             { title: "Free", price: prices.free, features: freePlanFeatures },
-            { title: "Basic", price: prices.basic, features: basicPlanFeatures },
+            {
+              title: "Basic",
+              price: prices.basic,
+              features: basicPlanFeatures,
+            },
           ].map((plan, index) => (
             <motion.div
               key={index}

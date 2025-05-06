@@ -2,9 +2,11 @@
 import React from "react";
 import { FaFacebook, FaTwitter, FaInstagram, FaLinkedin } from "react-icons/fa";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 
 const Footer = () => {
+  const router = useRouter();
   return (
     <footer className="bg-gradient-to-b from-gray-900 to-gray-800 text-gray-300 py-16 px-8 relative overflow-hidden">
       {/* Background Pattern */}
@@ -21,19 +23,23 @@ const Footer = () => {
             transition={{ duration: 0.5 }}
             className="space-y-6"
           >
-            <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+            <h2
+              onClick={() => router.push("/")}
+              className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent"
+            >
               Market-In
             </h2>
             <p className="text-sm text-gray-400 leading-relaxed max-w-md">
-              Empowering you to manage your products efficiently and effectively with our top-notch tools.
+              Empowering you to manage your products efficiently and effectively
+              with our top-notch tools.
             </p>
-            
+
             <div className="flex space-x-6">
               {[
                 { icon: FaFacebook, href: "https://facebook.com" },
                 { icon: FaTwitter, href: "https://twitter.com" },
                 { icon: FaInstagram, href: "https://instagram.com" },
-                { icon: FaLinkedin, href: "https://linkedin.com" }
+                { icon: FaLinkedin, href: "https://linkedin.com" },
               ].map((social, index) => (
                 <motion.a
                   key={index}
@@ -55,12 +61,14 @@ const Footer = () => {
             className="space-y-8"
           >
             <div>
-              <h3 className="text-lg font-semibold text-white mb-4">Quick Links</h3>
+              <h3 className="text-lg font-semibold text-white mb-4">
+                Quick Links
+              </h3>
               <ul className="space-y-3">
                 {["Pricing", "About Us", "Contact Us"].map((item, index) => (
                   <li key={index}>
-                    <Link 
-                      href={`/${item.toLowerCase().replace(' ', '-')}`}
+                    <Link
+                      href={`/${item.toLowerCase().replace(" ", "-")}`}
                       className="text-gray-400 hover:text-blue-400 transition-colors duration-300 text-sm"
                     >
                       {item}
@@ -71,12 +79,14 @@ const Footer = () => {
             </div>
 
             <div>
-              <h3 className="text-lg font-semibold text-white mb-4">Support & Resources</h3>
+              <h3 className="text-lg font-semibold text-white mb-4">
+                Support & Resources
+              </h3>
               <ul className="space-y-3">
                 {["Help Center", "FAQs", "Blogs"].map((item, index) => (
                   <li key={index}>
-                    <Link 
-                      href={`/${item.toLowerCase().replace(' ', '-')}`}
+                    <Link
+                      href={`/${item.toLowerCase().replace(" ", "-")}`}
                       className="text-gray-400 hover:text-blue-400 transition-colors duration-300 text-sm"
                     >
                       {item}
@@ -95,11 +105,15 @@ const Footer = () => {
             className="space-y-8"
           >
             <div>
-              <h3 className="text-lg font-semibold text-white mb-4">Contact Information</h3>
+              <h3 className="text-lg font-semibold text-white mb-4">
+                Contact Information
+              </h3>
               <div className="space-y-2">
                 <p className="text-sm text-gray-400">Kathmandu, Nepal</p>
                 <p className="text-sm text-gray-400 hover:text-blue-400 transition-colors duration-300">
-                  <a href="mailto:support@market-in.com">support@market-in.com</a>
+                  <a href="mailto:support@market-in.com">
+                    support@market-in.com
+                  </a>
                 </p>
               </div>
             </div>
@@ -107,16 +121,18 @@ const Footer = () => {
             <div>
               <h3 className="text-lg font-semibold text-white mb-4">Legal</h3>
               <ul className="space-y-3">
-                {["Terms of Service", "Privacy Policy", "Cookie Policy"].map((item, index) => (
-                  <li key={index}>
-                    <Link 
-                      href={`/${item.toLowerCase().replace(' ', '-')}`}
-                      className="text-gray-400 hover:text-blue-400 transition-colors duration-300 text-sm"
-                    >
-                      {item}
-                    </Link>
-                  </li>
-                ))}
+                {["Terms of Service", "Privacy Policy", "Cookie Policy"].map(
+                  (item, index) => (
+                    <li key={index}>
+                      <Link
+                        href={`/${item.toLowerCase().replace(" ", "-")}`}
+                        className="text-gray-400 hover:text-blue-400 transition-colors duration-300 text-sm"
+                      >
+                        {item}
+                      </Link>
+                    </li>
+                  )
+                )}
               </ul>
             </div>
           </motion.div>

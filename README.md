@@ -1,36 +1,123 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Market-In
+
+A modern web application for creating and managing digital product showcases with social media integration.
+
+## Overview
+
+Market-In helps businesses create professional product pages with rich media support, social media templates, and analytics tracking. Create beautiful one-page designs to showcase your products and share them across multiple platforms.
+
+## Features
+
+- **Custom Website Templates**
+  - Free tier with basic customization
+  - Basic tier with advanced customization options
+  - Rich media support (images and videos)
+  - Responsive design for all devices
+
+- **Product Showcase**
+  - Product details and descriptions
+  - Image galleries
+  - Video integration
+  - Pricing information
+  - Quality features and specifications
+
+- **Shop Management**
+  - Shop profile creation
+  - Contact information
+  - Location details
+  - Shop images
+
+- **Social Media Integration**
+  - Customizable social media templates
+  - Multi-platform sharing support
+  - Built-in hashtag management
+  - Call-to-action buttons
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
 
+- Node.js (v16 or higher)
+- npm or yarn
+- MongoDB database
+
+### Installation
+
+1. Clone the repository:
+```bash
+git clone <repository-url>
+cd m-in
+```
+
+2. Install dependencies:
+```bash
+npm install
+# or
+yarn install
+```
+
+3. Run the development server:
 ```bash
 npm run dev
 # or
 yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Usage Guide
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Creating a Product Page
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. Sign in using your Google account
+2. Choose a plan (Free or Basic)
+3. Click "Create New Product"
+4. Fill in the required information:
+   - Product name
+   - Product price
+   - Product descriptions
+   - Upload images/videos
+   - Add specifications and features
+5. Add shop details:
+   - Shop name
+   - Contact information
+   - Shop description
+   - Shop images
+6. Add FAQs (optional)
+7. Preview your page
+8. Generate a unique URL
+9. Share your product page
 
-## Learn More
+### Plan Limitations
 
-To learn more about Next.js, take a look at the following resources:
+#### Free Plan
+- Up to 3 product pages
+- Basic customization options
+- Single video upload
+- Basic analytics
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+#### Basic Plan
+- Up to 15 product pages
+- Advanced customization options
+- Multiple video uploads
+- Detailed analytics
+- Priority support
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Technical Support
 
-## Deploy on Vercel
+- Email: support@market-in.com
+- Help Center: [/help-center](help-center)
+- FAQs: [/faqs](faqs)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Contributing
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+If you'd like to contribute to Market-In, please:
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/YourFeature`)
+3. Commit your changes (`git commit -m 'Add some feature'`)
+4. Push to the branch (`git push origin feature/YourFeature`)
+5. Create a new Pull Request
+
+
+## Contact
+
+For further inquiries: please contact to the email provided in my github profile. 

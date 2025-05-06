@@ -20,12 +20,10 @@ export default function Header() {
         <header className="fixed w-full top-0 z-50 bg-transparent backdrop-blur-sm">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex items-center justify-between py-4">
-                    {/* Left - Logo */}
                     <Link href="/" className="text-2xl font-bold text-white">
                         Market-in
                     </Link>
 
-                    {/* Center - Navigation Links */}
                     <motion.div
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -47,13 +45,7 @@ export default function Header() {
                         ))}
                     </motion.div>
 
-                    {/* Right - Auth Section */}
                     <div className="flex items-center space-x-4">
-                        {session && (
-                            <span className="text-white/90 text-sm">
-                                {session.user?.email}
-                            </span>
-                        )}
                         <button
                             onClick={handleAuthAction}
                             className="px-6 py-2 bg-white/10 hover:bg-white/20 text-white rounded-full font-medium transition-all duration-300 hover:scale-105"

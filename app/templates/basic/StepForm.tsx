@@ -100,7 +100,42 @@ const StepForm: React.FC<StepFormProps> = ({ onComplete }) => {
     dispatch(updateSocialMediaTemplates(updatedTemplates));
   };
 
+  const validateRequiredFields = (productDetails: any, shopDetails: any) => {
+    const requiredFields = [
+      { field: productDetails.productName.content, name: 'Product Name' },
+      { field: productDetails.productPrice.content, name: 'Product Price' },
+      { field: shopDetails.shopName.content, name: 'Shop Name' },
+      { field: shopDetails.shopContact.content, name: 'Shop Contact' }
+    ];
+  
+    const missingFields = requiredFields
+      .filter(item => !item.field?.trim())
+      .map(item => item.name);
+  
+    if (missingFields.length > 0) {
+      toast.error(
+        <div>
+          <p>Please fill in the required fields:</p>
+          <ul className="list-disc pl-4 mt-2">
+            {missingFields.map(field => (
+              <li key={field}>{field}</li>
+            ))}
+          </ul>
+        </div>
+      );
+      return false;
+    }
+  
+    return true;
+  };
+
   const nextStep = () => {
+    if (currentStep === 4) {
+      if (!validateRequiredFields(productDetails, shopDetails)) {
+        return;
+      }
+    }
+    
     if (currentStep < 4) {
       setCurrentStep(currentStep + 1);
     } else {
@@ -112,7 +147,6 @@ const StepForm: React.FC<StepFormProps> = ({ onComplete }) => {
     if (e.target.files) {
       const files = Array.from(e.target.files);
       try {
-        // Upload all files and wait for results
         const uploadResults = await Promise.all(
           files.map(async file => {
             const actionResult = await dispatch(uploadMedia({ file, mediaType: "image" }));
@@ -121,13 +155,11 @@ const StepForm: React.FC<StepFormProps> = ({ onComplete }) => {
           })
         );
 
-        // Create MediaItem array from upload results
         const newImages = uploadResults.map(res => ({
           url: res.permanentUrl,
           type: "image" as "image"
         }));
 
-        // Update Redux with combined array
         dispatch(updateProductImages([
           ...productDetails.productPictures,
           ...newImages
@@ -203,19 +235,23 @@ const StepForm: React.FC<StepFormProps> = ({ onComplete }) => {
           <div className="space-y-6">
             <h2 className="text-gray-800 text-2xl font-bold">Product Details</h2>
             <div>
-              <label className="block font-semibold text-gray-700">Product Name</label>
+              <label className="block font-semibold text-gray-700">
+                Product Name <span className="text-red-500">*</span>
+              </label>
               <FreeTextEditor
                 value={productDetails.productName.content}
                 onSave={(content: string, style: object) => handleProductContentSave("productName", content, style)}
-                placeholder="Enter product name"
+                placeholder="Enter product name (Required)"
               />
             </div>
             <div>
-              <label className="block font-semibold text-gray-700">Product Price</label>
+              <label className="block font-semibold text-gray-700">
+                Product Price <span className="text-red-500">*</span>
+              </label>
               <FreeTextEditor
                 value={productDetails.productPrice.content}
                 onSave={(content: string, style: object) => handleProductContentSave("productPrice", content, style)}
-                placeholder="Enter product price"
+                placeholder="Enter product price (Required)"
               />
             </div>
             <div>
@@ -318,11 +354,13 @@ const StepForm: React.FC<StepFormProps> = ({ onComplete }) => {
           <div className="space-y-6">
             <h2 className="text-gray-800 text-2xl font-bold">Shop Details</h2>
             <div>
-              <label className="block font-semibold text-gray-700">Shop Name</label>
+              <label className="block font-semibold text-gray-700">
+                Shop Name <span className="text-red-500">*</span>
+              </label>
               <FreeTextEditor
                 value={shopDetails.shopName.content}
                 onSave={(content: string, style: object) => handleShopContentSave("shopName", content, style)}
-                placeholder="Enter shop name"
+                placeholder="Enter shop name (Required)"
               />
             </div>
             <div>
@@ -342,11 +380,13 @@ const StepForm: React.FC<StepFormProps> = ({ onComplete }) => {
               />
             </div>
             <div>
-              <label className="block font-semibold text-gray-700">Shop Contact</label>
+              <label className="block font-semibold text-gray-700">
+                Shop Contact <span className="text-red-500">*</span>
+              </label>
               <FreeTextEditor
                 value={shopDetails.shopContact.content}
                 onSave={(content: string, style: object) => handleShopContentSave("shopContact", content, style)}
-                placeholder="Enter shop contact information"
+                placeholder="Enter shop contact information (Required)"
               />
             </div>
             <div>
@@ -396,11 +436,11 @@ const StepForm: React.FC<StepFormProps> = ({ onComplete }) => {
             <div className="space-y-4">
               {faqList.map((faq, index) => (
                 <div key={index} className="border rounded p-4">
-                  <h3 className="font-semibold">{faq.question}</h3>
+                  <h3 className="font-semibold text-gray-600">{faq.question}</h3>
                   <p className="text-gray-600">{faq.answer}</p>
                 </div>
               ))}
-              <div className="space-y-2">
+              <div className="space-y-2 text-gray-600">
                 <input
                   type="text"
                   value={newFaq.question}
@@ -593,4 +633,4 @@ const StepForm: React.FC<StepFormProps> = ({ onComplete }) => {
   );
 };
 
-export default StepForm; 
+export default StepForm;

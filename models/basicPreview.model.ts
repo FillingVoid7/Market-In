@@ -1,9 +1,9 @@
 import { Schema, Document, Types } from "mongoose";
-import {mongoose} from '@lib/mongoose'; 
+import { mongoose } from "@lib/mongoose";
 
 interface StyledText {
   content: string;
-  style: Record<string, unknown>; 
+  style: Record<string, unknown>;
 }
 
 interface ProductDetails {
@@ -34,11 +34,11 @@ interface AnalyticsData {
 }
 
 export interface SocialMediaPostTemplate {
-  templateName: string;  // e.g., 'New Arrival', 'Limited Time Offer'
+  templateName: string;
   caption: string;
   hashtags: string[];
-  productUrl: string;        // The unique URL to the product page
-  callToAction?: string;     // e.g., 'Shop Now', 'Learn More'
+  productUrl: string;
+  callToAction?: string;
   metadata?: {
     lastUsed: string;
     usageCount: number;
@@ -61,49 +61,88 @@ export interface IBasicPreview extends Document {
 const basicPreviewSchema = new Schema<IBasicPreview>(
   {
     productDetails: {
-      productName: { content: { type: String }, style: { type: Schema.Types.Mixed } },
-      productPrice: { content: { type: String }, style: { type: Schema.Types.Mixed } },
-      shortDescription: { content: { type: String }, style: { type: Schema.Types.Mixed } },
-      longDescription: { content: { type: String }, style: { type: Schema.Types.Mixed } },
-      qualityFeatures: { content: { type: String }, style: { type: Schema.Types.Mixed } },
-      specifications: { content: { type: String }, style: { type: Schema.Types.Mixed } },
+      productName: {
+        content: { type: String },
+        style: { type: Schema.Types.Mixed },
+      },
+      productPrice: {
+        content: { type: String },
+        style: { type: Schema.Types.Mixed },
+      },
+      shortDescription: {
+        content: { type: String },
+        style: { type: Schema.Types.Mixed },
+      },
+      longDescription: {
+        content: { type: String },
+        style: { type: Schema.Types.Mixed },
+      },
+      qualityFeatures: {
+        content: { type: String },
+        style: { type: Schema.Types.Mixed },
+      },
+      specifications: {
+        content: { type: String },
+        style: { type: Schema.Types.Mixed },
+      },
       productPictures: [{ url: String }],
       productVideos: [{ url: String }],
     },
     shopDetails: {
-      shopName: { content: { type: String }, style: { type: Schema.Types.Mixed } },
-      shopDescription: { content: { type: String }, style: { type: Schema.Types.Mixed } },
+      shopName: {
+        content: { type: String },
+        style: { type: Schema.Types.Mixed },
+      },
+      shopDescription: {
+        content: { type: String },
+        style: { type: Schema.Types.Mixed },
+      },
       shopImages: [{ url: String }],
-      shopAddress: { content: { type: String }, style: { type: Schema.Types.Mixed } },
-      shopContact: { content: { type: String }, style: { type: Schema.Types.Mixed } },
-      shopEmail: { content: { type: String }, style: { type: Schema.Types.Mixed } },
+      shopAddress: {
+        content: { type: String },
+        style: { type: Schema.Types.Mixed },
+      },
+      shopContact: {
+        content: { type: String },
+        style: { type: Schema.Types.Mixed },
+      },
+      shopEmail: {
+        content: { type: String },
+        style: { type: Schema.Types.Mixed },
+      },
     },
     faqList: [{ question: String, answer: String }],
     uniqueURLs: [String],
-    socialMediaTemplates: [{
-      templateName: { type: String },
-      caption: { type: String },
-      hashtags: [{ type: String }],
-      productUrl: { type: String },
-      callToAction: String,
-      metadata: {
-        lastUsed: { type: String, default: Date.now.toString() },
-        usageCount: { type: Number, default: 0 },
-        isActive: { type: Boolean, default: true }
-      }
-    }],
-    analytics: [{
-      productPageId: { type: Schema.Types.ObjectId, ref: "ProductPage" },
-      views: { type: Number, default: 0 },
-      clicks: { type: Number, default: 0 },
-      emailClicks: { type: Number, default: 0 },
-    }],
+    socialMediaTemplates: [
+      {
+        templateName: { type: String },
+        caption: { type: String },
+        hashtags: [{ type: String }],
+        productUrl: { type: String },
+        callToAction: String,
+        metadata: {
+          lastUsed: { type: String, default: Date.now.toString() },
+          usageCount: { type: Number, default: 0 },
+          isActive: { type: Boolean, default: true },
+        },
+      },
+    ],
+    analytics: [
+      {
+        productPageId: { type: Schema.Types.ObjectId, ref: "ProductPage" },
+        views: { type: Number, default: 0 },
+        clicks: { type: Number, default: 0 },
+        emailClicks: { type: Number, default: 0 },
+      },
+    ],
   },
-  { 
-    timestamps: true, 
+  {
+    timestamps: true,
     collection: "saved-basic-previews",
-    strict: true
+    strict: true,
   }
 );
 
-export const BasicPreviewModel = mongoose.models.BasicPreview || mongoose.model<IBasicPreview>("BasicPreview", basicPreviewSchema);
+export const BasicPreviewModel =
+  mongoose.models.BasicPreview ||
+  mongoose.model<IBasicPreview>("BasicPreview", basicPreviewSchema);

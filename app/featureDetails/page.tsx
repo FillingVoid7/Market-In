@@ -75,7 +75,6 @@ const Features = () => {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 relative">
-            {/* Back Button */}
             <motion.button
                 onClick={() => router.push('/')}
                 className="fixed top-8 left-8 flex items-center gap-2 px-4 py-2 bg-white/80 

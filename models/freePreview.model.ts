@@ -1,9 +1,9 @@
 import { Schema, Document, Types } from "mongoose";
-import {mongoose} from '@lib/mongoose';  
+import { mongoose } from "@lib/mongoose";
 
 interface StyledText {
   content: string;
-  style: Record<string, unknown>; 
+  style: Record<string, unknown>;
 }
 
 interface ProductDetails {
@@ -26,9 +26,8 @@ interface ShopDetails {
   shopEmail: StyledText;
 }
 
-
 export interface IFreePreview extends Document {
-  _id: Types.ObjectId;  
+  _id: Types.ObjectId;
   productDetails: ProductDetails;
   shopDetails: ShopDetails;
   faqList: { question: string; answer: string }[];
@@ -40,28 +39,62 @@ export interface IFreePreview extends Document {
 const freePreviewSchema = new Schema<IFreePreview>(
   {
     productDetails: {
-      productName: { content: { type: String }, style: { type: Schema.Types.Mixed } },
-      productPrice: { content: { type: String }, style: { type: Schema.Types.Mixed } },
-      shortDescription: { content: { type: String }, style: { type: Schema.Types.Mixed } },
-      longDescription: { content: { type: String }, style: { type: Schema.Types.Mixed } },
-      qualityFeatures: { content: { type: String }, style: { type: Schema.Types.Mixed } },
-      specifications: { content: { type: String }, style: { type: Schema.Types.Mixed } },
-      productPictures: [{ url: String }], 
+      productName: {
+        content: { type: String },
+        style: { type: Schema.Types.Mixed },
+      },
+      productPrice: {
+        content: { type: String },
+        style: { type: Schema.Types.Mixed },
+      },
+      shortDescription: {
+        content: { type: String },
+        style: { type: Schema.Types.Mixed },
+      },
+      longDescription: {
+        content: { type: String },
+        style: { type: Schema.Types.Mixed },
+      },
+      qualityFeatures: {
+        content: { type: String },
+        style: { type: Schema.Types.Mixed },
+      },
+      specifications: {
+        content: { type: String },
+        style: { type: Schema.Types.Mixed },
+      },
+      productPictures: [{ url: String }],
       productVideos: [{ url: String }],
     },
     shopDetails: {
-      shopName: { content: { type: String }, style: { type: Schema.Types.Mixed } },
-      shopDescription: { content: { type: String }, style: { type: Schema.Types.Mixed } },
-      shopImages: [{ url: String }], 
-      shopAddress: { content: { type: String }, style: { type: Schema.Types.Mixed } },
-      shopContact: { content: { type: String }, style: { type: Schema.Types.Mixed } },
-      shopEmail: { content: { type: String }, style: { type: Schema.Types.Mixed } },
+      shopName: {
+        content: { type: String },
+        style: { type: Schema.Types.Mixed },
+      },
+      shopDescription: {
+        content: { type: String },
+        style: { type: Schema.Types.Mixed },
+      },
+      shopImages: [{ url: String }],
+      shopAddress: {
+        content: { type: String },
+        style: { type: Schema.Types.Mixed },
+      },
+      shopContact: {
+        content: { type: String },
+        style: { type: Schema.Types.Mixed },
+      },
+      shopEmail: {
+        content: { type: String },
+        style: { type: Schema.Types.Mixed },
+      },
     },
-    faqList: [{ question: String, answer: String }], 
-    uniqueURLs: [String], 
+    faqList: [{ question: String, answer: String }],
+    uniqueURLs: [String],
   },
-  { timestamps: true , collection:"saved-free-previews"},
-  
+  { timestamps: true, collection: "saved-free-previews" }
 );
 
-export const freePreviewModel = mongoose.models.FreePreview || mongoose.model<IFreePreview>("FreePreview",freePreviewSchema);
+export const freePreviewModel =
+  mongoose.models.FreePreview ||
+  mongoose.model<IFreePreview>("FreePreview", freePreviewSchema);

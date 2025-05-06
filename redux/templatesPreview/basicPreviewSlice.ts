@@ -1,4 +1,9 @@
-import { createSlice, createAsyncThunk, PayloadAction, Middleware } from "@reduxjs/toolkit";
+import {
+  createSlice,
+  createAsyncThunk,
+  PayloadAction,
+  Middleware,
+} from "@reduxjs/toolkit";
 import axios from "axios";
 import { RootState } from "./basicPreviewStore";
 
@@ -145,37 +150,37 @@ export const saveBasicPreview = createAsyncThunk(
       const sanitizedPayload = {
         productDetails: {
           ...data.productDetails,
-          productPictures: data.productDetails.productPictures.map(m => ({
+          productPictures: data.productDetails.productPictures.map((m) => ({
             url: m.url,
-            _id: m._id
+            _id: m._id,
           })),
-          productVideos: data.productDetails.productVideos.map(m => ({
+          productVideos: data.productDetails.productVideos.map((m) => ({
             url: m.url,
-            _id: m._id
-          }))
+            _id: m._id,
+          })),
         },
         shopDetails: {
           ...data.shopDetails,
-          shopImages: data.shopDetails.shopImages.map(m => ({
+          shopImages: data.shopDetails.shopImages.map((m) => ({
             url: m.url,
-            _id: m._id
-          }))
+            _id: m._id,
+          })),
         },
         faqList: data.faqList,
         uniqueURLs: data.uniqueURLs,
-        socialMediaTemplates: data.socialMediaTemplates.map(template => ({
+        socialMediaTemplates: data.socialMediaTemplates.map((template) => ({
           ...template,
           metadata: {
             lastUsed: new Date().toISOString(),
             usageCount: 0,
-            isActive: true
-          }
+            isActive: true,
+          },
         })),
-        analytics: data.analytics
+        analytics: data.analytics,
       };
 
       const response = await axios.post(`${API_URL}`, sanitizedPayload);
-      console.log('Returned saved state after save:',response);
+      console.log("Returned saved state after save:", response);
       return response.data;
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || "Server error");
@@ -215,7 +220,10 @@ export const getProductBasic = createAsyncThunk(
 
 export const uploadMedia = createAsyncThunk(
   "basicPreview/uploadMedia",
-  async ({ file, mediaType }: { file: File; mediaType: "image" | "video" }, { rejectWithValue }) => {
+  async (
+    { file, mediaType }: { file: File; mediaType: "image" | "video" },
+    { rejectWithValue }
+  ) => {
     try {
       const formData = new FormData();
       formData.append("file", file);
@@ -261,15 +269,18 @@ const basicPreviewSlice = createSlice({
   name: "basicPreview",
   initialState,
   reducers: {
-    updateProductField: (state, action: PayloadAction<UpdateProductFieldPayload>) => {
+    updateProductField: (
+      state,
+      action: PayloadAction<UpdateProductFieldPayload>
+    ) => {
       const { field, content, style } = action.payload;
       if (field === "productPictures" || field === "productVideos") {
         state.productDetails[field] = content as MediaItem[];
       } else {
         const newStyle = { ...style };
-        state.productDetails[field] = { 
-          content: content as string, 
-          style: newStyle
+        state.productDetails[field] = {
+          content: content as string,
+          style: newStyle,
         };
       }
     },
@@ -279,9 +290,9 @@ const basicPreviewSlice = createSlice({
         state.shopDetails[field] = content as MediaItem[];
       } else {
         const newStyle = { ...style };
-        state.shopDetails[field] = { 
-          content: content as string, 
-          style: newStyle
+        state.shopDetails[field] = {
+          content: content as string,
+          style: newStyle,
         };
       }
     },
@@ -294,17 +305,23 @@ const basicPreviewSlice = createSlice({
     updateShopImages: (state, action: PayloadAction<MediaItem[]>) => {
       state.shopDetails.shopImages = action.payload;
     },
-    updateFaqList: (state, action: PayloadAction<{ question: string; answer: string }[]>) => {
+    updateFaqList: (
+      state,
+      action: PayloadAction<{ question: string; answer: string }[]>
+    ) => {
       state.faqList = action.payload;
     },
-    updateSocialMediaTemplates: (state, action: PayloadAction<SocialMediaTemplate[]>) => {
-      state.socialMediaTemplates = action.payload.map(template => ({
+    updateSocialMediaTemplates: (
+      state,
+      action: PayloadAction<SocialMediaTemplate[]>
+    ) => {
+      state.socialMediaTemplates = action.payload.map((template) => ({
         ...template,
         metadata: template.metadata || {
           lastUsed: new Date().toISOString(),
           usageCount: 0,
-          isActive: true
-        }
+          isActive: true,
+        },
       }));
     },
     updateAnalytics: (state, action: PayloadAction<Analytics[]>) => {
@@ -336,18 +353,19 @@ const basicPreviewSlice = createSlice({
         state.createdPreview = action.payload;
       })
       .addCase(saveBasicPreview.rejected, (state, action) => {
-        state.error = action.payload as string || "Error creating basic preview";
+        state.error =
+          (action.payload as string) || "Error creating basic preview";
       })
       .addCase(generateUrlBasic.fulfilled, (state, action) => {
         state.uniqueURLs.push({
           id: action.payload.id,
           url: action.payload.url,
           contentHash: createContentHash(action.payload.existingData),
-          createdAt: new Date().toISOString()
+          createdAt: new Date().toISOString(),
         });
       })
       .addCase(generateUrlBasic.rejected, (state, action) => {
-        state.error = action.payload as string || "Error generating URL";
+        state.error = (action.payload as string) || "Error generating URL";
       })
       .addCase(getProductBasic.pending, (state) => {
         state.loading = true;
@@ -358,13 +376,15 @@ const basicPreviewSlice = createSlice({
         state.shopDetails = action.payload.shopDetails;
         state.faqList = action.payload.faqList;
         state.uniqueURLs = action.payload.uniqueURLs || [];
-        state.socialMediaTemplates = (action.payload.socialMediaTemplates || []).map((template: SocialMediaTemplate) => ({
+        state.socialMediaTemplates = (
+          action.payload.socialMediaTemplates || []
+        ).map((template: SocialMediaTemplate) => ({
           ...template,
           metadata: template.metadata || {
             lastUsed: new Date().toISOString(),
             usageCount: 0,
-            isActive: true
-          }
+            isActive: true,
+          },
         }));
         state.analytics = action.payload.analytics || [];
         state.loading = false;
@@ -372,7 +392,8 @@ const basicPreviewSlice = createSlice({
       })
       .addCase(getProductBasic.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload as string || "Error fetching product data";
+        state.error =
+          (action.payload as string) || "Error fetching product data";
       })
       .addCase(uploadMedia.fulfilled, (state, action) => {
         const { permanentUrl, mediaType } = action.payload;
@@ -385,7 +406,7 @@ const basicPreviewSlice = createSlice({
         }
       })
       .addCase(uploadMedia.rejected, (state, action) => {
-        state.error = action.payload as string || "Media upload failed";
+        state.error = (action.payload as string) || "Media upload failed";
       });
   },
 });
@@ -406,9 +427,10 @@ export const {
 
 export default basicPreviewSlice.reducer;
 
-export const persistStateMiddleware: Middleware = storeAPI => next => action => {
-  const result = next(action);
-  const state = storeAPI.getState() as RootState;
-  saveState(state.basicPreview);
-  return result;
-};
+export const persistStateMiddleware: Middleware =
+  (storeAPI) => (next) => (action) => {
+    const result = next(action);
+    const state = storeAPI.getState() as RootState;
+    saveState(state.basicPreview);
+    return result;
+  };
