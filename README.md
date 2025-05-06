@@ -101,12 +101,6 @@ yarn dev
 - Detailed analytics
 - Priority support
 
-## Technical Support
-
-- Email: support@market-in.com
-- Help Center: [/help-center](help-center)
-- FAQs: [/faqs](faqs)
-
 ## Contributing
 
 If you'd like to contribute to Market-In, please:
@@ -120,4 +114,6 @@ If you'd like to contribute to Market-In, please:
 
 ## Contact
 
-For further inquiries: please contact to the email provided in my github profile. 
+For further inquiries: Please contact to the email provided in my github profile. 
+
+---Thanks for visiting the repo---
