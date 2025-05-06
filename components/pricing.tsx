@@ -24,14 +24,6 @@ const Pricing = () => {
     "Social media link sharing.",
   ];
 
-  const proPlanFeatures = [
-    "Full customization options.",
-    "Unlimited product pages.",
-    "Comprehensive analytics.",
-    "Offer management.",
-    "Priority live support.",
-    "Social media automation.",
-  ];
 
   const renderFeatures = (features: string[]): JSX.Element[] => {
     return features.map((feature: string, index: number) => (
@@ -79,7 +71,6 @@ const Pricing = () => {
         {[
           { title: "Free", price: prices.free, features: freePlanFeatures },
           { title: "Basic", price: prices.basic, features: basicPlanFeatures },
-          { title: "Pro", price: prices.pro, features: proPlanFeatures },
         ].map((plan, index) => (
           <motion.div
             key={index}
@@ -117,7 +108,7 @@ const Pricing = () => {
                   : "bg-gray-500 hover:bg-gray-600"
               } text-white rounded-full transition-all duration-300`}
             >
-              {index === 0 ? "Get Started Free" : index === 1 ? "Change to Basic" : "Upgrade to Pro"}
+              {index === 0 ? "Get Started Free" : index === 1 ? "Upgrade to Basic" : "Upgrade to Pro"}
             </button>
           </motion.div>
         ))}
