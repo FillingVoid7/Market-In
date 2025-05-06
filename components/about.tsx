@@ -11,7 +11,7 @@ const About = () => {
   };
 
   interface CoreValueProps {
-    icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;  // icon as a react component 
+    icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;  
     title: string;
     description: string;
   }

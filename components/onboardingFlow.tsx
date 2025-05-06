@@ -37,11 +37,11 @@ const OnboardingFlow = () => {
   };
 
   return (
-    <section className="py-16 px-4 bg-gray-50">
+    <section className="py-16 px-4 bg-transparent">
       <div className="max-w-3xl mx-auto">
         <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold mb-4 text-black">Getting Started</h2>
-          <p className="text-gray-900">Follow these simple steps to get started</p>
+          <h2 className="text-3xl font-bold mb-4 text-white">Getting Started</h2>
+          <p className="text-gray-300">Follow these simple steps to get started</p>
         </div>
 
         <div className="space-y-8">
@@ -52,18 +52,18 @@ const OnboardingFlow = () => {
               variants={stepVariants}
               initial="hidden"
               whileInView="visible"
-              // transition={{ duration: 0.5, delay: index * 0.2 }}
+              whileHover={{ scale: 1.02 }}
             >
-              <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6   hover:scale-105 hover:shadow-md">
+              <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-lg shadow-lg p-6 hover:bg-white/10 transition-all duration-300">
                 <div className="flex items-start gap-6">
                   <div className="flex-shrink-0">
-                    <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                      <step.icon className="w-6 h-6 text-blue-600" />
+                    <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center shadow-lg">
+                      <step.icon className="w-6 h-6 text-white" />
                     </div>
                   </div>
                   <div>
-                    <h3 className="text-xl font-semibold mb-2 text-black">{step.title}</h3>
-                    <p className="text-gray-600">{step.description}</p>
+                    <h3 className="text-xl font-semibold mb-2 text-white">{step.title}</h3>
+                    <p className="text-gray-300">{step.description}</p>
                   </div>
                 </div>
               </div>

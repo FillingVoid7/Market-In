@@ -1,9 +1,14 @@
 "use client";
 import React, { useState } from 'react';
-import { Check } from 'lucide-react';
+import { Check, ArrowLeft, Sparkles } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
+import { toast } from 'react-hot-toast'; // You'll need to install react-hot-toast
 
 const PricingDetails = () => {
   const [isYearly, setIsYearly] = useState(false);
+  const router = useRouter();
+  const { data: session } = useSession();
 
   const plans = [
     {
@@ -22,7 +27,7 @@ const PricingDetails = () => {
     {
       name: "Basic Plan",
       monthlyPrice: "NPR 500",
-      yearlyPrice: "NPR 1000",
+      yearlyPrice: "NPR 5000",
       targetAudience: "Small businesses looking for more features to enhance their marketing.",
       keyFeatures: [
         "Advanced customization options (more colors and templates)",
@@ -33,22 +38,20 @@ const PricingDetails = () => {
       ],
       highlight: true
     },
-    {
-      name: "Pro Plan",
-      monthlyPrice: "NPR 1000",
-      yearlyPrice: "NPR 2000",
-      targetAudience: "Established businesses aiming for enhanced marketing capabilities.",
-      keyFeatures: [
-        "Full customization options",
-        "Unlimited upload of product pages",
-        "Comprehensive analytics dashboard",
-        "Offer management (discounts, limited-time offers)",
-        "Priority customer support (live chat and phone)",
-        "Advanced social media integration"
-      ],
-      highlight: false
-    }
   ];
+
+  const handlePlanSelection = (planName: string, isAuthenticated: boolean) => {
+    if (!isAuthenticated) {
+        toast.error('Please sign in to select a plan');
+        return;
+    }
+    
+    // Handle plan selection for authenticated users
+    if (planName === "Free Plan" || planName === "Basic Plan") {
+        // Add your plan selection logic here
+        toast.success(`Selected ${planName}`);
+    }
+  };
 
   interface ToggleProps {
     checked: boolean;
@@ -71,39 +74,57 @@ const PricingDetails = () => {
   );
 
   return (
-    <div className="w-full bg-gray-50 py-24">
-      <div className="max-w-7xl mx-auto px-4">
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+      {/* Back Button */}
+      <button
+        onClick={() => router.push('/')}
+        className="fixed top-8 left-8 flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-900 transition-colors"
+      >
+        <ArrowLeft className="w-5 h-5" />
+        <span>Back to Home</span>
+      </button>
+
+      <div className="max-w-7xl mx-auto px-4 py-24">
         <div className="text-center mb-16">
-          <h2 className="text-4xl font-bold mb-4 text-gray-900">
-            Pricing Plans
-          </h2>
-          <p className="text-gray-600 text-lg mb-8">
-            Build for free, upgrade when your network grows
+          <div className="flex items-center justify-center mb-4">
+            <Sparkles className="w-8 h-8 text-blue-500 mr-2" />
+            <h2 className="text-5xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              Pricing Plans
+            </h2>
+          </div>
+          <p className="text-gray-600 text-xl mb-8 max-w-2xl mx-auto">
+            Start your journey for free and upgrade as you grow
           </p>
           
-          <div className="flex items-center justify-center gap-4 mb-8">
-            <span className={`text-sm ${!isYearly ? 'text-blue-600 font-semibold' : 'text-gray-600'}`}>
+          <div className="inline-flex items-center justify-center gap-4 p-2 bg-gray-100 rounded-full mb-12">
+            <span className={`text-sm px-4 py-2 rounded-full transition-all duration-300 ${
+              !isYearly ? 'bg-white shadow-md text-blue-600 font-semibold' : 'text-gray-600'
+            }`}>
               Monthly
             </span>
             <Toggle checked={isYearly} onChange={setIsYearly} />
-            <span className={`text-sm ${isYearly ? 'text-blue-600 font-semibold' : 'text-gray-600'}`}>
+            <span className={`text-sm px-4 py-2 rounded-full transition-all duration-300 ${
+              isYearly ? 'bg-white shadow-md text-blue-600 font-semibold' : 'text-gray-600'
+            }`}>
               Yearly (Save 20%)
             </span>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
           {plans.map((plan, index) => (
             <div
               key={index}
-              className={`relative rounded-xl overflow-hidden shadow-lg transition-all duration-300 hover:shadow-xl ${
-                plan.highlight ? 'border-2 border-blue-500 bg-white' : 'border border-gray-200 bg-white'
+              className={`relative rounded-2xl overflow-hidden transition-all duration-300 hover:transform hover:scale-105 ${
+                plan.highlight 
+                  ? 'bg-white border-2 border-blue-500 shadow-2xl shadow-blue-100' 
+                  : 'bg-white border border-gray-200 shadow-xl'
               }`}
             >
               {plan.highlight && (
                 <div className="absolute top-4 right-4">
-                  <span className="bg-blue-100 text-blue-800 text-xs font-semibold px-3 py-1 rounded-full">
-                    Popular
+                  <span className="bg-blue-100 text-blue-800 text-xs font-semibold px-4 py-2 rounded-full">
+                    Most Popular
                   </span>
                 </div>
               )}
@@ -111,31 +132,34 @@ const PricingDetails = () => {
               <div className="p-8">
                 <h3 className="text-2xl font-bold mb-4 text-gray-900">{plan.name}</h3>
                 <div className="mb-6">
-                  <p className="text-4xl font-bold text-gray-900">
+                  <p className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                     {isYearly ? plan.yearlyPrice : plan.monthlyPrice}
-                    <span className="text-base font-normal text-gray-600">
+                    <span className="text-base font-normal text-gray-600 ml-1">
                       /{isYearly ? 'year' : 'month'}
                     </span>
                   </p>
                 </div>
                 
-                <p className="text-gray-600 text-sm mb-8">
+                <p className="text-gray-600 text-sm mb-8 border-b border-gray-100 pb-8">
                   {plan.targetAudience}
                 </p>
 
                 <ul className="space-y-4 mb-8">
                   {plan.keyFeatures.map((feature, featureIndex) => (
                     <li key={featureIndex} className="flex items-start gap-3">
-                      <Check className="h-5 w-5 text-blue-500 flex-shrink-0 mt-0.5" />
+                      <Check className={`h-5 w-5 flex-shrink-0 mt-0.5 ${
+                        plan.highlight ? 'text-blue-500' : 'text-green-500'
+                      }`} />
                       <span className="text-gray-600 text-sm">{feature}</span>
                     </li>
                   ))}
                 </ul>
 
                 <button
-                  className={`w-full px-6 py-3 rounded-lg font-semibold transition-colors ${
+                  onClick={() => handlePlanSelection(plan.name, !!session)}
+                  className={`w-full px-6 py-4 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 ${
                     plan.highlight
-                      ? 'bg-blue-600 text-white hover:bg-blue-700'
+                      ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:shadow-lg'
                       : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
                   }`}
                 >

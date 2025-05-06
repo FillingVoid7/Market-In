@@ -1,52 +1,68 @@
 "use client";
-import React from "react";
-import Link from "next/link";
+import { signIn, signOut, useSession } from 'next-auth/react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { motion } from 'framer-motion';
 
-const Header = () => {
-  return (
-    <header className="fixed top-0 left-0 w-full z-50 bg-white/90 backdrop-blur-sm border-b border-gray-200 shadow-sm">
-      <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-        {/* Logo */}
-        <div className="flex-shrink-0">
-          <Link href="/" className="flex items-center no-underline group">
-            <span className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent group-hover:from-blue-500 group-hover:to-blue-300 transition-all duration-300">
-              Market-In
-            </span>
-          </Link>
-        </div>
+export default function Header() {
+    const { data: session } = useSession();
+    const router = useRouter();
 
-        {/* Navigation Links */}
-        <div className="hidden md:flex items-center space-x-8">
-          {[
-            { href: "/", label: "Home" },
-            { href: "/featureDetails", label: "Features" },
-            { href: "/resources", label: "Resources" },
-            { href: "/pricingDetails", label: "Pricing" },
-            { href: "/services", label: "Services" },
-          ].map((link) => (
-            <Link
-              key={link.label}
-              href={link.href}
-              className="relative py-1 text-black text-lg no-underline group transition-colors duration-200 hover:text-blue-500"
-            >
-              {link.label}
-              <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-500 group-hover:w-full transition-all duration-300 ease-out"></span>
-            </Link>
-          ))}
-        </div>
+    const handleAuthAction = () => {
+        if (session) {
+            signOut({ callbackUrl: '/' });
+        } else {
+            router.push('/login');
+        }
+    };
 
-        {/* Auth Buttons */}
-        <div className="flex items-center space-x-4">
-          <Link
-            href="/login"
-            className="text-white hover:text-white bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-lg px-6 py-2 rounded-full no-underline transition-all duration-300 shadow-lg hover:shadow-xl"
-          >
-            Login
-          </Link>
-        </div>
-      </nav>
-    </header>
-  );
-};
+    return (
+        <header className="fixed w-full top-0 z-50 bg-transparent backdrop-blur-sm">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="flex items-center justify-between py-4">
+                    {/* Left - Logo */}
+                    <Link href="/" className="text-2xl font-bold text-white">
+                        Market-in
+                    </Link>
 
-export default Header;
+                    {/* Center - Navigation Links */}
+                    <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="flex items-center justify-center space-x-12"
+                    >
+                        {[
+                            { href: "/", label: "Home" },
+                            { href: "/featureDetails", label: "Features" },
+                            { href: "/pricingDetails", label: "Pricing" },
+                        ].map((link) => (
+                            <Link
+                                key={link.label}
+                                href={link.href}
+                                className="group relative py-1 text-white/90 text-lg font-medium hover:text-white transition-colors duration-200"
+                            >
+                                {link.label}
+                                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-white transition-all duration-300 group-hover:w-full"></span>
+                            </Link>
+                        ))}
+                    </motion.div>
+
+                    {/* Right - Auth Section */}
+                    <div className="flex items-center space-x-4">
+                        {session && (
+                            <span className="text-white/90 text-sm">
+                                {session.user?.email}
+                            </span>
+                        )}
+                        <button
+                            onClick={handleAuthAction}
+                            className="px-6 py-2 bg-white/10 hover:bg-white/20 text-white rounded-full font-medium transition-all duration-300 hover:scale-105"
+                        >
+                            {session ? 'Sign Out' : 'Login'}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+    );
+}
