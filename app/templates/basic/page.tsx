@@ -7,52 +7,11 @@ import { resetTemplate } from "../../../redux/templatesPreview/basicPreviewSlice
 import StepForm from "./StepForm"
 import { toast } from "sonner"
 
-const SocialMediaTemplatePreview: React.FC = () => {
-  const socialMediaTemplates = useSelector((state: RootState) => state.basicPreview.socialMediaTemplates)
-
-  if (!socialMediaTemplates.length) return null
-
-  return (
-    <div className="flex flex-col items-center justify-center py-8">
-      {socialMediaTemplates.map((template, idx) => (
-        <div
-          key={idx}
-          className="w-full max-w-xl bg-[#181A20] rounded-2xl shadow-lg p-6 mb-6 border border-[#23262F]"
-        >
-          {template.caption && (
-            <p className="text-gray-100 text-lg mb-4">{template.caption}</p>
-          )}
-          {template.hashtags.length > 0 && (
-            <div className="flex flex-wrap gap-2 mb-4">
-              {template.hashtags.map((tag, i) => (
-                <span
-                  key={i}
-                  className="text-xs text-blue-200 bg-[#23262F] px-3 py-1 rounded-full tracking-wide"
-                >
-                  #{tag}
-                </span>
-              ))}
-            </div>
-          )}
-          {template.callToAction && (
-            <div className="mt-4">
-              <div className="w-full bg-[#23262F] rounded-lg px-4 py-3 flex justify-center">
-                <span className="text-blue-400 font-semibold text-base">
-                  {template.callToAction}
-                </span>
-              </div>
-            </div>
-          )}
-        </div>
-      ))}
-    </div>
-  )
-}
 
 const BasicTemplate: React.FC = () => {
   const router = useRouter()
   const dispatch = useDispatch<AppDispatch>()
-  const [showPreview, setShowPreview] = useState<boolean>(false)
+  const [, setShowPreview] = useState<boolean>(false)
 
   const handleClearAll = () => {
     dispatch(resetTemplate())

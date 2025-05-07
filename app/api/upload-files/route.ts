@@ -1,4 +1,4 @@
-import { v2 as cloudinary } from 'cloudinary';
+import { v2 as cloudinary, UploadApiResponse } from 'cloudinary';
 import { NextRequest, NextResponse } from 'next/server';
 import { Readable } from 'stream';
 
@@ -22,11 +22,9 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Convert file to buffer
     const buffer = Buffer.from(await file.arrayBuffer());
-    
-    // Upload to Cloudinary
-    const result = await new Promise((resolve, reject) => {
+
+    const result: UploadApiResponse = await new Promise((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
         {
           folder: 'product-images',
@@ -35,21 +33,20 @@ export async function POST(req: NextRequest) {
         },
         (error, result) => {
           if (error) reject(error);
-          else resolve(result);
+          else resolve(result as UploadApiResponse);
         }
       );
-      
-      // Create a readable stream from buffer
+
       const readable = new Readable();
       readable.push(buffer);
       readable.push(null);
       readable.pipe(uploadStream);
     });
-    console.log('Upload result:', result);
+
     return NextResponse.json({
-      permanentUrl: (result as any).secure_url,
+      permanentUrl: result.secure_url,
       mediaType,
-      publicId: (result as any).public_id
+      publicId: result.public_id
     });
 
   } catch (error) {

@@ -21,18 +21,12 @@ import type {
 import FreeTextEditor from "../../../text-editors/freeTextEditor";
 import { toast } from "sonner";
 import { unwrapResult } from "@reduxjs/toolkit";
-import App from "next/app";
 
 interface Faq {
   id: number;
   question: string;
   answer: string;
   isEditing: boolean;
-}
-
-interface ImageFile {
-  file: File;
-  url: string;
 }
 
 const FreeTemplate: React.FC = () => {
@@ -55,9 +49,6 @@ const FreeTemplate: React.FC = () => {
     (state: RootState) => state.freePreview.shopDetails
   );
   const faqList = useSelector((state: RootState) => state.freePreview.faqList);
-  const uniqueURLs = useSelector(
-    (state: RootState) => state.freePreview.uniqueURLs
-  );
 
   const handleClearAll = () => {
     dispatch(resetTemplate());

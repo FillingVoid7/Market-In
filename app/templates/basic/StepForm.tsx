@@ -10,12 +10,10 @@ import {
   updateProductVideos,
   updateShopImages,
   uploadMedia,
-  MediaItem,
   ContentStyle
 } from '../../../redux/templatesPreview/basicPreviewSlice';
 import { SocialMediaPostTemplate } from '../../../models/basicPreview.model';
 import FreeTextEditor from '../../../text-editors/freeTextEditor';
-import { getPlatformLayout } from './platformLayouts';
 import { toast } from 'sonner';
 import { unwrapResult } from '@reduxjs/toolkit';
 

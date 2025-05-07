@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
-  Share2,
   Copy,
   Check,
   ChevronDown,
@@ -15,18 +14,12 @@ import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "../../redux/templatesPreview/basicPreviewStore";
 import {
   saveBasicPreview,
-  updateUniqueURLs,
-  createContentHash,
   generateUrlBasic,
   MediaItem,
 } from "../../redux/templatesPreview/basicPreviewSlice";
 import Footer from "../../components/footer";
 import { toast } from "sonner";
 
-interface Faq {
-  question: string;
-  answer: string;
-}
 
 const SocialMediaTemplatePreview: React.FC = () => {
   const socialMediaTemplates = useSelector(
