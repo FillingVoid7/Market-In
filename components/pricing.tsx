@@ -19,7 +19,7 @@ const Pricing = () => {
   ];
 
   const basicPlanFeatures = [
-    "Advanced customization options.",
+    "Advanced customization.",
     "15 product pages available.",
     "Basic analytics dashboard.",
     "Priority email support.",
