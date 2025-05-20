@@ -1,14 +1,14 @@
 import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import { MongoDBAdapter } from "@auth/mongodb-adapter";
-import clientPromise from "@lib/db";
+import getMongoClient from "@lib/db";
 
 const handler = NextAuth({
-  adapter: MongoDBAdapter(clientPromise),
+  adapter: MongoDBAdapter(getMongoClient()),
   providers: [
     GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID as string,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
       authorization: {
         params: {
           redirect_uri: `${process.env.NEXTAUTH_URL}/api/auth/callback/google`,
@@ -16,8 +16,8 @@ const handler = NextAuth({
       },
     }),
   ],
-  secret: process.env.AUTH_SECRET,
-  debug: true,
+  secret: process.env.AUTH_SECRET!,
+  debug: process.env.NODE_ENV === "development",
   callbacks: {
     async session({ session }) {
       if (session.user) {

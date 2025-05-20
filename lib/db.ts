@@ -1,32 +1,25 @@
 import { MongoClient, ServerApiVersion } from "mongodb";
 
-const uri = process.env.MONGODB_URI!;
-if (!uri) throw new Error("Missing MONGODB_URI!");
+declare global {
+  var _mongoClientPromise: Promise<MongoClient> | undefined;
+}
 
-const options = {
-  serverApi: {
-    version: ServerApiVersion.v1,
-    strict: true,
-    deprecationErrors: true,
-  },
+const getMongoClient = () => {
+  const uri = process.env.MONGODB_URI;
+  if (!uri) throw new Error("MONGODB_URI missing!");
+
+  const options = { serverApi: ServerApiVersion.v1 };
+
+  // Reuse connection in development
+  if (process.env.NODE_ENV === "development") {
+    if (!global._mongoClientPromise) {
+      global._mongoClientPromise = new MongoClient(uri, options).connect();
+    }
+    return global._mongoClientPromise;
+  }
+
+  // New connection in production
+  return new MongoClient(uri, options).connect();
 };
 
-declare global {
-  var _mongoClientPromise: Promise<MongoClient>;
-}
-
-let client: MongoClient;
-let clientPromise: Promise<MongoClient>;
-
-if (process.env.NODE_ENV === "development") {
-  if (!global._mongoClientPromise) {
-    client = new MongoClient(uri, options);
-    global._mongoClientPromise = client.connect();
-  }
-  clientPromise = global._mongoClientPromise;
-} else {
-  client = new MongoClient(uri, options);
-  clientPromise = client.connect();
-}
-
-export default clientPromise;
+export default getMongoClient;
